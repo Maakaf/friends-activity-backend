@@ -4,7 +4,7 @@ export class AddUserProfile1755614062187 implements MigrationInterface {
 //name = AddUserProfile1755614062187;
 public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS bronze.user_profile (
+      CREATE TABLE IF NOT EXISTS gold.user_profile (
         user_id         TEXT PRIMARY KEY,            -- matches bronze.actor_user_node (GitHub numeric id as text)
         node_id         TEXT UNIQUE,                 -- GitHub GraphQL node_id (optional but useful)
         login           TEXT UNIQUE NOT NULL,        -- e.g., "barlavi1"
@@ -23,13 +23,13 @@ public async up(queryRunner: QueryRunner): Promise<void> {
       );
 
       CREATE INDEX IF NOT EXISTS ix_user_profile_login
-        ON bronze.user_profile (login);
+        ON gold.user_profile (login);
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      DROP TABLE IF EXISTS bronze.user_profile;
+      DROP TABLE IF EXISTS gold.user_profile;
     `);
   }
 }
