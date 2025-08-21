@@ -30,6 +30,8 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-fastify": "^11.1.6",
     "@nestjs/typeorm": "^11.0.0",
+    "@octokit/plugin-paginate-rest": "^13.1.1",
+    "@octokit/rest": "^22.0.0",
     "dotenv": "^17.2.1",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",

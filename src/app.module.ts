@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { GithubModule } from './github/github.module';
 import 'dotenv/config';
 
 @Module({
@@ -14,6 +15,7 @@ import 'dotenv/config';
       // Do NOT use synchronize in prod; migrations will handle schema.
       synchronize: false,
     }),
+    GithubModule,
   ],
   controllers: [AppController],
   providers: [AppService],
