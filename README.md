@@ -1,98 +1,140 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Maakaf Home Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS-based backend service that analyzes GitHub user activity to assess open source contributions, engagement, and project involvement. This service is part of the broader **Maakaf Home** initiative - the website for [Maakaf](https://maakaf.com), an Israeli open source community.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Purpose
 
-## Description
+This service provides detailed analysis of GitHub user activity over the past 6 months, including:
+- **Commits**: Code contributions to repositories
+- **Pull Requests**: Feature contributions and bug fixes
+- **Issues**: Problem reporting and feature requests
+- **Comments**: Engagement on PRs and issues
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Features
 
-## Project setup
+- 🔍 **Activity Analysis**: Tracks commits, PRs, issues, and comments from the last 6 months
+- 📊 **Repository Filtering**: Only analyzes repositories with more than 3 forks (indicating community interest)
+- 🎯 **User-Specific Data**: Filters activity by specific GitHub usernames
+- 📝 **Comprehensive Logging**: Winston-based logging with file output
+- 📚 **API Documentation**: Swagger/OpenAPI documentation
+- ✅ **Input Validation**: Class-validator based request validation
 
+## Tech Stack
+
+- **Framework**: NestJS + Fastify
+- **Language**: TypeScript
+- **Database**: PostgreSQL via Neon cloud
+- **ORM**: TypeORM (with migrations)
+- **Documentation**: Swagger/OpenAPI
+- **Logging**: Winston
+
+## Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- GitHub Personal Access Token
+- PostgreSQL database (Neon account + connection string)  
+
+## Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd mfriends-activity-backend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   # Create .env file
+   DATABASE_URL="postgres://appuser:STRONG_PASSWORD@YOURHOST.region.aws.neon.tech/appdb?sslmode=require"
+   GITHUB_TOKEN=your_github_token_here
+   ```
+
+## Database Setup
+
+1. Create a free account at Neon
+2. Create a project + database
+3. Copy the provided connection string into your .env file as DATABASE_URL
+4. Run migrations to initialize schemas:
 ```bash
-$ npm install
+npm run build
+npm run migration:run
 ```
 
-## Compile and run the project
+## GitHub Token Setup
 
+1. Go to [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
+2. Generate a new token with the following scopes:
+   - `public_repo` (for public repository access)
+   - `read:user` (for user information)
+3. Copy the token and add it to your `.env` file
+
+## Running the Application
+
+### Development Mode
 ```bash
-# development
-$ npm run start
+# Unix/Linux/macOS
+npm run start:dev:unix
 
-# watch mode
-$ npm run start:dev
+# Windows
+npm run start:dev:win
 
-# production mode
-$ npm run start:prod
+# Cross-platform
+npm run start:dev
 ```
 
-## Run tests
-
+### Production Mode
 ```bash
-# unit tests
-$ npm run test
+# Build the application
+npm run build
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Start the production server
+npm start
 ```
 
-## Deployment
+The server will start on `http://localhost:3000`
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Available Scripts
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- `npm run start:dev`: Start development server
+- `npm run build`: Build for production
+- `npm start`: Start production server
+- `npm test`: Run tests (not implemented yet)
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## Contributing
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+We welcome contributions from the community! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on:
 
-## Resources
+- **Documentation**: Improving README, API docs, or code comments
+- **Bug Fixes**: Reporting and fixing issues
+- **Feature Suggestions**: Proposing new features or improvements
 
-Check out a few resources that may come in handy when working with NestJS:
+### Development Setup
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes
+4. Add tests if applicable
+5. Commit your changes: `git commit -m 'Add some feature'`
+6. Push to the branch: `git push origin feature/your-feature`
+7. Submit a pull request
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For questions, issues, or contributions:
+- Open an issue on GitHub
+- Contact the Maakaf community through [maakaf.com](https://maakaf.com)
+
+## Acknowledgments
+
+- Built with [NestJS](https://nestjs.com/)
+- Part of the [Maakaf](https://maakaf.com) open source community initiative 
