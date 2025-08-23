@@ -40,7 +40,7 @@ This service provides detailed analysis of GitHub user activity over the past 6 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd mfriends-activity-backend
+   cd friends-activity-backend
    ```
 
 2. **Install dependencies**
