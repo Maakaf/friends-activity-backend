@@ -12,7 +12,7 @@ const PR_NUM_RE    = /\/pulls\/(\d+)$/;
 @Injectable()
 export class GithubService {
   private readonly octokit = new MyOctokit({
-    auth: process.env.GITHUB_TOKEN,
+    auth: process.env.GITHUB_TOKEN || (() => { throw new Error('GITHUB_TOKEN environment variable is required') })(),
     userAgent: 'friends-activity-backend/1.0',
     request: { headers: { accept: 'application/vnd.github+json' } },
   });
@@ -65,11 +65,14 @@ export class GithubService {
     const cached = numberToId.get(num);
     if (cached) return cached;
 
-    // Fetch missing issue and cache
-    const { data } = await this.octokit.issues.get({ owner, repo, issue_number: Number(num) });
-    const id = String((data as any).id);
-    numberToId.set(num, id);
-    return id;
+    try {
+      const { data } = await this.octokit.issues.get({ owner, repo, issue_number: Number(num) });
+      const id = String((data as any).id);
+      numberToId.set(num, id);
+      return id;
+    } catch {
+      return null;
+    }
   }
 
   private async resolvePRParentId(
@@ -82,10 +85,14 @@ export class GithubService {
     const cached = numberToId.get(num);
     if (cached) return cached;
 
-    const { data } = await this.octokit.pulls.get({ owner, repo, pull_number: Number(num) });
-    const id = String((data as any).id);
-    numberToId.set(num, id);
-    return id;
+    try {
+      const { data } = await this.octokit.pulls.get({ owner, repo, pull_number: Number(num) });
+      const id = String((data as any).id);
+      numberToId.set(num, id);
+      return id;
+    } catch {
+      return null;
+    }
   }
 
   // --------- Ingestors (mirror your Python) ---------
@@ -96,6 +103,7 @@ export class GithubService {
     users: Set<string>, sinceIso: string,
   ) {
     const logins = users.size ? [...users] : [undefined];
+    const rows: BronzeRow[] = [];
 
     for (const login of logins) {
       const pages = await this.octokit.paginate(
@@ -120,8 +128,12 @@ export class GithubService {
           is_private: isPrivate ?? null,
           raw_payload: it,
         };
-        await insertBronze(this.ds, row);
+        rows.push(row);
       }
+    }
+
+    for (const row of rows) {
+      await insertBronze(this.ds, row);
     }
   }
 
@@ -140,21 +152,25 @@ export class GithubService {
       const login = (c as any).user?.login;
       if (users.size && login && !users.has(login)) continue;
 
-      const parentId = await this.resolveIssueParentId(owner, repo, c, numberToId);
+      try {
+        const parentId = await this.resolveIssueParentId(owner, repo, c, numberToId);
 
-      const row: BronzeRow = {
-        event_ulid: `issue_comment:${(c as any).id}`,
-        provider: 'github',
-        event_type: 'issue_comment',
-        provider_event_id: String((c as any).id),
-        actor_user_node: (c as any).user?.id ? String((c as any).user.id) : null,
-        repo_node: repoId != null ? String(repoId) : null,
-        target_node: parentId, // <-- Parent Issue/PR ID
-        created_at: (c as any).created_at ?? null,
-        is_private: isPrivate ?? null,
-        raw_payload: c,
-      };
-      await insertBronze(this.ds, row);
+        const row: BronzeRow = {
+          event_ulid: `issue_comment:${(c as any).id}`,
+          provider: 'github',
+          event_type: 'issue_comment',
+          provider_event_id: String((c as any).id),
+          actor_user_node: (c as any).user?.id ? String((c as any).user.id) : null,
+          repo_node: repoId != null ? String(repoId) : null,
+          target_node: parentId, // <-- Parent Issue/PR ID
+          created_at: (c as any).created_at ?? null,
+          is_private: isPrivate ?? null,
+          raw_payload: c,
+        };
+        await insertBronze(this.ds, row);
+      } catch {
+        // Continue with remaining comments if one fails
+      }
     }
   }
 
@@ -244,18 +260,22 @@ export class GithubService {
 
     const repos = await this.listRepos(org);
     for (const r of repos) {
-      const owner = r.owner?.login;
-      const name  = r.name;
-      const rid   = r.id as number | undefined;
-      const priv  = r.private as boolean | undefined;
+      try {
+        const owner = r.owner?.login;
+        const name  = r.name;
+        const rid   = r.id as number | undefined;
+        const priv  = r.private as boolean | undefined;
 
-      // Build cache so comments can resolve parent Issue/PR id
-      const numberToId = await this.buildNumberToIdMap(owner, name, since);
+        // Build cache so comments can resolve parent Issue/PR id
+        const numberToId = await this.buildNumberToIdMap(owner, name, since);
 
-      await this.ingestIssuesAndPRsByCreator(owner, name, rid, priv, users, since);
-      await this.ingestIssueComments(owner, name, rid, priv, users, since, numberToId);
-      await this.ingestPRReviewComments(owner, name, rid, priv, users, since, numberToId);
-      await this.ingestCommitsForUsers(owner, name, rid, priv, users, since, untilIso);
+        await this.ingestIssuesAndPRsByCreator(owner, name, rid, priv, users, since);
+        await this.ingestIssueComments(owner, name, rid, priv, users, since, numberToId);
+        await this.ingestPRReviewComments(owner, name, rid, priv, users, since, numberToId);
+        await this.ingestCommitsForUsers(owner, name, rid, priv, users, since, untilIso);
+      } catch {
+        // Continue with remaining repositories if one fails
+      }
     }
 
     return { org, users: [...users], since, until: untilIso ?? null, repos: repos.length };
