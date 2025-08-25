@@ -31,6 +31,31 @@ export class GithubService {
     return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
   }
 
+  private repoKey(owner: string, repo: string) {
+    return `${owner}/${repo}`;
+  }
+  private parseOwnerRepoFromRepoUrl(repoUrl?: string) {
+    if (!repoUrl) return null;
+    const parts = repoUrl.split('/').slice(-2);
+    if (parts.length < 2) return null;
+    return { owner: parts[0], repo: parts[1] };
+  }
+  private parseOwnerRepoFromHtmlUrl(htmlUrl?: string) {
+    if (!htmlUrl) return null;
+    const m = htmlUrl.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
+    if (!m) return null;
+    return { owner: m[1], repo: m[2] };
+  }
+  private async fetchRepoMeta(owner: string, repo: string) {
+    const { data } = await this.octokit.repos.get({ owner, repo });
+    return {
+      owner,
+      name: repo,
+      id: Number((data as any).id),
+      private: Boolean((data as any).private),
+    };
+  }
+
   private async listRepos(org: string) {
     return this.octokit.paginate(
       this.octokit.repos.listForOrg,
@@ -95,7 +120,71 @@ export class GithubService {
     }
   }
 
-  // --------- Ingestors (mirror your Python) ---------
+  // =======================
+  // repo discovery
+  // =======================
+
+  /** Repos a single user has activity in (issues/PRs/comments + commits) since `sinceIso`. */
+  private async discoverReposForUser(login: string, sinceIso: string) {
+  const found = new Map<string, { owner: string; repo: string }>();
+
+  // A) Issues/PRs the user is involved in (author/comment/assignee/mentioned)
+  const qIssues = `involves:${login} created:>=${sinceIso}`;
+  const issues = await this.octokit.paginate(
+    this.octokit.search.issuesAndPullRequests,
+    { q: qIssues, per_page: 100, advanced_search: 'true'}
+  ); // <- returns items[] directly
+
+  for (const it of issues as any[]) {
+    const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
+    if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
+  }
+
+  // B) Commits authored by the user
+  const qCommits = `author:${login} committer-date:>=${sinceIso}`;
+  const commits = await this.octokit.paginate(
+    this.octokit.search.commits,
+    {
+      q: qCommits,
+      per_page: 100,
+      // commit search historically needed this preview header
+      headers: { accept: 'application/vnd.github.cloak-preview+json' },
+    } as any
+  ); // <- returns items[] directly
+
+  for (const c of commits as any[]) {
+    const full = c.repository?.full_name as string | undefined;
+    if (full && full.includes('/')) {
+      const [owner, repo] = full.split('/');
+      found.set(this.repoKey(owner, repo), { owner, repo });
+    } else {
+      const parsed = this.parseOwnerRepoFromHtmlUrl(c.html_url);
+      if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
+    }
+  }
+
+  return Array.from(found.values());
+}
+
+
+  /** repo -> set(users) map for all users since `sinceIso` */
+  private async buildRepoUsersMap(allUsers: Set<string>, sinceIso: string) {
+    const map = new Map<string, { owner: string; repo: string; users: Set<string> }>();
+
+    for (const login of allUsers) {
+      const repos = await this.discoverReposForUser(login, sinceIso);
+      for (const r of repos) {
+        const key = this.repoKey(r.owner, r.repo);
+        if (!map.has(key)) map.set(key, { owner: r.owner, repo: r.repo, users: new Set<string>() });
+        map.get(key)!.users.add(login);
+      }
+    }
+    return map;
+  }
+
+  // =======================
+  // Ingestors (same as before)
+  // =======================
 
   /** Issues + PRs created by users (uses ?creator=login). */
   private async ingestIssuesAndPRsByCreator(
@@ -169,7 +258,7 @@ export class GithubService {
         };
         await insertBronze(this.ds, row);
       } catch {
-        // Continue with remaining comments if one fails
+        // continue with remaining comments if one fails
       }
     }
   }
@@ -230,7 +319,7 @@ export class GithubService {
         if (users.size && authorLogin && !users.has(authorLogin)) continue;
 
         const row: BronzeRow = {
-          event_ulid: `commit:${(c as any).sha}`,     // optionally include repo id: `commit:${repoId}:${sha}`
+          event_ulid: `commit:${(c as any).sha}`, // optionally include repo id: `commit:${repoId}:${sha}`
           provider: 'github',
           event_type: 'commit',
           provider_event_id: String((c as any).sha),
@@ -246,14 +335,47 @@ export class GithubService {
     }
   }
 
-  // --------- Orchestrator (entry point) ---------
+  // =======================
+  // orchestrator
+  // =======================
 
   /**
-   * Mirrors your Python driver:
-   *  - lists org repos
-   *  - builds number->id map for parent resolution
-   *  - ingests PRs, Issues, Issue comments, PR review comments, Commits
+   *  - discover per-user repos since `sinceIso`
+   *  - merge into repo -> set(users) map
+   *  - ingest each repo ONCE, using only the users who actually contributed there
    */
+  async ingestEachUserInTheirRepos(usersCsv = '', sinceIso?: string, untilIso?: string) {
+    const users = this.toSet(usersCsv);
+    if (!users.size) throw new Error('usersCsv is required');
+    const since = sinceIso ?? new Date(Date.now() - 7 * 86400e3).toISOString();
+
+    const repoUsers = await this.buildRepoUsersMap(users, since);
+
+    let ingestedRepos = 0;
+    for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
+      // fetch id/private once (skip if inaccessible)
+      let meta: { owner: string; name: string; id?: number; private?: boolean } | null = null;
+      try {
+        const m = await this.fetchRepoMeta(owner, repo);
+        meta = { owner: m.owner, name: m.name, id: m.id, private: m.private };
+      } catch {
+        continue;
+      }
+
+      const numberToId = await this.buildNumberToIdMap(meta.owner, meta.name, since);
+      await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since);
+      await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
+      await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
+      await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, untilIso);
+      ingestedRepos++;
+    }
+
+    return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until: untilIso ?? null };
+  }
+
+  // ==============
+  // Org orchestrator (kept as-is for org-scoped runs)
+  // ==============
   async ingestOrgForUsers(org: string, usersCsv = '', sinceIso?: string, untilIso?: string) {
     const users = this.toSet(usersCsv);
     const since = sinceIso ?? new Date(Date.now() - 7 * 86400e3).toISOString();
@@ -266,7 +388,6 @@ export class GithubService {
         const rid   = r.id as number | undefined;
         const priv  = r.private as boolean | undefined;
 
-        // Build cache so comments can resolve parent Issue/PR id
         const numberToId = await this.buildNumberToIdMap(owner, name, since);
 
         await this.ingestIssuesAndPRsByCreator(owner, name, rid, priv, users, since);
@@ -274,7 +395,7 @@ export class GithubService {
         await this.ingestPRReviewComments(owner, name, rid, priv, users, since, numberToId);
         await this.ingestCommitsForUsers(owner, name, rid, priv, users, since, untilIso);
       } catch {
-        // Continue with remaining repositories if one fails
+        // continue with remaining repositories if one fails
       }
     }
 
