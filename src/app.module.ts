@@ -9,7 +9,7 @@ import 'dotenv/config';
     imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      url: process.env.DATABASE_URL || (() => { throw new Error('DATABASE_URL environment variable is required') })(),
       autoLoadEntities: true,
       ssl: { rejectUnauthorized: false },
       // Do NOT use synchronize in prod; migrations will handle schema.

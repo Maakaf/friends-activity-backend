@@ -6,4 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, new FastifyAdapter());
   await app.listen(3000, '0.0.0.0');
 }
-bootstrap();
+bootstrap().catch(err => {
+  console.error('Application failed to start:', err);
+  process.exit(1);
+});

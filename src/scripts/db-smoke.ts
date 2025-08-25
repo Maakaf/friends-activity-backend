@@ -4,7 +4,7 @@ import { Client } from 'pg';
 (async () => {
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: { rejectUnauthorized: false }, // ssl: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
   });
   await client.connect();
 

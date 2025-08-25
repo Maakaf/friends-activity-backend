@@ -15,4 +15,13 @@ export class GithubController {
   ) {
     return this.svc.ingestOrgForUsers(org, users ?? '', since, until);
   }
+  @Post('ingest/users-strict')
+  async ingestUsersStrict(
+    @Query('users') users: string,
+    @Query('since') since?: string,
+    @Query('until') until?: string,
+  ) {
+    return this.svc.ingestEachUserInTheirRepos(users, since, until);
+  }
 }
+
