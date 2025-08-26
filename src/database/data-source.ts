@@ -1,16 +1,36 @@
 // src/database/data-source.ts
+import 'reflect-metadata';
 import 'dotenv/config';
+
 import { DataSource } from 'typeorm';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-const url = process.env.DATABASE_URL;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-export const dataSource = new DataSource({
+const isProd = process.env.NODE_ENV === 'production';
+const DATABASE_URL = process.env.DATABASE_URL;
+
+const migrationsGlob = isProd
+  ? path.join(__dirname, 'migrations', '*.js')
+  : path.join(__dirname, 'migrations', '*.ts');
+
+
+const entitiesArr: string[] = [];
+
+const dataSource = new DataSource({
   type: 'postgres',
-  url,
-  // Neon requires SSL; set it explicitly (don’t rely on PG_SSL being set)
+  url: DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  entities: [],
-  migrations: ['dist/database/migrations/*.js'],
+
+
+  entities: entitiesArr,
+
+  migrations: [migrationsGlob],
   migrationsTableName: 'typeorm_migrations',
   schema: 'public',
+  logging: false, 
 });
+
+export default dataSource;
