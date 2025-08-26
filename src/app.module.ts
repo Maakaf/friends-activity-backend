@@ -1,18 +1,21 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { GithubModule } from './github/github.module';
+// src/app.module.ts
 import 'dotenv/config';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+
+import { GithubModule } from './github/github.module.js';
+import dataSource from './database/data-source.js';
 
 @Module({
-    imports: [
+  imports: [
+    // Use the same options as the CLI (data-source.ts)
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL || (() => { throw new Error('DATABASE_URL environment variable is required') })(),
-      autoLoadEntities: true,
-      ssl: { rejectUnauthorized: false },
-      // Do NOT use synchronize in prod; migrations will handle schema.
+      ...dataSource.options,     // includes type, url, ssl, schema, migrations, etc.
+      autoLoadEntities: false,
+      // Never sync in prod; migrations handle schema
       synchronize: false,
     }),
     GithubModule,
