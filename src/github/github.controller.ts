@@ -1,9 +1,9 @@
-import { Controller, Post, Param, Query } from '@nestjs/common';
-import { GithubService } from './github.service';
+import { Controller, Post, Param, Query, Inject } from '@nestjs/common';
+import { GithubService } from './github.service.js';
 
 @Controller('github')
 export class GithubController {
-  constructor(private readonly svc: GithubService) {}
+  constructor(@Inject(GithubService) private readonly githubService: GithubService) {}
 
   // POST /github/ingest/org/Maakaf?users=barlavi1,UrielOfir&since=2025-02-19T00:00:00Z&until=2025-03-01T00:00:00Z
   @Post('ingest/org/:org')
@@ -13,7 +13,7 @@ export class GithubController {
     @Query('since') since?: string,
     @Query('until') until?: string,
   ) {
-    return this.svc.ingestOrgForUsers(org, users ?? '', since, until);
+    return this.githubService.ingestOrgForUsers(org, users ?? '', since, until);
   }
   @Post('ingest/users-strict')
   async ingestUsersStrict(
@@ -21,7 +21,7 @@ export class GithubController {
     @Query('since') since?: string,
     @Query('until') until?: string,
   ) {
-    return this.svc.ingestEachUserInTheirRepos(users, since, until);
+    return this.githubService.ingestEachUserInTheirRepos(users, since, until);
   }
 }
 

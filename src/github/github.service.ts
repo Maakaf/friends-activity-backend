@@ -3,9 +3,10 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Octokit } from '@octokit/rest';
 import { paginateRest } from '@octokit/plugin-paginate-rest';
-import { insertBronze, BronzeRow } from './bronze-saver';
+import { insertBronze, BronzeRow } from './bronze-saver.js';
 
 const MyOctokit = Octokit.plugin(paginateRest);
+  
 const ISSUE_NUM_RE = /\/issues\/(\d+)$/;
 const PR_NUM_RE    = /\/pulls\/(\d+)$/;
 
@@ -171,8 +172,14 @@ export class GithubService {
   private async buildRepoUsersMap(allUsers: Set<string>, sinceIso: string) {
     const map = new Map<string, { owner: string; repo: string; users: Set<string> }>();
 
-    for (const login of allUsers) {
+    const userRepoPromises = Array.from(allUsers).map(async (login) => {
       const repos = await this.discoverReposForUser(login, sinceIso);
+      return { login, repos };
+    });
+
+    const userRepoResults = await Promise.all(userRepoPromises);
+    
+    for (const { login, repos } of userRepoResults) {
       for (const r of repos) {
         const key = this.repoKey(r.owner, r.repo);
         if (!map.has(key)) map.set(key, { owner: r.owner, repo: r.repo, users: new Set<string>() });
