@@ -356,14 +356,12 @@ export class GithubService {
    *  - ingest each repo ONCE, using only the users who actually contributed there
    */
   async ingestEachUserInTheirRepos(
-    usersCsvOrArray: string | string[] = '',
+    usersArray: string[],
     sinceIso?: string,
     untilIso?: string,
   ) {
-    const users = Array.isArray(usersCsvOrArray)
-      ? new Set(usersCsvOrArray.map((s) => s.trim()).filter(Boolean))
-      : this.toSet(usersCsvOrArray);
-
+    const users = new Set(usersArray.map((s) => s.trim()).filter(Boolean));
+    
     if (!users.size) throw new Error('users list is required');
 
     const since = sinceIso ?? this.isoDaysAgo(180);
