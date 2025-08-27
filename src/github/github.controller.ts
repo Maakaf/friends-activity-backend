@@ -1,5 +1,7 @@
-import { Controller, Post, Param, Query, Inject } from '@nestjs/common';
+import { Controller, Post, Param, Query, Inject, Body, BadRequestException } from '@nestjs/common';
 import { GithubService } from './github.service.js';
+
+type IngestUsersBody = { users: string[] };
 
 @Controller('github')
 export class GithubController {
@@ -15,13 +17,14 @@ export class GithubController {
   ) {
     return this.githubService.ingestOrgForUsers(org, users ?? '', since, until);
   }
+  //POST /github/ingest/users-strict  with JSON body: { "users": ["barlavi1", "UrielOfir"] }
   @Post('ingest/users-strict')
-  async ingestUsersStrict(
-    @Query('users') users: string,
-    @Query('since') since?: string,
-    @Query('until') until?: string,
-  ) {
-    return this.githubService.ingestEachUserInTheirRepos(users, since, until);
+  async ingestUsersStrict(@Body() body: IngestUsersBody) {
+    if (!body || !Array.isArray(body.users) || body.users.length === 0) {
+      throw new BadRequestException('Body must be { "users": string[] } with at least one username.');
+    }
+    // since/until are NOT taken from the request; service sets: since=180 days ago, until=now
+    return this.githubService.ingestEachUserInTheirRepos(body.users);
   }
 }
 
