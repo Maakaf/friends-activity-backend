@@ -32,6 +32,10 @@ export class GithubService {
     return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
   }
 
+  private isoDaysAgo(days: number): string {
+    return new Date(Date.now() - days * 86400e3).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  }
+
   private repoKey(owner: string, repo: string) {
     return `${owner}/${repo}`;
   }
@@ -351,16 +355,24 @@ export class GithubService {
    *  - merge into repo -> set(users) map
    *  - ingest each repo ONCE, using only the users who actually contributed there
    */
-  async ingestEachUserInTheirRepos(usersCsv = '', sinceIso?: string, untilIso?: string) {
-    const users = this.toSet(usersCsv);
-    if (!users.size) throw new Error('usersCsv is required');
-    const since = sinceIso ?? new Date(Date.now() - 7 * 86400e3).toISOString();
+  async ingestEachUserInTheirRepos(
+    usersCsvOrArray: string | string[] = '',
+    sinceIso?: string,
+    untilIso?: string,
+  ) {
+    const users = Array.isArray(usersCsvOrArray)
+      ? new Set(usersCsvOrArray.map((s) => s.trim()).filter(Boolean))
+      : this.toSet(usersCsvOrArray);
+
+    if (!users.size) throw new Error('users list is required');
+
+    const since = sinceIso ?? this.isoDaysAgo(180);
+    const until = untilIso ?? this.isoNow();
 
     const repoUsers = await this.buildRepoUsersMap(users, since);
 
     let ingestedRepos = 0;
     for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
-      // fetch id/private once (skip if inaccessible)
       let meta: { owner: string; name: string; id?: number; private?: boolean } | null = null;
       try {
         const m = await this.fetchRepoMeta(owner, repo);
@@ -373,11 +385,11 @@ export class GithubService {
       await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since);
       await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
       await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
-      await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, untilIso);
+      await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, until);
       ingestedRepos++;
     }
 
-    return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until: untilIso ?? null };
+    return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until };
   }
 
   // ==============
