@@ -45,7 +45,7 @@ This service provides detailed analysis of GitHub user activity over the past 6 
 
 2. **Install dependencies**
    ```bash
-   npm instal
+   npm install
    ```
 
 3. **Set up environment variables**
@@ -77,13 +77,7 @@ npm run migration:run
 ## Running the Application
 
 ### Development Mode
-```bash
-# Unix/Linux/macOS
-npm run dev unix
-
-# Windows
-npm run dev win
-
+```
 # Cross-platform
 npm run dev
 ```
