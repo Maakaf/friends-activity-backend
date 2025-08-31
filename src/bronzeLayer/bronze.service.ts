@@ -11,11 +11,11 @@ const ISSUE_NUM_RE = /\/issues\/(\d+)$/;
 const PR_NUM_RE    = /\/pulls\/(\d+)$/;
 
 @Injectable()
-export class GithubService {
+export class BronzeService {
   private readonly octokit = new MyOctokit({
     auth: process.env.GITHUB_TOKEN || (() => { throw new Error('GITHUB_TOKEN environment variable is required') })(),
     userAgent: 'friends-activity-backend/1.0',
-    request: { headers: { accept: 'application/vnd.github+json' } },
+    request: { headers: { accept: 'application/vnd.bronzeLayer+json' } },
   });
 
   constructor(@InjectDataSource() private readonly ds: DataSource) {}
@@ -153,7 +153,7 @@ export class GithubService {
       q: qCommits,
       per_page: 100,
       // commit search historically needed this preview header
-      headers: { accept: 'application/vnd.github.cloak-preview+json' },
+      headers: { accept: 'application/vnd.bronzeLayer.cloak-preview+json' },
     } as any
   ); // <- returns items[] directly
 
@@ -218,7 +218,7 @@ export class GithubService {
 
         const row: BronzeRow = {
           event_ulid: `${event_type}:${(it as any).id}`,
-          provider: 'github',
+          provider: 'bronzeLayer',
           event_type,
           provider_event_id: String((it as any).id),
           actor_user_node: (it as any).user?.id ? String((it as any).user.id) : null,
@@ -257,7 +257,7 @@ export class GithubService {
 
         const row: BronzeRow = {
           event_ulid: `issue_comment:${(c as any).id}`,
-          provider: 'github',
+          provider: 'bronzeLayer',
           event_type: 'issue_comment',
           provider_event_id: String((c as any).id),
           actor_user_node: (c as any).user?.id ? String((c as any).user.id) : null,
@@ -293,7 +293,7 @@ export class GithubService {
 
       const row: BronzeRow = {
         event_ulid: `pr_review_comment:${(c as any).id}`,
-        provider: 'github',
+        provider: 'bronzeLayer',
         event_type: 'pr_review_comment',
         provider_event_id: String((c as any).id),
         actor_user_node: (c as any).user?.id ? String((c as any).user.id) : null,
@@ -331,7 +331,7 @@ export class GithubService {
 
         const row: BronzeRow = {
           event_ulid: `commit:${(c as any).sha}`, // optionally include repo id: `commit:${repoId}:${sha}`
-          provider: 'github',
+          provider: 'bronzeLayer',
           event_type: 'commit',
           provider_event_id: String((c as any).sha),
           actor_user_node: (c as any).author?.id ? String((c as any).author.id) : null,

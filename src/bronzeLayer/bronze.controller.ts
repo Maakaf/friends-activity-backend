@@ -1,13 +1,13 @@
 import { Controller, Post, Param, Query, Inject, Body, BadRequestException } from '@nestjs/common';
-import { GithubService } from './github.service.js';
+import { BronzeService } from './bronze.service.js';
 
 type IngestUsersBody = { users: string[] };
 
-@Controller('github')
-export class GithubController {
-  constructor(@Inject(GithubService) private readonly githubService: GithubService) {}
+@Controller('bronzeLayer')
+export class BronzeController {
+  constructor(@Inject(BronzeService) private readonly githubService: BronzeService) {}
 
-  // POST /github/ingest/org/Maakaf?users=barlavi1,UrielOfir&since=2025-02-19T00:00:00Z&until=2025-03-01T00:00:00Z
+  // POST /bronzeLayer/ingest/org/Maakaf?users=barlavi1,UrielOfir&since=2025-02-19T00:00:00Z&until=2025-03-01T00:00:00Z
   @Post('ingest/org/:org')
   async ingestOrgForUsers(
     @Param('org') org: string,
@@ -17,7 +17,7 @@ export class GithubController {
   ) {
     return this.githubService.ingestOrgForUsers(org, users ?? '', since, until);
   }
-  //POST /github/ingest/users-strict  with JSON body: { "users": ["barlavi1", "UrielOfir"] }
+  //POST /bronzeLayer/ingest/users-strict  with JSON body: { "users": ["barlavi1", "UrielOfir"] }
   @Post('ingest/users-strict')
   async ingestUsersStrict(@Body() body: IngestUsersBody) {
     if (!body || !Array.isArray(body.users) || body.users.length === 0) {

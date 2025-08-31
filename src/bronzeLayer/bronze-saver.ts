@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 
 export interface BronzeRow {
   event_ulid: string;
-  provider: 'github';
+  provider: 'bronzeLayer';
   event_type: string;
   provider_event_id: string;
   actor_user_node?: string | null;
@@ -23,7 +23,7 @@ export async function insertBronze(ds: DataSource, row: BronzeRow) {
        actor_user_node, repo_node, target_node, created_at, received_at,
        is_private, raw_payload)
     VALUES
-      ($1,'github',$2,$3,$4,$5,$6,$7, now(), $8, $9::jsonb)
+      ($1,'bronzeLayer',$2,$3,$4,$5,$6,$7, now(), $8, $9::jsonb)
     ON CONFLICT (event_ulid) DO NOTHING
     `,
     [
