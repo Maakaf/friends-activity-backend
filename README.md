@@ -30,7 +30,7 @@ This service provides detailed analysis of GitHub user activity over the past 6 
 
 ## Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v20 or higher)
 - npm or yarn
 - GitHub Personal Access Token
 - PostgreSQL database (Neon account + connection string)  
@@ -45,7 +45,7 @@ This service provides detailed analysis of GitHub user activity over the past 6 
 
 2. **Install dependencies**
    ```bash
-   npm install
+   npm instal
    ```
 
 3. **Set up environment variables**
@@ -79,13 +79,13 @@ npm run migration:run
 ### Development Mode
 ```bash
 # Unix/Linux/macOS
-npm run start:dev:unix
+npm run dev unix
 
 # Windows
-npm run start:dev:win
+npm run dev win
 
 # Cross-platform
-npm run start:dev
+npm run dev
 ```
 
 ### Production Mode
@@ -97,11 +97,12 @@ npm run build
 npm start
 ```
 
-The server will start on `http://localhost:3000`
+The server will start on http://localhost:3000
+Swagger UI is available at http://localhost:3000/docs
 
 ### Available Scripts
 
-- `npm run start:dev`: Start development server
+- `npm run dev`: Start development server
 - `npm run build`: Build for production
 - `npm start`: Start production server
 - `npm test`: Run tests (not implemented yet)
