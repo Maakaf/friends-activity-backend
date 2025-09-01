@@ -9,7 +9,7 @@ export class InitSchemas1755604729706 implements MigrationInterface {
     
     await queryRunner.query(`CREATE TABLE IF NOT EXISTS bronze.github_events (
       event_ulid        TEXT PRIMARY KEY,
-      provider          TEXT NOT NULL DEFAULT 'github',
+      provider          TEXT NOT NULL DEFAULT 'bronzeLayer',
       event_type        TEXT,
       provider_event_id TEXT,
       actor_user_node   TEXT,

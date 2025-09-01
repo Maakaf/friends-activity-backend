@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
-import { GithubModule } from './github/github.module.js';
+import { BronzeModule } from './bronzeLayer/bronze.module.js';
 import dataSource from './database/data-source.js';
 
 @Module({
@@ -18,7 +18,7 @@ import dataSource from './database/data-source.js';
       // Never sync in prod; migrations handle schema
       synchronize: false,
     }),
-    GithubModule,
+    BronzeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
