@@ -1,1 +1,0 @@
-// explains silver is implemented as views

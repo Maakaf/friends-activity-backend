@@ -1,1 +1,0 @@
-// here SQL views for silver will be migrated.
