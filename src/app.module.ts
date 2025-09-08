@@ -4,7 +4,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
 
 import { BronzeModule } from './bronzeLayer/bronze.module.js';
 import dataSource from './database/data-source.js';
@@ -21,6 +20,6 @@ import dataSource from './database/data-source.js';
     BronzeModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule {}
