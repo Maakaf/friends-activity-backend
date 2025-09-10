@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { SilverService } from './silver.service.js';
+import { IssueSilverService } from './issue.service.js';
 
 // Entities
 import { UserEntity } from './entities/user.entity.js';
@@ -22,7 +22,7 @@ import {PullRequestEntity} from './entities/pr.entity.js';
       PullRequestEntity,
     ]),
   ],
-  providers: [SilverService],
-  exports: [SilverService], // so Gold layer or schedulers can use it
+  providers: [IssueSilverService],
+  exports: [IssueSilverService], // so Gold layer or schedulers can use it
 })
 export class SilverModule {}

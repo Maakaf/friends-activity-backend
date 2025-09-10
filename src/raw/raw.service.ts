@@ -1,20 +1,24 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { insertBronze, BronzeRow } from './bronze-saver.js';
-import { GithubClientService } from './github-client.service.js';
+import { Octokit } from '@octokit/rest';
+import { paginateRest } from '@octokit/plugin-paginate-rest';
+import { insertBronze, BronzeRow } from './raw-saver.js';
 
+const MyOctokit = Octokit.plugin(paginateRest);
+  
 const ISSUE_NUM_RE = /\/issues\/(\d+)$/;
 const PR_NUM_RE    = /\/pulls\/(\d+)$/;
 
 @Injectable()
-export class BronzeService {
-  private readonly logger = new Logger(BronzeService.name);
+export class GithubService {
+  private readonly octokit = new MyOctokit({
+    auth: process.env.GITHUB_TOKEN || (() => { throw new Error('GITHUB_TOKEN environment variable is required') })(),
+    userAgent: 'friends-activity-backend/1.0',
+    request: { headers: { accept: 'application/vnd.github+json' } },
+  });
 
-  constructor(
-    @InjectDataSource() private readonly ds: DataSource,
-    private readonly githubClient: GithubClientService,
-  ) {}
+  constructor(@InjectDataSource() private readonly ds: DataSource) {}
 
   // --------- Helpers ----------
   private toSet(csv?: string) {
@@ -35,23 +39,20 @@ export class BronzeService {
   private repoKey(owner: string, repo: string) {
     return `${owner}/${repo}`;
   }
-
   private parseOwnerRepoFromRepoUrl(repoUrl?: string) {
     if (!repoUrl) return null;
     const parts = repoUrl.split('/').slice(-2);
     if (parts.length < 2) return null;
     return { owner: parts[0], repo: parts[1] };
   }
-
   private parseOwnerRepoFromHtmlUrl(htmlUrl?: string) {
     if (!htmlUrl) return null;
     const m = htmlUrl.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
     if (!m) return null;
     return { owner: m[1], repo: m[2] };
   }
-
   private async fetchRepoMeta(owner: string, repo: string) {
-    const data = await this.githubClient.reposGet(owner, repo);
+    const { data } = await this.octokit.repos.get({ owner, repo });
     return {
       owner,
       name: repo,
@@ -61,18 +62,21 @@ export class BronzeService {
   }
 
   private async listRepos(org: string) {
-    return this.githubClient.listRepos(org);
+    return this.octokit.paginate(
+      this.octokit.repos.listForOrg,
+      { org, type: 'all', per_page: 100 },
+      (r) => r.data,
+    );
   }
 
   /** Build { issue/PR number -> id } for one repo (since watermark) */
   private async buildNumberToIdMap(owner: string, repo: string, sinceIso: string) {
     const map = new Map<string, string>();
-    const items = await this.githubClient.listIssuesForRepo({
-      owner,
-      repo,
-      state: 'all',
-      since: sinceIso,
-    });
+    const items = await this.octokit.paginate(
+      this.octokit.issues.listForRepo,
+      { owner, repo, state: 'all', per_page: 100, since: sinceIso },
+      (r) => r.data,
+    );
     for (const it of items) {
       const num = (it as any).number;
       const id  = (it as any).id;
@@ -92,11 +96,7 @@ export class BronzeService {
     if (cached) return cached;
 
     try {
-      const data = await this.githubClient.getIssue({
-        owner,
-        repo,
-        issue_number: Number(num),
-      });
+      const { data } = await this.octokit.issues.get({ owner, repo, issue_number: Number(num) });
       const id = String((data as any).id);
       numberToId.set(num, id);
       return id;
@@ -116,11 +116,7 @@ export class BronzeService {
     if (cached) return cached;
 
     try {
-      const data = await this.githubClient.getPull({
-        owner,
-        repo,
-        pull_number: Number(num),
-      });
+      const { data } = await this.octokit.pulls.get({ owner, repo, pull_number: Number(num) });
       const id = String((data as any).id);
       numberToId.set(num, id);
       return id;
@@ -133,36 +129,50 @@ export class BronzeService {
   // repo discovery
   // =======================
 
+  /** Repos a single user has activity in (issues/PRs/comments + commits) since `sinceIso`. */
   private async discoverReposForUser(login: string, sinceIso: string) {
-    const found = new Map<string, { owner: string; repo: string }>();
+  const found = new Map<string, { owner: string; repo: string }>();
 
-    // A) Issues/PRs the user is involved in
-    const qIssues = `involves:${login} created:>=${sinceIso}`;
-    const issues = await this.githubClient.searchIssuesAndPRs(qIssues);
+  // A) Issues/PRs the user is involved in (author/comment/assignee/mentioned)
+  const qIssues = `involves:${login} created:>=${sinceIso}`;
+  const issues = await this.octokit.paginate(
+    this.octokit.search.issuesAndPullRequests,
+    { q: qIssues, per_page: 100, advanced_search: 'true'}
+  ); // <- returns items[] directly
 
-    for (const it of issues as any[]) {
-      const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
-      if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
-    }
-
-    // B) Commits authored by the user
-    const qCommits = `author:${login} committer-date:>=${sinceIso}`;
-    const commits = await this.githubClient.searchCommits(qCommits);
-
-    for (const c of commits as any[]) {
-      const full = c.repository?.full_name as string | undefined;
-      if (full && full.includes('/')) {
-        const [owner, repo] = full.split('/');
-        found.set(this.repoKey(owner, repo), { owner, repo });
-      } else {
-        const parsed = this.parseOwnerRepoFromHtmlUrl(c.html_url);
-        if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
-      }
-    }
-
-    return Array.from(found.values());
+  for (const it of issues as any[]) {
+    const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
+    if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
   }
 
+  // B) Commits authored by the user
+  const qCommits = `author:${login} committer-date:>=${sinceIso}`;
+  const commits = await this.octokit.paginate(
+    this.octokit.search.commits,
+    {
+      q: qCommits,
+      per_page: 100,
+      // commit search historically needed this preview header
+      headers: { accept: 'application/vnd.github.cloak-preview+json' },
+    } as any
+  ); // <- returns items[] directly
+
+  for (const c of commits as any[]) {
+    const full = c.repository?.full_name as string | undefined;
+    if (full && full.includes('/')) {
+      const [owner, repo] = full.split('/');
+      found.set(this.repoKey(owner, repo), { owner, repo });
+    } else {
+      const parsed = this.parseOwnerRepoFromHtmlUrl(c.html_url);
+      if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
+    }
+  }
+
+  return Array.from(found.values());
+}
+
+
+  /** repo -> set(users) map for all users since `sinceIso` */
   private async buildRepoUsersMap(allUsers: Set<string>, sinceIso: string) {
     const map = new Map<string, { owner: string; repo: string; users: Set<string> }>();
 
@@ -172,7 +182,7 @@ export class BronzeService {
     });
 
     const userRepoResults = await Promise.all(userRepoPromises);
-
+    
     for (const { login, repos } of userRepoResults) {
       for (const r of repos) {
         const key = this.repoKey(r.owner, r.repo);
@@ -184,9 +194,10 @@ export class BronzeService {
   }
 
   // =======================
-  // Ingestors
+  // Ingestors (same as before)
   // =======================
 
+  /** Issues + PRs created by users (uses ?creator=login). */
   private async ingestIssuesAndPRsByCreator(
     owner: string, repo: string, repoId: number | undefined, isPrivate: boolean | undefined,
     users: Set<string>, sinceIso: string,
@@ -195,13 +206,11 @@ export class BronzeService {
     const rows: BronzeRow[] = [];
 
     for (const login of logins) {
-      const pages = await this.githubClient.listIssuesForRepo({
-        owner,
-        repo,
-        state: 'all',
-        since: sinceIso,
-        ...(login ? { creator: login } : {}),
-      });
+      const pages = await this.octokit.paginate(
+        this.octokit.issues.listForRepo,
+        { owner, repo, state: 'all', per_page: 100, since: sinceIso, ...(login ? { creator: login } : {}) } as any,
+        (r) => r.data,
+      );
 
       for (const it of pages) {
         const isPR = (it as any).pull_request != null;
@@ -209,12 +218,12 @@ export class BronzeService {
 
         const row: BronzeRow = {
           event_ulid: `${event_type}:${(it as any).id}`,
-          provider: 'bronzeLayer',
+          provider: 'github',
           event_type,
           provider_event_id: String((it as any).id),
           actor_user_node: (it as any).user?.id ? String((it as any).user.id) : null,
           repo_node: repoId != null ? String(repoId) : null,
-          target_node: String((it as any).id),
+          target_node: String((it as any).id), // parent for itself
           created_at: (it as any).created_at ?? null,
           is_private: isPrivate ?? null,
           raw_payload: it,
@@ -228,15 +237,16 @@ export class BronzeService {
     }
   }
 
+  /** Issue comments (filter client-side by commenter; resolve ParentID from issue_url). */
   private async ingestIssueComments(
     owner: string, repo: string, repoId: number | undefined, isPrivate: boolean | undefined,
     users: Set<string>, sinceIso: string, numberToId: Map<string, string>,
   ) {
-    const comments = await this.githubClient.listCommentsForRepo({
-      owner,
-      repo,
-      since: sinceIso,
-    });
+    const comments = await this.octokit.paginate(
+      this.octokit.issues.listCommentsForRepo,
+      { owner, repo, per_page: 100, since: sinceIso },
+      (r) => r.data,
+    );
 
     for (const c of comments) {
       const login = (c as any).user?.login;
@@ -247,12 +257,12 @@ export class BronzeService {
 
         const row: BronzeRow = {
           event_ulid: `issue_comment:${(c as any).id}`,
-          provider: 'bronzeLayer',
+          provider: 'github',
           event_type: 'issue_comment',
           provider_event_id: String((c as any).id),
           actor_user_node: (c as any).user?.id ? String((c as any).user.id) : null,
           repo_node: repoId != null ? String(repoId) : null,
-          target_node: parentId,
+          target_node: parentId, // <-- Parent Issue/PR ID
           created_at: (c as any).created_at ?? null,
           is_private: isPrivate ?? null,
           raw_payload: c,
@@ -264,15 +274,16 @@ export class BronzeService {
     }
   }
 
+  /** PR review comments (inline) — resolve ParentID from pull_request_url. */
   private async ingestPRReviewComments(
     owner: string, repo: string, repoId: number | undefined, isPrivate: boolean | undefined,
     users: Set<string>, sinceIso: string, numberToId: Map<string, string>,
   ) {
-    const comments = await this.githubClient.listReviewCommentsForRepo({
-      owner,
-      repo,
-      since: sinceIso,
-    });
+    const comments = await this.octokit.paginate(
+      this.octokit.pulls.listReviewCommentsForRepo,
+      { owner, repo, per_page: 100, since: sinceIso },
+      (r) => r.data,
+    );
 
     for (const c of comments) {
       const login = (c as any).user?.login;
@@ -282,12 +293,12 @@ export class BronzeService {
 
       const row: BronzeRow = {
         event_ulid: `pr_review_comment:${(c as any).id}`,
-        provider: 'bronzeLayer',
+        provider: 'github',
         event_type: 'pr_review_comment',
         provider_event_id: String((c as any).id),
         actor_user_node: (c as any).user?.id ? String((c as any).user.id) : null,
         repo_node: repoId != null ? String(repoId) : null,
-        target_node: parentId,
+        target_node: parentId, // <-- Parent PR ID
         created_at: (c as any).created_at ?? null,
         is_private: isPrivate ?? null,
         raw_payload: c,
@@ -296,6 +307,7 @@ export class BronzeService {
     }
   }
 
+  /** Commits — best with author=<login>; falls back to everyone since. */
   private async ingestCommitsForUsers(
     owner: string, repo: string, repoId: number | undefined, isPrivate: boolean | undefined,
     users: Set<string>, sinceIso: string, untilIso?: string,
@@ -303,24 +315,28 @@ export class BronzeService {
     const who = users.size ? [...users] : [undefined];
 
     for (const login of who) {
-      const params: any = { since: sinceIso };
+      const params: any = { owner, repo, per_page: 100, since: sinceIso };
       if (untilIso) params.until = untilIso;
       if (login) params.author = login;
 
-      const commits = await this.githubClient.listCommits(owner, repo, params);
+      const commits = await this.octokit.paginate(
+        this.octokit.repos.listCommits,
+        params,
+        (r) => r.data,
+      );
 
       for (const c of commits) {
         const authorLogin = (c as any).author?.login;
         if (users.size && authorLogin && !users.has(authorLogin)) continue;
 
         const row: BronzeRow = {
-          event_ulid: `commit:${(c as any).sha}`,
-          provider: 'bronzeLayer',
+          event_ulid: `commit:${(c as any).sha}`, // optionally include repo id: `commit:${repoId}:${sha}`
+          provider: 'github',
           event_type: 'commit',
           provider_event_id: String((c as any).sha),
           actor_user_node: (c as any).author?.id ? String((c as any).author.id) : null,
           repo_node: repoId != null ? String(repoId) : null,
-          target_node: null,
+          target_node: null, // no push linkage here (can be added via Events pipeline later)
           created_at: (c as any).commit?.committer?.date ?? null,
           is_private: isPrivate ?? null,
           raw_payload: c,
@@ -331,15 +347,21 @@ export class BronzeService {
   }
 
   // =======================
-  // orchestrators
+  // orchestrator
   // =======================
 
+  /**
+   *  - discover per-user repos since `sinceIso`
+   *  - merge into repo -> set(users) map
+   *  - ingest each repo ONCE, using only the users who actually contributed there
+   */
   async ingestEachUserInTheirRepos(
     usersArray: string[],
     sinceIso?: string,
     untilIso?: string,
   ) {
     const users = new Set(usersArray.map((s) => s.trim()).filter(Boolean));
+    
     if (!users.size) throw new Error('users list is required');
 
     const since = sinceIso ?? this.isoDaysAgo(180);
@@ -368,6 +390,9 @@ export class BronzeService {
     return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until };
   }
 
+  // ==============
+  // Org orchestrator (kept as-is for org-scoped runs)
+  // ==============
   async ingestOrgForUsers(org: string, usersCsv = '', sinceIso?: string, untilIso?: string) {
     const users = this.toSet(usersCsv);
     const since = sinceIso ?? new Date(Date.now() - 7 * 86400e3).toISOString();
@@ -386,14 +411,11 @@ export class BronzeService {
         await this.ingestIssueComments(owner, name, rid, priv, users, since, numberToId);
         await this.ingestPRReviewComments(owner, name, rid, priv, users, since, numberToId);
         await this.ingestCommitsForUsers(owner, name, rid, priv, users, since, untilIso);
-      } catch (err) {
-        this.logger.warn(
-          `Failed to ingest repo ${r.full_name || `${r.owner.login}/${r.name}`}: ${err.message}`,
-        );
-        continue; // move on to next repo      }
+      } catch {
+        // continue with remaining repositories if one fails
+      }
     }
 
     return { org, users: [...users], since, until: untilIso ?? null, repos: repos.length };
   }
-}
 }
