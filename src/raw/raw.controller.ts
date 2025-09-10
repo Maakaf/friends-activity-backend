@@ -1,5 +1,5 @@
 import { Controller, Post, Param, Query, Inject, Body, BadRequestException } from '@nestjs/common';
-import { GithubService } from './github.service.js';
+import { GithubService } from './raw.service.js';
 import { ApiBody, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { IngestUsersDto } from './dto/ingest-users.dto.js';
 type IngestUsersBody = { users: string[] };

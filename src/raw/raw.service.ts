@@ -3,7 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Octokit } from '@octokit/rest';
 import { paginateRest } from '@octokit/plugin-paginate-rest';
-import { insertBronze, BronzeRow } from './bronze-saver.js';
+import { insertBronze, BronzeRow } from './raw-saver.js';
 
 const MyOctokit = Octokit.plugin(paginateRest);
   

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GithubController } from './github.controller.js';
-import { GithubService } from './github.service.js';
+import { GithubController } from './raw.controller.js';
+import { GithubService } from './raw.service.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([])],  // allows InjectDataSource in this module
