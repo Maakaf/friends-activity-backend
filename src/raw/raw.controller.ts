@@ -35,4 +35,3 @@ export class GithubController {
     return this.githubService.ingestEachUserInTheirRepos(body.users);
   }
 }
-

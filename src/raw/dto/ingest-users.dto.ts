@@ -1,4 +1,3 @@
-// github/dto/ingest-users.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, ArrayNotEmpty, IsString } from 'class-validator';
 

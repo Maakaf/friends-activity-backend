@@ -3,7 +3,7 @@ export type RepoId   = string;
 export type UserId   = string;
 export type IssueId  = string;
 export type PullId   = string;
-export type CommentId= string;
+export type CommentId = string;
 export type CommitId = string;
 
 /** Enums / literal unions */
@@ -74,7 +74,7 @@ export interface PR {
 export interface Comment {
   commentId: CommentId;          // provider_event_id for the comment
   repoId: RepoId | null;
-  parentId: IssueId | PullId;    // the issue/pr numeric id (as string)
+  parentId: IssueId | PullId | null;    // the issue/pr numeric id (as string)
   parentType: ParentType;        // 'Issue' | 'PR'
   authorUserId: UserId | null;
   createdAt: ISO8601 | null;
