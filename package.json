@@ -23,10 +23,12 @@
     "test:comments": "tsx src/scripts/test-comments.ts",
     "test:commits": "tsx src/scripts/test-commits.ts",
     "test:users": "tsx src/scripts/test-users.ts",
+    "ingest:sample": "tsx src/scripts/ingest-sample-data.ts",
     "typeorm:ts": "cross-env DOTENV_CONFIG_PATH=./.env DOTENV_CONFIG_OVERRIDE=true ts-node --esm -r dotenv/config",
     "migration:generate": "npm run typeorm:ts -- ./node_modules/typeorm/cli.js migration:generate -d src/database/data-source.ts src/database/migrations/Auto",
-    "migration:run": "npm run typeorm:ts -- ./node_modules/typeorm/cli.js migration:run -d src/database/data-source.ts",
-    "migration:revert": "npm run typeorm:ts -- ./node_modules/typeorm/cli.js migration:revert -d src/database/data-source.ts"
+    "migration:run": "cross-env DOTENV_CONFIG_PATH=./.env tsx ./node_modules/typeorm/cli.js -d src/database/data-source.ts migration:run",
+    "migration:revert": "cross-env DOTENV_CONFIG_PATH=./.env tsx ./node_modules/typeorm/cli.js -d src/database/data-source.ts migration:revert",
+    "migration:show": "cross-env DOTENV_CONFIG_PATH=./.env tsx ./node_modules/typeorm/cli.js -d src/database/data-source.ts migration:show"
   },
   "dependencies": {
     "@fastify/swagger": "^9.5.1",
@@ -72,6 +74,7 @@
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.16.0",
+    "typeorm-ts-node-esm": "^0.3.20",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },

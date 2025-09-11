@@ -3,7 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Octokit } from '@octokit/rest';
 import { paginateRest } from '@octokit/plugin-paginate-rest';
-import { insertBronze, BronzeRow } from './raw-saver.js';
+import { insertBronze, BronzeRow,  upsertBronzeUser, upsertBronzeRepo } from './raw-saver.js';
 
 const MyOctokit = Octokit.plugin(paginateRest);
   
@@ -53,12 +53,41 @@ export class GithubService {
   }
   private async fetchRepoMeta(owner: string, repo: string) {
     const { data } = await this.octokit.repos.get({ owner, repo });
+    
+    try {
+      await upsertBronzeRepo(this.ds, {
+        repo_node: String((data as any).id),
+        full_name: (data as any).full_name ?? `${owner}/${repo}`,
+        owner_login: (data as any).owner?.login ?? owner,
+        name: (data as any).name ?? repo,
+        is_private: Boolean((data as any).private),
+        raw_payload: data,
+      });
+    } catch { /* swallow and continue ingest */ }
+    
     return {
       owner,
       name: repo,
       id: Number((data as any).id),
       private: Boolean((data as any).private),
     };
+  }
+
+  private async upsertUserProfilesToBronze(logins: string[]) {
+    const unique = Array.from(new Set(logins.map(s => s.trim()).filter(Boolean)));
+    for (const login of unique) {
+      try {
+        const { data } = await this.octokit.users.getByUsername({ username: login });
+        await upsertBronzeUser(this.ds, {
+          user_node: String((data as any).id),
+          login: (data as any).login ?? login,
+          name: (data as any).name ?? null,
+          raw_payload: data,
+        });
+      } catch {
+        // continue on single-user failure
+      }
+    }
   }
 
   private async listRepos(org: string) {
@@ -367,6 +396,7 @@ export class GithubService {
     const since = sinceIso ?? this.isoDaysAgo(180);
     const until = untilIso ?? this.isoNow();
 
+    await this.upsertUserProfilesToBronze([...users]);
     const repoUsers = await this.buildRepoUsersMap(users, since);
 
     let ingestedRepos = 0;

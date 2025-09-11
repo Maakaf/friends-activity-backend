@@ -39,3 +39,66 @@ export async function insertBronze(ds: DataSource, row: BronzeRow) {
     ],
   );
 }
+
+/* -------- Bronze users -------- */
+export interface BronzeUserRow {
+  user_node: string;       // GitHub numeric id, as text
+  login: string;
+  name?: string | null;
+  raw_payload: any;
+}
+
+/** Upsert latest user payload into bronze.github_users */
+export async function upsertBronzeUser(ds: DataSource, row: BronzeUserRow) {
+  await ds.query(
+    `
+    INSERT INTO bronze.github_users
+      (user_node, provider, login, name, fetched_at, raw_payload)
+    VALUES
+      ($1, 'github', $2, $3, now(), $4::jsonb)
+    ON CONFLICT (user_node) DO UPDATE
+      SET login = EXCLUDED.login,
+          name  = EXCLUDED.name,
+          fetched_at = now(),
+          raw_payload = EXCLUDED.raw_payload
+    `,
+    [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload)]
+  );
+}
+
+/* -------- Bronze repos -------- */
+export interface BronzeRepoRow {
+  repo_node: string;       // GitHub numeric id, as text
+  full_name: string;       // owner/name
+  owner_login?: string | null;
+  name?: string | null;
+  is_private?: boolean | null;
+  raw_payload: any;
+}
+
+/** Upsert latest repo payload into bronze.github_repos */
+export async function upsertBronzeRepo(ds: DataSource, row: BronzeRepoRow) {
+  await ds.query(
+    `
+    INSERT INTO bronze.github_repos
+      (repo_node, provider, full_name, owner_login, name, is_private, fetched_at, raw_payload)
+    VALUES
+      ($1, 'github', $2, $3, $4, $5, now(), $6::jsonb)
+    ON CONFLICT (repo_node) DO UPDATE
+      SET full_name   = EXCLUDED.full_name,
+          owner_login = EXCLUDED.owner_login,
+          name        = EXCLUDED.name,
+          is_private  = EXCLUDED.is_private,
+          fetched_at  = now(),
+          raw_payload = EXCLUDED.raw_payload
+    `,
+    [
+      row.repo_node,
+      row.full_name,
+      row.owner_login ?? null,
+      row.name ?? null,
+      row.is_private ?? null,
+      JSON.stringify(row.raw_payload),
+    ]
+  );
+}
