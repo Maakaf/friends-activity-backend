@@ -1,1 +1,0 @@
-// aggregates silver → gold tables
