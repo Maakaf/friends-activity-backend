@@ -1,8 +1,8 @@
 
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { IssueBronzeRepo } from './issue.repo.js';
-import { mapIssue, mergeIssue } from './mappers.js';
-import type { Issue } from './types.js';
+import { mapIssue, mergeIssue } from '../mappers.js';
+import type { Issue } from '../types.js';
 
 @Injectable()
 export class IssueSilverService {

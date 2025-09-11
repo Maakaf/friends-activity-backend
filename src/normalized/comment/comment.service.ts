@@ -1,7 +1,7 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { CommentBronzeRepo } from './comment.repo.js';
-import { mapComment, mergeComment } from './mappers.js';
-import type { Comment } from './types.js';
+import { mapComment, mergeComment } from '../mappers.js';
+import type { Comment } from '../types.js';
 
 @Injectable()
 export class CommentSilverService {

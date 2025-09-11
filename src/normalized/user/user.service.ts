@@ -1,7 +1,7 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { UserBronzeRepo } from './user.repo.js';
-import { mapUserFromPayload, pickUserObjectForActor, mergeUser } from './mappers.js';
-import type { User } from './types.js';
+import { mapUserFromPayload, pickUserObjectForActor, mergeUser } from '../mappers.js';
+import type { User } from '../types.js';
 
 @Injectable()
 export class UserSilverService {

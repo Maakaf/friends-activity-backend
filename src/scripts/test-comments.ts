@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module.js';
-import { CommentSilverService } from '../normalized/comment.service.js';
+import { CommentSilverService } from '../normalized/comment/comment.service.js';
 
 async function main() {
   const app = await NestFactory.createApplicationContext(AppModule);
