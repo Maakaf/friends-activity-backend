@@ -8,9 +8,9 @@ import { CommentSilverService } from './comment/comment.service.js';
 import { CommitSilverService } from './commit/commit.service.js';
 
 export interface SilverBuildArgs {
-  sinceIso?: string;     // אם לא מגיע - ניקח 180 ימים אחורה
-  untilIso?: string;     // אופציונלי
-  limit?: number;        // אופציונלי: לחתוך כמות users/repos
+  sinceIso?: string;
+  untilIso?: string;      //optional
+  limit?: number;        // optional
 }
 
 @Injectable()
