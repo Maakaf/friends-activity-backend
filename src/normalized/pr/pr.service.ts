@@ -1,7 +1,7 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { PRBronzeRepo } from './pr.repo.js';
-import { mapPR, mergePR } from './mappers.js';
-import type { PR } from './types.js';
+import { mapPR, mergePR } from '../mappers.js';
+import type { PR } from '../types.js';
 
 @Injectable()
 export class PRSilverService {

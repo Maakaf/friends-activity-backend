@@ -1,7 +1,7 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { CommitBronzeRepo } from './commit.repo.js';
-import { mapCommit, mergeCommit } from './mappers.js';
-import type { Commit } from './types.js';
+import { mapCommit, mergeCommit } from '../mappers.js';
+import type { Commit } from '../types.js';
 
 @Injectable()
 export class CommitSilverService {

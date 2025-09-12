@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import type { BronzeRow } from './mappers.js';
+import type { BronzeRow } from '../mappers.js';
 
 @Injectable()
 export class PRBronzeRepo {

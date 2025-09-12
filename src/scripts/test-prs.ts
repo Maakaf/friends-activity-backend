@@ -2,7 +2,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module.js';
-import { PRSilverService } from '../normalized/pr.service.js';
+import { PRSilverService } from '../normalized/pr/pr.service.js';
 
 async function main() {
   const app = await NestFactory.createApplicationContext(AppModule);

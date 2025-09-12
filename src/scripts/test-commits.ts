@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module.js';
-import { CommitSilverService } from '../normalized/commit.service.js';
+import { CommitSilverService } from '../normalized/commit/commit.service.js';
 
 async function main() {
   const app = await NestFactory.createApplicationContext(AppModule);

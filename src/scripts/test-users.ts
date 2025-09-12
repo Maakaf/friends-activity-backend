@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module.js';
-import { UsersSilverService } from '../normalized/user.service.js';
+import { UsersSilverService } from '../normalized/user/user.service.js';
 
 async function main() {
   // Boot a DI-only Nest context (no HTTP server)
