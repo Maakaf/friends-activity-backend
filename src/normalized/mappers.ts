@@ -1,6 +1,6 @@
 import {
   Issue, PR, Comment, Commit,
-  Repository, User, IssueState, ParentType, RepoId, UserId, ISO8601
+  Repository, User, IssueState, ParentType, RepoId, UserId, ISO8601, Visibility
 } from './types.js';
 
 export interface BronzeRow {
@@ -253,5 +253,64 @@ export function mergeUser(prev: User, next: User): User {
     siteAdmin:   pick(prev.siteAdmin,   next.siteAdmin),
     ghCreatedAt: pick(prev.ghCreatedAt, next.ghCreatedAt),
     ghUpdatedAt: pick(prev.ghUpdatedAt, next.ghUpdatedAt),
+  };
+}
+
+
+/** Map a GitHub repo JSON payload to Silver Repository shape */
+export function mapRepositoryFromPayload(r: any): Repository | null {
+  if (!r || r.id == null) return null;
+
+  const repoId: RepoId = String(r.id);
+  const ownerUserId: UserId | null = r.owner?.id != null ? String(r.owner.id) : null;
+
+  const visibility: Visibility | null =
+    typeof r.visibility === 'string'
+      ? (r.visibility as Visibility)
+      : r.private === true
+      ? 'private'
+      : r.private === false
+      ? 'public'
+      : null;
+
+  const lastActivity: ISO8601 | null = r.pushed_at ?? r.updated_at ?? null;
+
+  return {
+    repoId,
+    ownerUserId,
+    repoName: r.name ?? null,
+    visibility,
+    defaultBranch: r.default_branch ?? null,
+    forkCount: typeof r.forks_count === 'number' ? r.forks_count : null,
+    lastActivity,
+    ghCreatedAt: r.created_at ?? null,
+  };
+}
+
+/** Map directly from bronze.github_repos row */
+export function mapRepoFromBronzeRow(row: {
+  repo_node: string;
+  name: string | null;
+  is_private: boolean | null;
+  raw_payload: any;
+}): Repository | null {
+  const fromPayload = mapRepositoryFromPayload(row.raw_payload);
+  if (fromPayload) return fromPayload;
+
+  // fallback minimal mapping if payload is missing or empty
+  return {
+    repoId: String(row.repo_node),
+    ownerUserId: null,
+    repoName: row.name ?? null,
+    visibility:
+      row.is_private === true
+        ? 'private'
+        : row.is_private === false
+        ? 'public'
+        : null,
+    defaultBranch: null,
+    forkCount: null,
+    lastActivity: null,
+    ghCreatedAt: null,
   };
 }

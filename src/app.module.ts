@@ -15,7 +15,9 @@ import { CommentSilverService } from './normalized/comment.service.js';
 import { CommitBronzeRepo } from './normalized/commit.repo.js';
 import { CommitSilverService } from './normalized/commit.service.js';
 import { UserBronzeRepo } from './normalized/user.repo.js';
-import { UserSilverService } from './normalized/user.service.js';
+import { UsersSilverService } from './normalized/user.service.js';
+import { RepoBronzeRepo } from './normalized/repo.repo.js';
+import { ReposSilverService } from './normalized/repo.service.js';
 import dataSource from './database/data-source.js';
 
 function pgConfig() {
@@ -52,14 +54,17 @@ function pgConfig() {
     CommitBronzeRepo, 
     CommitSilverService,
     UserBronzeRepo,
-    UserSilverService,
+    UsersSilverService,
+    RepoBronzeRepo,
+    ReposSilverService,
   ],
   exports: [
     IssueSilverService,
     PRSilverService,
     CommentSilverService,
     CommitSilverService,
-    UserSilverService,
+    UsersSilverService,
+    ReposSilverService,
   ],
 })
 export class AppModule {}

@@ -1,9 +1,10 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
-export interface LatestActorRow {
-  actor_user_node: string;
-  created_at: string | null;
+export interface BronzeUsersRow {
+  user_node: string;            // PK in bronze.github_users
+  login: string | null;
+  fetched_at: string | null;    // ISO
   raw_payload: any;
 }
 
@@ -11,34 +12,36 @@ export interface LatestActorRow {
 export class UserBronzeRepo {
   constructor(@Inject(DataSource) private readonly ds: DataSource) {}
 
-  /**
-   * Returns ONE latest bronze row per actor_user_node since 'sinceIso'.
-   * Optional narrowing by untilIso / repoId.
-   */
-  async loadLatestByActor(params: {
-    sinceIso: string;
+  async loadFromBronzeUsers(params: {
+    sinceIso?: string;
     untilIso?: string;
-    repoId?: string;
-  }): Promise<LatestActorRow[]> {
-    const { sinceIso, untilIso, repoId } = params;
+    userIds?: string[];
+    logins?: string[];
+    limit?: number;
+  }): Promise<BronzeUsersRow[]> {
+    const { sinceIso, untilIso, userIds, logins, limit } = params;
 
-    const wh: string[] = [`actor_user_node IS NOT NULL`, `created_at >= $1`];
-    const args: any[] = [sinceIso];
+    const where: string[] = ['1=1'];
+    const args: any[] = [];
 
-    if (untilIso) { wh.push(`created_at < $${args.length + 1}`); args.push(untilIso); }
-    if (repoId)   { wh.push(`repo_node = $${args.length + 1}`);   args.push(repoId); }
+    if (sinceIso) { where.push(`fetched_at >= $${args.length + 1}`); args.push(sinceIso); }
+    if (untilIso) { where.push(`fetched_at <  $${args.length + 1}`); args.push(untilIso); }
+    if (userIds?.length) {
+      where.push(`user_node = ANY($${args.length + 1}::text[])`); args.push(userIds);
+    }
+    if (logins?.length) {
+      where.push(`login = ANY($${args.length + 1}::text[])`); args.push(logins);
+    }
+
+    const lim = limit && limit > 0 ? `LIMIT ${Number(limit)}` : '';
 
     const sql = `
-      SELECT DISTINCT ON (actor_user_node)
-             actor_user_node,
-             created_at,
-             raw_payload
-        FROM bronze.github_events
-       WHERE ${wh.join(' AND ')}
-       ORDER BY actor_user_node, created_at DESC, event_ulid DESC
+      SELECT user_node, login, fetched_at, raw_payload
+        FROM bronze.github_users
+       WHERE ${where.join(' AND ')}
+       ORDER BY fetched_at DESC
+       ${lim}
     `;
-
-    const rows = await this.ds.query(sql, args);
-    return rows as LatestActorRow[];
+    return (await this.ds.query(sql, args)) as BronzeUsersRow[];
   }
 }
