@@ -1,7 +1,7 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import type { Repository } from './types.js';
+import type { Repository } from '../types.js';
 import { RepoBronzeRepo } from './repo.repo.js';
-import { mapRepoFromBronzeRow } from './mappers.js';
+import { mapRepoFromBronzeRow } from '../mappers.js';
 
 @Injectable()
 export class ReposSilverService {

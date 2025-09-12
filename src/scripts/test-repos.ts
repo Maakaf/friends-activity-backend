@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module.js';
-import { ReposSilverService } from '../normalized/repo.service.js';
+import { ReposSilverService } from '../normalized/repo/repo.service.js';
 
 /**
  * Tiny CLI arg parser:
