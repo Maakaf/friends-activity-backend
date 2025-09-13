@@ -10,6 +10,45 @@ This service provides detailed analysis of GitHub user activity over the past 6 
 - **Issues**: Problem reporting and feature requests
 - **Comments**: Engagement on PRs and issues
 
+## Architecture
+
+The project follows a **three-layered data architecture** for processing GitHub data:
+
+### 🥉 Bronze Layer (Raw Data)
+- **Purpose**: Stores raw data exactly as received from GitHub API
+- **Format**: JSONB format preserving original API responses
+- **Tables**: `bronze.github_events`, `bronze.github_users`, `bronze.github_repos`
+- **Characteristics**:
+  - Zero processing - direct API response storage
+  - Complete data preservation for auditing and reprocessing
+  - Flexible schema that adapts to API changes
+
+### 🥈 Silver Layer (Normalized Data)
+- **Purpose**: Processes, cleans, and normalizes raw data into structured relational tables
+- **Format**: Traditional relational database tables with defined schemas
+- **Services**: Dedicated services for each data type (`UsersSilverService`, `ReposSilverService`, etc.)
+- **Characteristics**:
+  - Data extraction and transformation from raw JSON
+  - Normalization into separate, related tables
+  - Data validation and cleaning
+  - Optimized for queries and analysis
+
+### 🥇 Gold Layer (Analytics-Ready Data)
+- **Purpose**: Aggregated and processed data ready for frontend consumption
+- **Format**: Optimized tables for specific use cases
+- **Tables**: `gold.user_profile`, `gold.repository`, `gold.user_activity`
+- **Characteristics**:
+  - Pre-calculated metrics and aggregations
+  - User-friendly data structures
+  - Performance-optimized for API responses
+
+### Data Flow
+```
+GitHub API → Bronze Layer → Silver Layer → Gold Layer → Frontend
+     ↓           ↓             ↓            ↓
+  Raw JSON → Normalized → Aggregated → API Response
+```
+
 ## Features
 
 - 🔍 **Activity Analysis**: Tracks commits, PRs, issues, and comments from the last 6 months
@@ -132,4 +171,4 @@ For questions, issues, or contributions:
 ## Acknowledgments
 
 - Built with [NestJS](https://nestjs.com/)
-- Part of the [Maakaf](https://maakaf.com) open source community initiative 
+- Part of the [Maakaf](https://maakaf.com) open source community initiative
