@@ -6,6 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 
 import { GithubModule } from './raw/raw.module.js';
+
+import { CuratedModule } from './curated/curated.module.js';
+
 /* tmp modules for testing and debugging */
 import { IssueBronzeRepo } from './normalized/issue/issue.repo.js';
 import { IssueSilverService } from './normalized/issue/issue.service.js';
@@ -45,6 +48,7 @@ function pgConfig() {
   imports: [
     TypeOrmModule.forRoot(pgConfig()),
     GithubModule,
+    CuratedModule
   ],
   controllers: [AppController],
   providers: [
