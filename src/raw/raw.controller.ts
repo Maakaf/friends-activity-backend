@@ -1,6 +1,7 @@
 import { Controller, Post, Param, Query, Inject, Body, BadRequestException } from '@nestjs/common';
 import { GithubService } from './raw.service.js';
 import { SilverOrchestratorService } from '../normalized/orchestrator.js';
+import { CuratedService } from '../analytics/analytics.service.js';
 import { ApiBody, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { IngestUsersDto } from './dto/ingest-users.dto.js';
 type IngestUsersBody = { users: string[] };
@@ -12,6 +13,7 @@ export class GithubController {
   constructor(
     @Inject(GithubService) private readonly githubService: GithubService,
     @Inject(SilverOrchestratorService) private readonly silver: SilverOrchestratorService,
+    @Inject(CuratedService) private readonly curated: CuratedService,
   ) {}
 
   /*
@@ -45,6 +47,9 @@ export class GithubController {
       untilIso: ingestResult.until,
     });
     
+    // 3. Curated layer: Transform and save to analytics tables
+    await this.curated.refreshAll();
+    
     return {
       bronze: ingestResult,
       silver: {
@@ -61,6 +66,9 @@ export class GithubController {
           firstUser: silverBundle.users?.[0] || null,
           firstRepo: silverBundle.repos?.[0] || null,
         }
+      },
+      curated: {
+        message: 'Curated layer refresh completed - data saved to analytics tables'
       }
     };
   }

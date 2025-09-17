@@ -33,44 +33,55 @@ export function mapSilverToCurated(bundle: SilverBundle): {
     location: u.location ?? null,
     bio: u.bio ?? null,
     // type: u.type ?? null - add in silver types (User), for now null
-    type: 'fix needed',
+    //type: 'fix needed',
+    type: u.type ?? null,
     siteAdmin: u.siteAdmin ?? null,
     ghCreatedAt: u.ghCreatedAt ? new Date(u.ghCreatedAt) : null,
     ghUpdatedAt: u.ghUpdatedAt ? new Date(u.ghUpdatedAt) : null,
-    fetchedAt: new Date(),
+    fetchedAt: u.fetchedAt ? new Date(u.fetchedAt) : new Date(),
   }));
 
   /* ---------- curated.repository ---------- */
   const repoEntities: RepositoryEntity[] = (repos ?? []).map(r => ({
     repoId: r.repoId,
-    ownerUserId: r.ownerUserId ?? null,
+    // ownerUserId: r.ownerUserId ?? null,
     repoName: r.repoName ?? null,
     visibility: r.visibility ?? null,
     defaultBranch: r.defaultBranch ?? null,
     forkCount: r.forkCount ?? null,
     lastActivity: r.lastActivity ? new Date(r.lastActivity) : null,
     ghCreatedAt: r.ghCreatedAt ? new Date(r.ghCreatedAt) : null,
-    fetchedAt: new Date(),
+    // fetchedAt: r.fetchedAt ? new Date(r.fetchedAt) : null,
 
   }));
 
   /* ---------- curated.user_activity ---------- */
-  const activities: UserActivityEntity[] = [];
+  const activityMap = new Map<string, UserActivityEntity>();
 
   const addActivity = (userId: string | null, repoId: string | null, dateIso: string | null, type: string) => {
-    activities.push({
-      userId,
-      day: toDate(dateIso),
-      repoId,
-      activityType: type,
-      activityCount: 1,
-    });
+    const day = toDate(dateIso);
+    const key = `${userId}-${day?.toISOString().split('T')[0]}-${repoId}-${type}`;
+    
+    const existing = activityMap.get(key);
+    if (existing) {
+      existing.activityCount = (existing.activityCount || 0) + 1;
+    } else {
+      activityMap.set(key, {
+        userId,
+        day,
+        repoId,
+        activityType: type,
+        activityCount: 1,
+      });
+    }
   };
 
   issues.forEach(i   => addActivity(i.authorUserId, i.repoId, i.createdAt, 'issue'));
   prs.forEach(p      => addActivity(p.authorUserId, p.repoId, p.createdAt, 'pr'));
   comments.forEach(c => addActivity(c.authorUserId, c.repoId, c.createdAt, 'comment'));
   commits.forEach(c  => addActivity(c.authorUserId, c.repoId, c.createdAt, 'commit'));
+
+  const activities = Array.from(activityMap.values());
 
   return { profiles, activities, repos: repoEntities };
 }

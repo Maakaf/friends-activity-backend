@@ -1,23 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserProfileEntity } from './user_profile.entity.js';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class UserProfileRepo extends Repository<UserProfileEntity> {
-  constructor(@InjectDataSource() dataSource: DataSource) {
-    super(UserProfileEntity, dataSource.createEntityManager());
-  }
+export class UserProfileRepo {
+  constructor(
+    @InjectRepository(UserProfileEntity)
+    private readonly repository: Repository<UserProfileEntity>
+  ) {}
 
   /** Insert or update many user profiles in a single query */
   async upsertMany(rows: UserProfileEntity[]) {
-    return this.createQueryBuilder()
+    return this.repository.createQueryBuilder()
       .insert()
       .into(UserProfileEntity)
       .values(rows)
       .orUpdate(
         [
-          'node_id',
           'login',
           'name',
           'avatar_url',
@@ -35,5 +35,9 @@ export class UserProfileRepo extends Repository<UserProfileEntity> {
         ['user_id']           // conflict target (PRIMARY KEY)
       )
       .execute();
+  }
+
+  async findAll(): Promise<UserProfileEntity[]> {
+    return this.repository.find();
   }
 }

@@ -25,6 +25,7 @@
     "test:users": "tsx src/scripts/test-users.ts",
     "test:repos": "tsx src/scripts/test-repos.ts",
     "test:silver": "tsx src/scripts/test-silver.ts",
+    "test:curated": "tsx src/scripts/test-curated.ts",
     "silver:dump": "tsx src/scripts/dump-normalized.ts",
     "ingest:sample": "tsx src/scripts/ingest-sample-data.ts",
     "typeorm:ts": "cross-env DOTENV_CONFIG_PATH=./.env DOTENV_CONFIG_OVERRIDE=true ts-node --esm -r dotenv/config",

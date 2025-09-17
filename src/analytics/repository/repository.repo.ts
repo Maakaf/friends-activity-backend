@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { RepositoryEntity } from './repository.entity.js';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class RepositoryRepo extends Repository<RepositoryEntity> {
-  constructor(@InjectDataSource() dataSource: DataSource) {
-    super(RepositoryEntity, dataSource.createEntityManager());
-  }
+export class RepositoryRepo {
+  constructor(
+    @InjectRepository(RepositoryEntity)
+    private readonly repository: Repository<RepositoryEntity>
+  ) {}
 
   /** Insert or update many repository records */
   async upsertMany(rows: RepositoryEntity[]) {
-    return this.createQueryBuilder()
+    return this.repository.createQueryBuilder()
       .insert()
       .into(RepositoryEntity)
       .values(rows)
@@ -28,5 +29,9 @@ export class RepositoryRepo extends Repository<RepositoryEntity> {
         ['repo_id']
       )
       .execute();
+  }
+
+  async findAll(): Promise<RepositoryEntity[]> {
+    return this.repository.find();
   }
 }
