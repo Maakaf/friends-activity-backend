@@ -7,6 +7,8 @@ import { AppController } from './app.controller.js';
 import { GithubController } from './raw/raw.controller.js';
 import { GithubModule } from './raw/raw.module.js';
 
+import { CuratedModule } from './curated/curated.module.js';
+
 // --- DB-backed repo *tokens* (we keep these as the DI tokens)
 import { IssueBronzeRepo } from './normalized/issue/issue.repo.js';
 import { PRBronzeRepo } from './normalized/pr/pr.repo.js';
@@ -65,6 +67,7 @@ const BronzeRepoBindings: Provider[] = [
   imports: [
     TypeOrmModule.forRoot(pgConfig()), // keep: raw ingest still writes to DB
     GithubModule,                      // exports RawMemoryStore
+    CuratedModule
   ],
   controllers: [AppController, GithubController],
   providers: [

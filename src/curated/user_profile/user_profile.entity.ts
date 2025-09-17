@@ -5,11 +5,8 @@ export class UserProfileEntity {
   @PrimaryColumn('text')
   userId!: string;
 
-  @Column('text', { unique: true, nullable: true })
-  nodeId!: string | null;
-
   @Column('text', { unique: true })
-  login!: string;
+  login!: string | null;
 
   @Column('text', { nullable: true })
   name!: string | null;
