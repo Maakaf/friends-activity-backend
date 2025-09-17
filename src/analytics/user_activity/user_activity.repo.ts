@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserActivityEntity } from './user_activity.entity.js';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class UserActivityRepo extends Repository<UserActivityEntity> {
-  constructor(@InjectDataSource() dataSource: DataSource) {
-    super(UserActivityEntity, dataSource.createEntityManager());
-  }
+export class UserActivityRepo {
+  constructor(
+    @InjectRepository(UserActivityEntity)
+    private readonly repository: Repository<UserActivityEntity>
+  ) {}
 
   /** Bulk insert or update activity counts */
   async upsertMany(rows: UserActivityEntity[]) {
-    return this.createQueryBuilder()
+    return this.repository.createQueryBuilder()
       .insert()
       .into(UserActivityEntity)
       .values(rows)
@@ -20,5 +21,9 @@ export class UserActivityRepo extends Repository<UserActivityEntity> {
         ['user_id', 'day', 'repo_id', 'activity_type']
       )
       .execute();
+  }
+
+  async findAll(): Promise<UserActivityEntity[]> {
+    return this.repository.find();
   }
 }

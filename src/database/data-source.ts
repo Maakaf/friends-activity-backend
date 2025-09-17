@@ -17,7 +17,12 @@ const migrationsGlob = isProd
   : path.join(__dirname, 'migrations', '*.ts');
 
 
-const entitiesArr: string[] = [];
+const entitiesArr: string[] = [
+  // Raw entities
+  path.join(__dirname, '..', 'raw', '**', '*.entity.{ts,js}'),
+  // Curated entities
+  path.join(__dirname, '..', 'analytics', '**', '*.entity.{ts,js}'),
+];
 
 const dataSource = new DataSource({
   type: 'postgres',
