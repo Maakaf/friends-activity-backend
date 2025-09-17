@@ -3,13 +3,13 @@ import { Entity, Column, PrimaryColumn } from 'typeorm';
 @Entity({ schema: 'gold', name: 'user_activity' })
 export class UserActivityEntity {
   @PrimaryColumn('text')
-  userId!: string;
+  userId!: string | null;
 
   @PrimaryColumn('date')
-  day!: Date;
+  day!: Date | null;
 
   @PrimaryColumn('text')
-  repoId!: string;
+  repoId!: string | null;
 
   @PrimaryColumn('text')
   activityType!: string;

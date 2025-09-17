@@ -23,6 +23,8 @@ export interface User {
   location?: string | null;
   bio?: string | null;
   siteAdmin?: boolean | null;
+  type?: string | null;    // GitHub user type (e.g., "User", "Organization")
+  fetchedAt?: ISO8601 | null;  // when this user data was fetched from raw layer
   ghCreatedAt?: ISO8601 | null;   // timestamps from GitHub
   ghUpdatedAt?: ISO8601 | null;
 }
@@ -36,6 +38,7 @@ export interface Repository {
   defaultBranch?: string | null;
   forkCount?: number | null;
   lastActivity?: ISO8601 | null;  // last observed activity time
+  fetchedAt?: ISO8601 | null;     // when this repo data was fetched from raw layer
   ghCreatedAt?: ISO8601 | null;
 }
 

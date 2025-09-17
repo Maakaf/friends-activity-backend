@@ -203,8 +203,43 @@ export function mapUserFromPayload(u: any): User | null {
     location: u.location ?? null,
     bio: u.bio ?? null,
     siteAdmin: u.site_admin ?? null,
+    type: u.type ?? null,
     ghCreatedAt: u.created_at ?? null,
     ghUpdatedAt: u.updated_at ?? null,
+  };
+}
+
+/** Map directly from bronze.github_users row */
+export function mapUserFromBronzeRow(row: {
+  user_node: string;
+  login: string | null;
+  fetched_at: string | null;
+  raw_payload: any;
+}): User | null {
+  const fromPayload = mapUserFromPayload(row.raw_payload);
+  if (fromPayload) {
+    return {
+      ...fromPayload,
+      fetchedAt: row.fetched_at,
+    };
+  }
+
+  // fallback minimal mapping if payload is missing or empty
+  return {
+    userId: String(row.user_node),
+    login: row.login ?? null,
+    fetchedAt: row.fetched_at,
+    name: null,
+    avatarUrl: null,
+    htmlUrl: null,
+    email: null,
+    company: null,
+    location: null,
+    bio: null,
+    siteAdmin: null,
+    type: null,
+    ghCreatedAt: null,
+    ghUpdatedAt: null,
   };
 }
 
@@ -251,6 +286,8 @@ export function mergeUser(prev: User, next: User): User {
     location:    pick(prev.location,    next.location),
     bio:         pick(prev.bio,         next.bio),
     siteAdmin:   pick(prev.siteAdmin,   next.siteAdmin),
+    type:        pick(prev.type,        next.type),
+    fetchedAt:   pick(prev.fetchedAt,   next.fetchedAt),
     ghCreatedAt: pick(prev.ghCreatedAt, next.ghCreatedAt),
     ghUpdatedAt: pick(prev.ghUpdatedAt, next.ghUpdatedAt),
   };
@@ -292,10 +329,16 @@ export function mapRepoFromBronzeRow(row: {
   repo_node: string;
   name: string | null;
   is_private: boolean | null;
+  fetched_at: string | null;
   raw_payload: any;
 }): Repository | null {
   const fromPayload = mapRepositoryFromPayload(row.raw_payload);
-  if (fromPayload) return fromPayload;
+  if (fromPayload) {
+    return {
+      ...fromPayload,
+      fetchedAt: row.fetched_at,
+    };
+  }
 
   // fallback minimal mapping if payload is missing or empty
   return {
@@ -311,6 +354,7 @@ export function mapRepoFromBronzeRow(row: {
     defaultBranch: null,
     forkCount: null,
     lastActivity: null,
+    fetchedAt: row.fetched_at,
     ghCreatedAt: null,
   };
 }
