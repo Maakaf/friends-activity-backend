@@ -2,11 +2,17 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module.js';
 import { SilverOrchestratorService } from '../normalized/orchestrator.js';
+import { GithubService } from '../raw/raw.service.js';
 
 async function main() {
   const app = await NestFactory.createApplicationContext(AppModule);
   try {
-    console.log('🔄 Building Silver bundle (this may take a moment)...');
+    console.log('🔄 Ingesting sample data first...');
+    
+    const githubService = app.get(GithubService);
+    await githubService.ingestEachUserInTheirRepos(['barlavi1'], '2025-01-01T00:00:00Z');
+    
+    console.log('✅ Sample data ingested. Building Silver bundle...');
 
     const silver = await app.get(SilverOrchestratorService).buildBundle({
       sinceIso: '2025-01-01T00:00:00Z',

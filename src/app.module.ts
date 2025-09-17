@@ -1,27 +1,37 @@
 // src/app.module.ts
 import 'dotenv/config';
-import { Module } from '@nestjs/common';
+import { Module, Provider } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller.js';
-
+import { GithubController } from './raw/raw.controller.js';
 import { GithubModule } from './raw/raw.module.js';
-/* tmp modules for testing and debugging */
-import { IssueBronzeRepo } from './normalized/issue/issue.repo.js';
-import { IssueSilverService } from './normalized/issue/issue.service.js';
-import { PRBronzeRepo } from './normalized/pr/pr.repo.js';
-import { PRSilverService } from './normalized/pr/pr.service.js';
-import { CommentBronzeRepo } from './normalized/comment/comment.repo.js';
-import { CommentSilverService } from './normalized/comment/comment.service.js';
-import { CommitBronzeRepo } from './normalized/commit/commit.repo.js';
-import { CommitSilverService } from './normalized/commit/commit.service.js';
-import { UserBronzeRepo } from './normalized/user/user.repo.js';
-import { UsersSilverService } from './normalized/user/user.service.js';
-import { RepoBronzeRepo } from './normalized/repo/repo.repo.js';
-import { ReposSilverService } from './normalized/repo/repo.service.js';
-/* end tmp modules for testing and debugging */
 
+// --- DB-backed repo *tokens* (we keep these as the DI tokens)
+import { IssueBronzeRepo } from './normalized/issue/issue.repo.js';
+import { PRBronzeRepo } from './normalized/pr/pr.repo.js';
+import { CommentBronzeRepo } from './normalized/comment/comment.repo.js';
+import { CommitBronzeRepo } from './normalized/commit/commit.repo.js';
+import { UserBronzeRepo } from './normalized/user/user.repo.js';
+import { RepoBronzeRepo } from './normalized/repo/repo.repo.js';
+
+// --- Memory-backed implementations (what we'll actually instantiate)
+import { IssueRawMemoryRepo } from './normalized/issue/issue.memory.repo.js';
+import { PRRawMemoryRepo } from './normalized/pr/pr.memory.repo.js';
+import { CommentRawMemoryRepo } from './normalized/comment/comment.memory.repo.js';
+import { CommitRawMemoryRepo } from './normalized/commit/commit.memory.repo.js';
+import { UserMemoryRepo } from './normalized/user/user.memory.repo.js';
+import { RepoRawMemoryRepo } from './normalized/repo/repo.memory.repo.js';
+
+// Silver services (unchanged)
+import { IssueSilverService } from './normalized/issue/issue.service.js';
+import { PRSilverService } from './normalized/pr/pr.service.js';
+import { CommentSilverService } from './normalized/comment/comment.service.js';
+import { CommitSilverService } from './normalized/commit/commit.service.js';
+import { UsersSilverService } from './normalized/user/user.service.js';
+import { ReposSilverService } from './normalized/repo/repo.service.js';
 import { SilverOrchestratorService } from './normalized/orchestrator.js';
+
 import dataSource from './database/data-source.js';
 
 function pgConfig() {
@@ -41,39 +51,40 @@ function pgConfig() {
   };
 }
 
+// Always bind the DB *token* to the Memory *class*
+const BronzeRepoBindings: Provider[] = [
+  { provide: IssueBronzeRepo, useClass: IssueRawMemoryRepo },
+  { provide: PRBronzeRepo, useClass: PRRawMemoryRepo },
+  { provide: CommentBronzeRepo, useClass: CommentRawMemoryRepo },
+  { provide: CommitBronzeRepo, useClass: CommitRawMemoryRepo },
+  { provide: UserBronzeRepo, useClass: UserMemoryRepo },
+  { provide: RepoBronzeRepo, useClass: RepoRawMemoryRepo },
+];
+
 @Module({
   imports: [
-    TypeOrmModule.forRoot(pgConfig()),
-    GithubModule,
+    TypeOrmModule.forRoot(pgConfig()), // keep: raw ingest still writes to DB
+    GithubModule,                      // exports RawMemoryStore
   ],
-  controllers: [AppController],
+  controllers: [AppController, GithubController],
   providers: [
-    /* tmp providers for testing and debugging */
-    IssueBronzeRepo,
+    ...BronzeRepoBindings,    // ← memory-only now
     IssueSilverService,
-    PRBronzeRepo,
     PRSilverService,
-    CommentBronzeRepo,
     CommentSilverService,
-    CommitBronzeRepo, 
     CommitSilverService,
-    UserBronzeRepo,
     UsersSilverService,
-    RepoBronzeRepo,
     ReposSilverService,
-    /* end tmp providers for testing and debugging */
     SilverOrchestratorService,
   ],
   exports: [
-    /* tmp exports for testing and debugging */
     IssueSilverService,
     PRSilverService,
     CommentSilverService,
     CommitSilverService,
     UsersSilverService,
     ReposSilverService,
-    /* end tmp exports for testing and debugging */
-    SilverOrchestratorService
+    SilverOrchestratorService,
   ],
 })
 export class AppModule {}

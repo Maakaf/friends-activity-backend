@@ -1,6 +1,6 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { UserBronzeRepo } from './user.repo.js';
-import { mapUserFromPayload, pickUserObjectForActor, mergeUser } from '../mappers.js';
+import { mapUserFromBronzeRow, pickUserObjectForActor, mergeUser } from '../mappers.js';
 import type { User } from '../types.js';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class UsersSilverService {
     const users: User[] = [];
 
     for (const row of rows) {
-      const u = mapUserFromPayload(row.raw_payload);
+      const u = mapUserFromBronzeRow(row);
       if (u) users.push(u);
     }
 
