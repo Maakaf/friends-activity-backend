@@ -253,6 +253,44 @@ export class GithubService {
     }
   }
 
+  private async ingestCommitsForPR(
+    owner: string,
+    repo: string,
+    repoId: number | undefined,
+    isPrivate: boolean | undefined,
+    prNumber: number,
+    prId: string,
+    users: Set<string>
+  ) {
+    const commits = await this.retryWithBackoff(
+      () => this.octokit.paginate(
+        this.octokit.pulls.listCommits,
+        { owner, repo, pull_number: prNumber, per_page: 100 },
+        r => r.data,
+      ),
+      `PR commits for ${owner}/${repo}#${prNumber}`
+    );
+
+    for (const c of commits) {
+      const authorLogin = (c as any).author?.login;
+      if (users.size && (!authorLogin || !users.has(authorLogin))) continue;
+      
+      const row: BronzeRow = {
+        event_ulid: `commit:${(c as any).sha}`,
+        provider: 'github',
+        event_type: 'commit',
+        provider_event_id: String((c as any).sha),
+        actor_user_node: (c as any).author?.id ? String((c as any).author.id) : null,
+        repo_node: repoId != null ? String(repoId) : null,
+        target_node: prId,
+        created_at: (c as any).commit?.committer?.date ?? null,
+        is_private: isPrivate ?? null,
+        raw_payload: c,
+      };
+      await this.writeEventBoth(row);
+    }
+  }
+
   // =======================
   // repo discovery
   // =======================
@@ -370,6 +408,13 @@ export class GithubService {
           const isPR = (it as any).pull_request != null;
           const event_type = isPR ? 'pull_request' : 'issue';
 
+          // For PRs, augment payload with repo info for commit fetching
+          const payload = isPR ? {
+            ...it,
+            _repo_owner: owner,
+            _repo_name: repo,
+          } : it;
+
           const row: BronzeRow = {
             event_ulid: `${event_type}:${(it as any).id}`,
             provider: 'github',
@@ -380,9 +425,15 @@ export class GithubService {
             target_node: String((it as any).id), // parent for itself
             created_at: (it as any).created_at ?? null,
             is_private: isPrivate ?? null,
-            raw_payload: it,
+            raw_payload: payload,
           };
           rows.push(row);
+          
+          if (isPR) {
+            const prNumber = (it as any).number;
+            const prId = String((it as any).id);
+            await this.ingestCommitsForPR(owner, repo, repoId, isPrivate, prNumber, prId, users);
+          }
         }
       } catch (error) {
         this.logger.warn(`❌ Failed to fetch issues/PRs for ${owner}/${repo} ${login ? `(creator: ${login})` : ''}: ${error}`);
@@ -504,7 +555,7 @@ export class GithubService {
 
         for (const c of commits) {
           const authorLogin = (c as any).author?.login;
-          if (users.size && authorLogin && !users.has(authorLogin)) continue;
+          if (users.size && (!authorLogin || !users.has(authorLogin))) continue;
 
           const row: BronzeRow = {
             event_ulid: `commit:${(c as any).sha}`, // optionally include repo id: `commit:${repoId}:${sha}`
@@ -570,6 +621,26 @@ export class GithubService {
     }
 
     return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until };
+  }
+
+  /**
+   * Fetch commits for a specific PR
+   */
+  async fetchPRCommits(owner: string, repo: string, pullNumber: number): Promise<string[]> {
+    try {
+      const commits = await this.retryWithBackoff(
+        () => this.octokit.paginate(
+          this.octokit.pulls.listCommits,
+          { owner, repo, pull_number: pullNumber, per_page: 100 },
+          (r) => r.data,
+        ),
+        `PR commits for ${owner}/${repo}#${pullNumber}`
+      );
+      return commits.map((c: any) => c.sha);
+    } catch (error) {
+      this.logger.warn(`❌ Failed to fetch PR commits for ${owner}/${repo}#${pullNumber}: ${error}`);
+      return [];
+    }
   }
 
   // ==============

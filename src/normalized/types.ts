@@ -22,6 +22,11 @@ export interface User {
   company?: string | null;
   location?: string | null;
   bio?: string | null;
+  blog?: string | null;
+  twitterUsername?: string | null;
+  publicRepos?: number | null;
+  followers?: number | null;
+  following?: number | null;
   siteAdmin?: boolean | null;
   type?: string | null;    // GitHub user type (e.g., "User", "Organization")
   fetchedAt?: ISO8601 | null;  // when this user data was fetched from raw layer
@@ -34,9 +39,12 @@ export interface Repository {
   repoId: RepoId;                 // GitHub repo id as string
   ownerUserId: UserId | null;     // can be an org (treated as "user" id)
   repoName: string | null;        // name only (not full path)
+  description?: string | null;
+  htmlUrl?: string | null;
   visibility: Visibility | null;
   defaultBranch?: string | null;
   forkCount?: number | null;
+  parentRepoId?: RepoId | null;   // if this is a fork, the parent repo id
   lastActivity?: ISO8601 | null;  // last observed activity time
   fetchedAt?: ISO8601 | null;     // when this repo data was fetched from raw layer
   ghCreatedAt?: ISO8601 | null;
@@ -67,6 +75,7 @@ export interface PR {
   updatedAt: ISO8601 | null;
   title?: string | null;
   body?: string | null;
+  commits?: string[];             // Array of commit SHAs included in this PR
 }
 
 /**

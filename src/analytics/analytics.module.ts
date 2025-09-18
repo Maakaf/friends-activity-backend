@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CuratedService } from './analytics.service.js';
+import { AnalyticsReportService } from './analytics-report.service.js';
 import { NormalizedModule } from '../normalized/normalized.module.js';
 
 import { UserProfileEntity } from './user_profile/user_profile.entity.js';
@@ -18,7 +19,8 @@ import { RepositoryEntity } from './repository/repository.entity.js';
   ],
   providers: [
     CuratedService,
+    AnalyticsReportService,
   ],
-  exports: [CuratedService],
+  exports: [CuratedService, AnalyticsReportService],
 })
 export class CuratedModule {}

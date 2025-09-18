@@ -32,8 +32,11 @@ export function mapSilverToCurated(bundle: SilverBundle): {
     company: u.company ?? null,
     location: u.location ?? null,
     bio: u.bio ?? null,
-    // type: u.type ?? null - add in silver types (User), for now null
-    //type: 'fix needed',
+    blog: u.blog ?? null,
+    twitterUsername: u.twitterUsername ?? null,
+    publicRepos: u.publicRepos ?? null,
+    followers: u.followers ?? null,
+    following: u.following ?? null,
     type: u.type ?? null,
     siteAdmin: u.siteAdmin ?? null,
     ghCreatedAt: u.ghCreatedAt ? new Date(u.ghCreatedAt) : null,
@@ -46,6 +49,8 @@ export function mapSilverToCurated(bundle: SilverBundle): {
     repoId: r.repoId,
     // ownerUserId: r.ownerUserId ?? null,
     repoName: r.repoName ?? null,
+    description: r.description ?? null,
+    htmlUrl: r.htmlUrl ?? null,
     visibility: r.visibility ?? null,
     defaultBranch: r.defaultBranch ?? null,
     forkCount: r.forkCount ?? null,
@@ -78,7 +83,10 @@ export function mapSilverToCurated(bundle: SilverBundle): {
 
   issues.forEach(i   => addActivity(i.authorUserId, i.repoId, i.createdAt, 'issue'));
   prs.forEach(p      => addActivity(p.authorUserId, p.repoId, p.createdAt, 'pr'));
-  comments.forEach(c => addActivity(c.authorUserId, c.repoId, c.createdAt, 'comment'));
+  comments.forEach(c => {
+    const commentType = c.parentType === 'PullRequest' ? 'pr_comment' : 'issue_comment';
+    addActivity(c.authorUserId, c.repoId, c.createdAt, commentType);
+  });
   commits.forEach(c  => addActivity(c.authorUserId, c.repoId, c.createdAt, 'commit'));
 
   const activities = Array.from(activityMap.values());
