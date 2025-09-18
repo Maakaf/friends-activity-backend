@@ -23,6 +23,24 @@ export class CommitRawMemoryRepo {
       .filter(e => !untilIso || (e.created_at && e.created_at < untilIso))
       .filter(e => !repoId || e.repo_node === repoId)
       .filter(e => !authorUserIds?.length || (e.actor_user_node && authorUserIds.includes(e.actor_user_node)))
+      .filter(e => {
+        // Include commits that are either:
+        // 1. Regular commits (target_node is null) - these are already "merged" to main branch
+        // 2. Commits linked to merged PRs (target_node points to a merged PR)
+        if (!e.target_node) return true; // Regular commit
+        
+        // Check if the linked PR is merged
+        const linkedPR = allEvents.find(pr => 
+          pr.event_type === 'pull_request' && 
+          pr.provider_event_id === e.target_node
+        );
+        
+        if (!linkedPR?.raw_payload) return false;
+        
+        const rp = linkedPR.raw_payload;
+        const mergedAt = rp.merged_at || rp.pull_request?.merged_at;
+        return !!mergedAt;
+      })
       .map(e => ({
         event_ulid: e.event_ulid,
         provider: e.provider as 'github',

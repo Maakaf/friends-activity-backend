@@ -1,0 +1,3265 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-18T13:27:50.987Z",
+    "since": "2025-01-01T00:00:00Z",
+    "until": "2025-09-18T13:24:25Z",
+    "counts": {
+      "users": 3,
+      "repos": 24,
+      "issues": 20,
+      "prs": 36,
+      "comments": 42,
+      "commits": 232
+    }
+  },
+  "data": {
+    "users": [
+      {
+        "userId": "33284345",
+        "login": "barlavi1",
+        "name": "Bar Lavi",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/33284345?v=4",
+        "htmlUrl": "https://github.com/barlavi1",
+        "email": null,
+        "company": null,
+        "location": null,
+        "bio": null,
+        "blog": "",
+        "twitterUsername": null,
+        "publicRepos": 13,
+        "followers": 0,
+        "following": 0,
+        "siteAdmin": false,
+        "type": "User",
+        "ghCreatedAt": "2017-11-01T11:58:42Z",
+        "ghUpdatedAt": "2025-06-12T07:50:48Z",
+        "fetchedAt": null
+      },
+      {
+        "userId": "30144878",
+        "login": "UrielOfir",
+        "name": "Uriel Ofir",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/30144878?v=4",
+        "htmlUrl": "https://github.com/UrielOfir",
+        "email": "urielofir@gmail.com",
+        "company": "mizrahi-tefahot",
+        "location": "Jerusalem, Israel",
+        "bio": "Manager of the Israeli open-source community: maakaf.com.\r\nCOBOL programmer.",
+        "blog": "urielofir.website",
+        "twitterUsername": "OfirUriel",
+        "publicRepos": 83,
+        "followers": 37,
+        "following": 15,
+        "siteAdmin": false,
+        "type": "User",
+        "ghCreatedAt": "2017-07-13T09:26:30Z",
+        "ghUpdatedAt": "2025-09-07T13:17:03Z",
+        "fetchedAt": null
+      },
+      {
+        "userId": "219325371",
+        "login": "Lidor57",
+        "name": null,
+        "avatarUrl": "https://avatars.githubusercontent.com/u/219325371?v=4",
+        "htmlUrl": "https://github.com/Lidor57",
+        "email": null,
+        "company": null,
+        "location": null,
+        "bio": null,
+        "blog": "",
+        "twitterUsername": null,
+        "publicRepos": 6,
+        "followers": 0,
+        "following": 0,
+        "siteAdmin": false,
+        "type": "User",
+        "ghCreatedAt": "2025-07-04T17:09:24Z",
+        "ghUpdatedAt": "2025-09-11T18:21:25Z",
+        "fetchedAt": null
+      }
+    ],
+    "repos": [
+      {
+        "repoId": "1040346838",
+        "ownerUserId": "137611544",
+        "repoName": "friends-activity-backend",
+        "description": "A backend service that collects and processes GitHub activity to showcase the contributions of community members.",
+        "htmlUrl": "https://github.com/Maakaf/friends-activity-backend",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 3,
+        "parentRepoId": null,
+        "lastActivity": "2025-09-17T17:12:07Z",
+        "ghCreatedAt": "2025-08-18T20:47:55Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "992779830",
+        "ownerUserId": "137611544",
+        "repoName": "maakaf_home",
+        "description": "Website for Ma'akaf - Israeli Open Source Community",
+        "htmlUrl": "https://github.com/Maakaf/maakaf_home",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 17,
+        "parentRepoId": "153179091",
+        "lastActivity": "2025-09-17T05:38:52Z",
+        "ghCreatedAt": "2025-05-29T17:43:53Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1031684459",
+        "ownerUserId": "33284345",
+        "repoName": "maakaf_home",
+        "description": "Website for Ma'akaf - Israeli Open Source Community",
+        "htmlUrl": "https://github.com/barlavi1/maakaf_home",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": "992779830",
+        "lastActivity": "2025-09-16T14:07:15Z",
+        "ghCreatedAt": "2025-08-04T07:16:11Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1027097156",
+        "ownerUserId": "33284345",
+        "repoName": "Factory-Analytics-and-Dashboard-Platform",
+        "description": "AI-powered platform that securely connects to any factory data source (ERP, MES, IoT, databases) to deliver dynamic dashboards, actionable analytics, and natural-language insights. Designed for rapid onboarding, multi-tenant use, and robust privacy on AWS or hybrid deployments.",
+        "htmlUrl": "https://github.com/barlavi1/Factory-Analytics-and-Dashboard-Platform",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-07-28T05:42:29Z",
+        "ghCreatedAt": "2025-07-27T10:01:33Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "11180687",
+        "ownerUserId": "29385237",
+        "repoName": "hugo",
+        "description": "The world’s fastest framework for building websites.",
+        "htmlUrl": "https://github.com/gohugoio/hugo",
+        "visibility": "public",
+        "defaultBranch": "master",
+        "forkCount": 8019,
+        "parentRepoId": null,
+        "lastActivity": "2025-09-18T13:22:39Z",
+        "ghCreatedAt": "2013-07-04T15:26:26Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1007869267",
+        "ownerUserId": "137611544",
+        "repoName": "maakaf_home_backend",
+        "description": null,
+        "htmlUrl": "https://github.com/Maakaf/maakaf_home_backend",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 2,
+        "parentRepoId": null,
+        "lastActivity": "2025-07-26T11:40:49Z",
+        "ghCreatedAt": "2025-06-24T16:53:11Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "153179091",
+        "ownerUserId": "1342004",
+        "repoName": "docsy-example",
+        "description": "An example documentation site using the Docsy Hugo theme",
+        "htmlUrl": "https://github.com/google/docsy-example",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 730,
+        "parentRepoId": null,
+        "lastActivity": "2025-09-09T20:07:54Z",
+        "ghCreatedAt": "2018-10-15T20:44:11Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "153180924",
+        "ownerUserId": "1342004",
+        "repoName": "docsy",
+        "description": "Hugo theme for open source documentation",
+        "htmlUrl": "https://github.com/google/docsy",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 947,
+        "parentRepoId": null,
+        "lastActivity": "2025-08-05T13:25:15Z",
+        "ghCreatedAt": "2018-10-15T20:59:47Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "704479842",
+        "ownerUserId": "137611544",
+        "repoName": "maakaf-temp",
+        "description": "A website for the Isreli open-source community- Ma'akaf",
+        "htmlUrl": "https://github.com/Maakaf/maakaf-temp",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 37,
+        "parentRepoId": null,
+        "lastActivity": "2025-05-24T14:57:10Z",
+        "ghCreatedAt": "2023-10-13T10:50:26Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "938622914",
+        "ownerUserId": "30144878",
+        "repoName": "cobol_banking",
+        "description": "Cobol Mini Project",
+        "htmlUrl": "https://github.com/UrielOfir/cobol_banking",
+        "visibility": "public",
+        "defaultBranch": "master",
+        "forkCount": 0,
+        "parentRepoId": "935907511",
+        "lastActivity": "2025-02-27T11:56:00Z",
+        "ghCreatedAt": "2025-02-25T08:44:12Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "935907511",
+        "ownerUserId": "105045691",
+        "repoName": "cobol_banking",
+        "description": "Cobol Mini Project",
+        "htmlUrl": "https://github.com/le-minh-duc-dev/cobol_banking",
+        "visibility": "public",
+        "defaultBranch": "master",
+        "forkCount": 3,
+        "parentRepoId": null,
+        "lastActivity": "2025-02-26T09:35:01Z",
+        "ghCreatedAt": "2025-02-20T08:05:13Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1052083068",
+        "ownerUserId": "30144878",
+        "repoName": "community_managers",
+        "description": "אתר שיתוף ידע עבור מנהלי קהילות טכנולוגיות מקצועיות",
+        "htmlUrl": "https://github.com/UrielOfir/community_managers",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-09-08T04:14:22Z",
+        "ghCreatedAt": "2025-09-07T11:20:39Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "456416341",
+        "ownerUserId": "30144878",
+        "repoName": "urielofir",
+        "description": null,
+        "htmlUrl": "https://github.com/UrielOfir/urielofir",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 1,
+        "parentRepoId": null,
+        "lastActivity": "2025-06-27T09:34:43Z",
+        "ghCreatedAt": "2022-02-07T08:22:06Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1024855676",
+        "ownerUserId": "30144878",
+        "repoName": "COBOL_migration",
+        "description": null,
+        "htmlUrl": "https://github.com/UrielOfir/COBOL_migration",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-07-23T12:30:41Z",
+        "ghCreatedAt": "2025-07-23T10:52:26Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "698059874",
+        "ownerUserId": "30144878",
+        "repoName": "personal-website",
+        "description": null,
+        "htmlUrl": "https://github.com/UrielOfir/personal-website",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-09-10T09:40:24Z",
+        "ghCreatedAt": "2023-09-29T04:18:54Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "925971413",
+        "ownerUserId": "137611544",
+        "repoName": "projectsAPI",
+        "description": null,
+        "htmlUrl": "https://github.com/Maakaf/projectsAPI",
+        "visibility": "public",
+        "defaultBranch": "master",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-05-24T17:10:02Z",
+        "ghCreatedAt": "2025-02-02T07:57:48Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "643453344",
+        "ownerUserId": "30144878",
+        "repoName": "os-practice",
+        "description": null,
+        "htmlUrl": "https://github.com/UrielOfir/os-practice",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 323,
+        "parentRepoId": null,
+        "lastActivity": "2025-09-13T12:18:23Z",
+        "ghCreatedAt": "2023-05-21T07:56:10Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1009535098",
+        "ownerUserId": "137611544",
+        "repoName": ".github",
+        "description": null,
+        "htmlUrl": "https://github.com/Maakaf/.github",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-06-27T09:41:52Z",
+        "ghCreatedAt": "2025-06-27T09:37:49Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1020847107",
+        "ownerUserId": "30144878",
+        "repoName": "playwrightAI",
+        "description": null,
+        "htmlUrl": "https://github.com/UrielOfir/playwrightAI",
+        "visibility": "public",
+        "defaultBranch": "master",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-07-16T13:37:42Z",
+        "ghCreatedAt": "2025-07-16T13:37:39Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "107890515",
+        "ownerUserId": "316371",
+        "repoName": "awesome-opensource-israel",
+        "description": "A curated list of Israeli-made projects, events, and individuals",
+        "htmlUrl": "https://github.com/lirantal/awesome-opensource-israel",
+        "visibility": "public",
+        "defaultBranch": "master",
+        "forkCount": 129,
+        "parentRepoId": null,
+        "lastActivity": "2025-08-21T03:12:32Z",
+        "ghCreatedAt": "2017-10-22T18:11:00Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1031281650",
+        "ownerUserId": "30144878",
+        "repoName": "libi_website",
+        "description": null,
+        "htmlUrl": "https://github.com/UrielOfir/libi_website",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-08-03T12:13:25Z",
+        "ghCreatedAt": "2025-08-03T12:13:22Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1045555145",
+        "ownerUserId": "219325371",
+        "repoName": "friends-activity-backend",
+        "description": "A backend service that collects and processes GitHub activity to showcase the contributions of community members.",
+        "htmlUrl": "https://github.com/Lidor57/friends-activity-backend",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": "1040346838",
+        "lastActivity": "2025-09-16T14:32:06Z",
+        "ghCreatedAt": "2025-08-27T11:08:57Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1036643903",
+        "ownerUserId": "219325371",
+        "repoName": "Maze-Game",
+        "description": "Generate & solve 2D/3D mazes in Java: custom OOP generators, BFS/DFS/Best-First, multithreaded client-server (caching + compression), JavaFX MVVM.",
+        "htmlUrl": "https://github.com/Lidor57/Maze-Game",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-08-12T11:37:30Z",
+        "ghCreatedAt": "2025-08-12T11:28:49Z",
+        "fetchedAt": null
+      },
+      {
+        "repoId": "1036599861",
+        "ownerUserId": "219325371",
+        "repoName": "Rick-Morty-Object-Managment-System",
+        "description": "modular C system inspired by the Rick and Morty universe, featuring custom generic ADTs (LinkedList, KeyValuePair, HashTable, MultiValueHashTable) with manual memory management, deep copying, function pointers, and rigorous error handling in a filedriven interactive program.",
+        "htmlUrl": "https://github.com/Lidor57/Rick-Morty-Object-Managment-System",
+        "visibility": "public",
+        "defaultBranch": "main",
+        "forkCount": 0,
+        "parentRepoId": null,
+        "lastActivity": "2025-08-12T10:30:44Z",
+        "ghCreatedAt": "2025-08-12T10:06:24Z",
+        "fetchedAt": null
+      }
+    ],
+    "issues": [
+      {
+        "issueId": "3126600190",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-07T06:58:26Z",
+        "closedAt": "2025-06-07T17:16:51Z",
+        "updatedAt": "2025-06-07T17:16:53Z",
+        "title": "Fix: 404 Page Routing Redirects to Goldydocs of Netlify Instead of Custom 404 Page",
+        "body": "## Issue Description\n\nWhen accessing non-existent routes on the website, users are incorrectly redirected to a Goldydocs page instead of our custom 404 error page.\n\n### Expected Behavior\n- Non-existent routes should display our custom Hebrew 404 error page\n- The HTTP status code should be 404\n- Users should see the message \"הדף לא נמצא\" with a link back to the homepage\n\n### Current Behavior\n- Non-existent routes redirect to a Goldydocs page\n- The custom 404 page is not being served\n- Users see unrelated content instead of the proper error message\n\n### Root Cause\nThe issue stems from incorrect configuration in multiple places:\n1. Missing dedicated 404 page in the Hebrew content directory\n2. Incorrect Netlify redirect configuration\n3. Incomplete Hugo output and page handling configuration\n\n## Solution Implemented\n\n### 1. Created Hebrew 404 Page\nAdded a dedicated 404 page in the Hebrew content directory:\n```markdown\n---\ntitle: \"הדף לא נמצא\"\nlayout: \"404\"\n---\n\n# הדף לא נמצא\n\nאופס! הדף הזה לא קיים. נסה לחזור אל [דף הבית](/).\n```\n\n### 2. Updated Netlify Configuration\nModified `netlify.toml` to properly handle 404 redirects:\n```toml\n[[redirects]]\n  from = \"/*\"\n  to = \"/he/404.html\"\n  status = 404\n\n[[headers]]\n  for = \"/*\"\n  [headers.values]\n    X-Frame-Options = \"DENY\"\n    X-XSS-Protection = \"1; mode=block\"\n    X-Content-Type-Options = \"nosniff\"\n```\n\n### 3. Updated Hugo Configuration\nModified `hugo.yaml` to ensure proper 404 page handling:\n```yaml\noutputs:\n  section: [HTML, RSS]\n  home: [HTML, RSS]\n  page: [HTML]\n  404: [HTML]\n\ndisableAliases: true\n```\n\n## Testing\nTo verify the fix:\n1. Run the site locally using `hugo server`\n2. Try accessing a non-existent URL (e.g., `http://localhost:1313/non-existent-page`)\n3. Verify that the Hebrew 404 page is displayed\n4. Check that the HTTP status code is 404\n\n## Additional Notes\n- This fix ensures proper 404 handling while maintaining security headers\n- The solution respects the site's multilingual setup with Hebrew as the default language\n- The fix prevents unwanted redirects and maintains proper HTTP status codes\n\n## Related Documentation\n- [Hugo 404 Pages](https://gohugo.io/templates/404/)\n- [Netlify Custom 404](https://docs.netlify.com/routing/redirects/redirect-options/#custom-404-page-handling) "
+      },
+      {
+        "issueId": "3129176888",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": "62191192",
+        "state": "closed",
+        "createdAt": "2025-06-09T05:21:48Z",
+        "closedAt": "2025-06-30T07:55:04Z",
+        "updatedAt": "2025-06-30T07:55:04Z",
+        "title": "Add Community Logo as Website Favicon",
+        "body": "## Description\nCurrently, the website doesn't have a custom favicon (browser tab icon). We should use our community logo as the favicon to improve brand recognition and provide a better user experience.\n\n## Current State\n- The website uses the default browser favicon\n- We already have our logo in SVG format at `assets/icons/logo.svg`\n\n## Proposed Changes\n1. Convert the existing SVG logo to appropriate favicon formats:\n   - `.ico` file (16x16, 32x32 pixels)\n   - `.png` files in various sizes (16x16, 32x32, 48x48, 64x64)\n   - Apple Touch Icon (180x180)\n   - Other necessary sizes for different platforms\n\n2. Add the favicon files to the appropriate directory (typically `/static/favicon/` or similar)\n\n3. Add the necessary HTML tags in the website's `<head>` section:\n```html\n<link rel=\"icon\" type=\"image/x-icon\" href=\"/favicon.ico\">\n<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/apple-touch-icon.png\">\n<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/favicon-32x32.png\">\n<link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/favicon-16x16.png\">\n```\n\n## Technical Details\n- The Hugo theme might already have a way to configure favicons - we should check the theme documentation first\n- We'll need to use an image editing tool to convert the SVG to the appropriate formats\n- The favicon files should be optimized for web use\n\n## Benefits\n- Improved brand recognition\n- Professional appearance in browser tabs\n- Better user experience across different devices and platforms\n\n## Resources\n- Current logo: `assets/icons/logo.svg`\n- [Hugo Favicon Documentation](https://gohugo.io/templates/internal/#configure-faviconspng)\n- [Favicon Best Practices](https://developers.google.com/web/fundamentals/design-and-ux/browser-customization/)"
+      },
+      {
+        "issueId": "3148971011",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-16T08:05:10Z",
+        "closedAt": "2025-06-20T09:02:48Z",
+        "updatedAt": "2025-06-20T09:02:48Z",
+        "title": "Add Comments Section to Website Pages and Blog Posts",
+        "body": "## Description\nAdd a comments section to both website pages and blog posts to enable user engagement and discussion.\n\n## Features Requested\n- Add a comments section at the bottom of each page and blog post\n- Support for user authentication (optional)\n- Moderation capabilities for comments\n- Markdown support in comments\n- Email notifications for new comments (optional)\n\n## Technical Considerations\n- Consider using a third-party service like:\n  - Disqus\n  - Giscus (GitHub Discussions based)\n  - Utterances (GitHub Issues based)\n  - Or implement a custom solution\n\n## Benefits\n- Increased user engagement\n- Community building\n- Valuable feedback collection\n- Enhanced user experience\n\n## Additional Notes\n- Ensure the comments section is responsive and works well on mobile devices\n- Consider RTL support for Hebrew comments\n- Implement spam protection measures\n- Add moderation tools for managing comments\n\nPlease discuss the preferred implementation approach and any specific requirements before proceeding with the implementation."
+      },
+      {
+        "issueId": "3165190990",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": "30144878",
+        "state": "closed",
+        "createdAt": "2025-06-21T15:59:18Z",
+        "closedAt": "2025-08-24T15:18:55Z",
+        "updatedAt": "2025-08-24T15:18:55Z",
+        "title": "Issue Title: Feature Request: Members Open-Source Activity Page",
+        "body": "We would like to add a new page to the Maakaf home website dedicated to showcasing the open-source activity of our members. This page will provide a centralized view of individual contributions to various open-source projects, highlighting their involvement and impact within the broader open-source community.\n\n# Goals\n- Increase visibility of Maakaf members' open-source contributions.\n- Motivate members to engage more with open-source projects.\n- Provide a clear overview of collective Maakaf member involvement in open-source.\n\n# Proposed Feature: Members Open-Source Activity Page\nThis page will display aggregated and detailed data about each Maakaf member's activity in open-source repositories.\nWe'll consider a repository \"open-source\" if it has more than 4 unique contributors of commits directly to the project. For forked repositories, only commit contributions made to the fork itself will count towards this definition; inherited contributions from the original project are excluded.\n\n## Data Collection & Processing:\n**Source:** All data will be collected from GitHub.\n**Member Identification:** Members will be identified by their GitHub profile usernames.\n### Metrics to Collect per Member per Identified Repository:\n- Total number of commits made by the member to the repository.\n- Total number of pull requests (PRs) opened by the member in the repository.\n- Total number of issues opened by the member in the repository.\n- Total number of comments added by the member to PR discussions in the repository.\n- Total number of comments added by the member to issue discussions in the repository.\n\n## Data Presentation (Open to Design Ideas):\nThe page should clearly present the following information for each Maakaf member:\n\n### Individual Member Profile/Summary:\n- Member's Name (and potentially their GitHub username/avatar).\n- Total aggregated counts across all relevant repositories for:\n- Total Commits\n- Total Pull Requests Opened\n- Total Issues Opened\n- Total Comments (sum of PR and Issue comments)\n- Per-Repository Breakdown (e.g., in an expandable section or detailed view):\n- List of each open-source repository the member contributed to.\nFor each repository, display:\nRepository Name and Link.\nThe member's specific counts for that repository: commits, PRs opened, issues opened, PR comments, issue comments.\n\n### Potential UI/UX Considerations (Ideas for Discussion):\n**Member List:** A list of all Maakaf members, possibly sortable by total activity.\n**Clickable Profiles:** Clicking on a member's name could expand to show their detailed per-repository breakdown.\n**Filtering/Sorting:** Options to filter by activity type or sort members by highest contributions.\n**Visualizations:** Simple charts (e.g., bar charts) to show total contributions or contribution trends over time (future enhancement).\n\n## Technical Considerations\n**GitHub API Usage:** This feature will require extensive use of the GitHub API. We will need to consider rate limits and authentication (e.g., using a GitHub App or Personal Access Token with appropriate scopes).\n**Data Storage:** A mechanism to store the collected activity data to avoid hitting API rate limits on every page load. This could involve a database or cached JSON files.\n**Scheduled Updates:** A cron job or similar mechanism to periodically update the data (e.g., daily, weekly) to keep it fresh.\n**Frontend Framework:** Integration with the existing website's frontend framework.\n\n## Open Questions for Discussion / Further Research:\nHow will we collect the GitHub usernames of Maakaf members?\nWhat is the preferred method for authenticating with the GitHub API (e.g., GitHub App, PAT)?"
+      },
+      {
+        "issueId": "3170257272",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": "30144878",
+        "state": "closed",
+        "createdAt": "2025-06-24T04:51:46Z",
+        "closedAt": "2025-07-11T06:10:10Z",
+        "updatedAt": "2025-07-11T06:10:10Z",
+        "title": "[Epic]: Epic 1: Project Foundation & Setup",
+        "body": "## Epic1: Project Foundation & Setup\n\n### Overview\nCore project infrastructure and development environment setup.\n\n### User Stories\n- As a developer, I want a properly configured development environment so that I can start contributing to the project immediately.\n\n### Tasks Breakdown\n- [x] #i16- [Feature]: Repository Structure Setup\n- [ ] Development environment (Docker Compose)\n- [x] CI/CD pipeline foundation\n- [x] Documentation\n\n### Definition of Done\n- [x] Feature implemented and tested\n- [x] Documentation updated\n- [x] Code reviewed and merged\n- [x] Deployed to production\n\n**Estimated Effort**: We don't know yet\n**Priority**: Critical\n**Phase**: 1"
+      },
+      {
+        "issueId": "3170260221",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-24T04:53:07Z",
+        "closedAt": "2025-07-11T06:18:26Z",
+        "updatedAt": "2025-07-11T06:18:26Z",
+        "title": "[Epic]: Epic 2: GitHub API Integration",
+        "body": "## Epic 2: GitHub API Integration\n\nPhase: 1 | Effort: 2 weeks | Priority: High\nIntegrate with GitHub API to fetch community member contribution data.\nUser Story:\n\nAs a community member, I want my GitHub contributions to be automatically discovered and displayed so that my open-source work is recognized.\n\nIssues to Create:\n\nGitHub GraphQL client implementation\nRate limiting and error handling\nAuthentication and token management\nData validation and sanitization\n\n### Overview\nBrief description of the epic and its business value.\n\n### Success Criteria\n- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n\n### User Stories\n- As a [user type], I want [goal] so that [benefit]\n- As a [user type], I want [goal] so that [benefit]\n\n### Technical Requirements\n- Requirement 1\n- Requirement 2\n\n### Dependencies\n- [ ] #issue-number - Description\n- [ ] External dependency\n\n### Tasks Breakdown\n- [ ] #issue-number - Task name\n- [ ] #issue-number - Task name\n\n### Definition of Done\n- [ ] Feature implemented and tested\n- [ ] Documentation updated\n- [ ] Code reviewed and merged\n- [ ] Deployed to production\n\n**Estimated Effort**: X weeks\n**Priority**: High/Medium/Low\n**Phase**: 1/2/3"
+      },
+      {
+        "issueId": "3170262000",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-24T04:54:04Z",
+        "closedAt": "2025-07-23T14:12:40Z",
+        "updatedAt": "2025-07-23T14:12:40Z",
+        "title": "[Epic]: Epic 3: Data Processing Pipeline",
+        "body": "## Epic 3: Data Processing Pipeline\n\nPhase: 1 | Effort: 1.5 weeks | Priority: High\nProcess raw GitHub data into structured contribution scores and statistics.\nUser Story:\n\nAs a community visitor, I want to see meaningful contribution statistics so that I can understand each member's involvement in open-source projects.\n\nIssues to Create:\n\nOpen-source repository identification\nContribution scoring algorithm\nData aggregation and statistics\nJSON output generation for Hugo\n\n### Overview\nBrief description of the epic and its business value.\n\n### Success Criteria\n- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n\n### User Stories\n- As a [user type], I want [goal] so that [benefit]\n- As a [user type], I want [goal] so that [benefit]\n\n### Technical Requirements\n- Requirement 1\n- Requirement 2\n\n### Dependencies\n- [ ] #issue-number - Description\n- [ ] External dependency\n\n### Tasks Breakdown\n- [ ] #issue-number - Task name\n- [ ] #issue-number - Task name\n\n### Definition of Done\n- [ ] Feature implemented and tested\n- [ ] Documentation updated\n- [ ] Code reviewed and merged\n- [ ] Deployed to production\n\n**Estimated Effort**: X weeks\n**Priority**: High/Medium/Low\n**Phase**: 1/2/3"
+      },
+      {
+        "issueId": "3170262710",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-24T04:54:27Z",
+        "closedAt": "2025-07-22T15:08:20Z",
+        "updatedAt": "2025-07-22T15:08:20Z",
+        "title": "[Epic]: Epic 4: Hugo Frontend Implementation",
+        "body": "## Epic 4: Hugo Frontend Implementation\n\nPhase: 1 | Effort: 2 weeks | Priority: High\nCreate the community contributions page on the Hugo website.\nUser Story:\n\nAs a community visitor, I want to browse member contributions in an attractive, easy-to-use interface so that I can discover interesting projects and contributors.\n\nIssues to Create:\n\nHugo page layout and template\nMember contribution cards design\nResponsive styling implementation\nBasic sorting functionality\n\n### Overview\nBrief description of the epic and its business value.\n\n### Success Criteria\n- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n\n### User Stories\n- As a [user type], I want [goal] so that [benefit]\n- As a [user type], I want [goal] so that [benefit]\n\n### Technical Requirements\n- Requirement 1\n- Requirement 2\n\n### Dependencies\n- [ ] #issue-number - Description\n- [ ] External dependency\n\n### Tasks Breakdown\n- [ ] #issue-number - Task name\n- [ ] #issue-number - Task name\n\n### Definition of Done\n- [ ] Feature implemented and tested\n- [ ] Documentation updated\n- [ ] Code reviewed and merged\n- [ ] Deployed to production\n\n**Estimated Effort**: X weeks\n**Priority**: High/Medium/Low\n**Phase**: 1/2/3"
+      },
+      {
+        "issueId": "3170266156",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-24T04:56:01Z",
+        "closedAt": "2025-07-11T06:20:36Z",
+        "updatedAt": "2025-07-11T06:20:36Z",
+        "title": "[Epic]: Epic 5: Automation & Deployment",
+        "body": "## Epic: [Epic Name]\n\nPhase: 1 | Effort: 1 week | Priority: Medium\nAutomate data updates and deployment processes.\nUser Story:\n\nAs a project maintainer, I want contribution data to update automatically so that the information stays current without manual intervention.\n\nIssues to Create:\n\nGitHub Actions workflow\nAutomated data refresh scheduling\nError monitoring and alerting\nProduction deployment configuration\n\n### Overview\nBrief description of the epic and its business value.\n\n### Success Criteria\n- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n\n### User Stories\n- As a [user type], I want [goal] so that [benefit]\n- As a [user type], I want [goal] so that [benefit]\n\n### Technical Requirements\n- Requirement 1\n- Requirement 2\n\n### Dependencies\n- [ ] #issue-number - Description\n- [ ] External dependency\n\n### Tasks Breakdown\n- [ ] #issue-number - Task name\n- [ ] #issue-number - Task name\n\n### Definition of Done\n- [ ] Feature implemented and tested\n- [ ] Documentation updated\n- [ ] Code reviewed and merged\n- [ ] Deployed to production\n\n**Estimated Effort**: X weeks\n**Priority**: High/Medium/Low\n**Phase**: 1/2/3"
+      },
+      {
+        "issueId": "3170269994",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": "30144878",
+        "state": "closed",
+        "createdAt": "2025-06-24T04:58:02Z",
+        "closedAt": "2025-06-24T17:06:27Z",
+        "updatedAt": "2025-06-24T17:06:27Z",
+        "title": "[Feature]: Repository Structure Setup",
+        "body": "## Description\nSet up the initial repository structure for the Ma'akaf Community Contributions project.\n\n## Acceptance Criteria\n- [x] Create folder structure following design document specifications\n- [x] Set up backend/ directory with Node.js project structure\n- [x] Configure website/ directory for Hugo integration\n- [x] Create config/ directory for community member configuration\n- [x] Set up docs/ directory with initial documentation\n- [x] Create .github/ directory with workflow templates\n\n## File Structure to Create\nmaakaf-website/\n├── backend/\n│   ├── src/\n│   │   ├── services/\n│   │   ├── utils/\n│   │   └── config/\n│   ├── tests/\n│   ├── package.json\n│   └── README.md\n├── website/\n│   ├── content/community/\n│   ├── layouts/community/\n│   ├── data/\n│   └── static/\n├── config/\n│   └── community-members.json\n├── .github/\n│   └── workflows/\n└── docs/\n\n## Tasks\n- [x] Create directory structure\n- [x] Initialize package.json for backend\n- [x] Create initial README files\n- [x] Set up basic .gitignore\n- [x] Create community-members.json template\n\n**Estimated Effort**: 4 hours"
+      },
+      {
+        "issueId": "3170278083",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-24T05:01:56Z",
+        "closedAt": "2025-07-11T06:19:45Z",
+        "updatedAt": "2025-07-11T06:19:45Z",
+        "title": "[Feature]: Development Environment Setup",
+        "body": "## Feature: Development Environment Setup\n\n## Description\nCreate a Docker Compose development environment for the full stack.\n\n## Acceptance Criteria\n- [ ] Docker Compose file for backend and Hugo development\n- [ ] Environment variable configuration\n- [ ] Volume mounts for live code reloading\n- [ ] Documentation for local setup\n\n## Technical Requirements\n- Node.js 18+ container for backend\n- Hugo container for website development\n- Shared volumes for data exchange\n- Environment variable management\n\n## Resources\n- Design document section 12.3 (Environment Configuration)\n\n**Estimated Effort**: 1 day"
+      },
+      {
+        "issueId": "3170281430",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": "30144878",
+        "state": "closed",
+        "createdAt": "2025-06-24T05:03:35Z",
+        "closedAt": "2025-07-22T15:08:57Z",
+        "updatedAt": "2025-07-22T15:08:58Z",
+        "title": "[Feature]: GitHub GraphQL Client Implementation",
+        "body": "## Description\nImplement a GitHub GraphQL API client service for fetching user contribution data.\n\n## Acceptance Criteria\n- [ ] GraphQL client with authentication\n- [ ] Rate limiting implementation (5000 points/hour)\n- [ ] Error handling with retry logic\n- [ ] Support for pagination\n- [ ] Comprehensive logging\n\n## GraphQL Query to Implement\n```graphql\nquery($username: String!, $after: String) {\n  user(login: $username) {\n    login\n    name\n    avatarUrl\n    publicRepos: repositories(privacy: PUBLIC) {\n      totalCount\n    }\n    pullRequests(first: 50, after: $after, orderBy: {field: CREATED_AT, direction: DESC}) {\n      nodes {\n        title\n        url\n        createdAt\n        merged\n        state\n        repository {\n          name\n          owner { login }\n          isPrivate\n          collaborators { totalCount }\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n\nTechnical Details\n\nUse axios or node-fetch for HTTP requests\nImplement exponential backoff for retries\nToken validation and error handling\nTypeScript interfaces for response data\n\nTest Cases\n\n Successful user data fetch\n Rate limit handling\n Invalid user handling\n Network error recovery\n Pagination functionality\n\nDependencies: Repository structure setup\nEstimated Effort: 3 days"
+      },
+      {
+        "issueId": "3170287901",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-24T05:06:22Z",
+        "closedAt": "2025-07-23T14:07:47Z",
+        "updatedAt": "2025-07-23T14:07:47Z",
+        "title": "[Feature]: Open-Source Repository Identification",
+        "body": "## Feature: Open-Source Repository Identification\n\n## Description\nImplement logic to identify open-source repositories from contribution data.\n\n## Acceptance Criteria  \n- [ ] Filter repositories with >4 collaborators\n- [ ] Exclude private repositories\n- [ ] Exclude personal repositories (owner matches contributor)\n- [ ] Unit tests for filtering logic\n\n## Phase 1 Implementation\n```javascript\nfunction isOpenSourceProject(repository, contributorUsername) {\n  return repository.isPrivate === false &&\n         repository.collaborators.totalCount > 4 &&\n         repository.owner.login !== contributorUsername;\n}\nTest Cases\n\n Public repo with many collaborators → true\n Private repo → false\n Personal repo → false\n Public repo with few collaborators → false\n\nDependencies: GitHub API client\nEstimated Effort: 1 day"
+      },
+      {
+        "issueId": "3170290899",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": "102241886",
+        "state": "closed",
+        "createdAt": "2025-06-24T05:07:35Z",
+        "closedAt": "2025-07-23T14:07:28Z",
+        "updatedAt": "2025-07-23T14:07:28Z",
+        "title": "[Feature]: Hugo Contributions Page Layout",
+        "body": "## Feature: Hugo Contributions Page Layout\n**Labels**: `type: feature`, `component: frontend`, `phase: 1-mvp`, `priority: high`, `difficulty: intermediate`\n\n## Description\nCreate the main contributions page layout using Hugo templates.\n\n## Acceptance Criteria\n- [ ] Create contributions.md content file\n- [ ] Implement contributions.html layout template\n- [ ] Display community summary statistics\n- [ ] Render member contribution cards\n- [ ] Responsive design for mobile/desktop\n\n## Page Sections\n1. Header with title and description\n2. Summary statistics dashboard\n3. Member grid with contribution cards\n4. Last updated timestamp\n\n## Hugo Template Structure\n```html\n{{ define \"main\" }}\n<div class=\"contributions-page\">\n  <section class=\"summary-stats\">\n    <!-- Statistics from .Site.Data.community_contributions.summary -->\n  </section>\n  \n  <section class=\"member-grid\">\n    {{ range .Site.Data.community_contributions.members }}\n      <div class=\"member-card\">\n        <!-- Member card content -->\n      </div>\n    {{ end }}\n  </section>\n</div>\n{{ end }}\nDesign Requirements\n\nMatch existing Ma'akaf website design\nCard-based layout for members\nClear visual hierarchy\nAccessible color contrast\n\nDependencies: Data processing pipeline\nEstimated Effort: 2 days\n"
+      },
+      {
+        "issueId": "3170313683",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-06-24T05:16:21Z",
+        "closedAt": "2025-07-23T14:07:16Z",
+        "updatedAt": "2025-07-23T14:07:16Z",
+        "title": "[Feature]: Member Contribution Cards",
+        "body": "## Feature: Member Contribution Cards\n\n\n## Description\nDesign and implement individual member contribution cards showing key statistics.\n\n## Acceptance Criteria\n- [ ] Display member avatar, name, and GitHub username\n- [ ] Show contribution score and recent activity count\n- [ ] List recent contributions (last 5)\n- [ ] Hover effects and responsive design\n- [ ] Link to member's GitHub profile\n\n## Card Content\n- GitHub avatar (with fallback)\n- Display name and username  \n- Total contribution score\n- Pull request count\n- Recent contributions list\n- Last activity date\n\n## Styling Requirements\n- Card hover animations\n- Consistent spacing and typography\n- Mobile-responsive layout\n- Accessibility considerations (ARIA labels, keyboard navigation)\n\n**Dependencies**: Hugo page layout\n\n**Estimated Effort**: 1.5 days"
+      },
+      {
+        "issueId": "3203366189",
+        "repoId": "643453344",
+        "authorUserId": "219325371",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-07-04T17:32:54Z",
+        "closedAt": "2025-07-04T17:33:56Z",
+        "updatedAt": "2025-07-04T17:33:56Z",
+        "title": "Add MD file - Tutorial",
+        "body": "create an MD file"
+      },
+      {
+        "issueId": "3203368214",
+        "repoId": "643453344",
+        "authorUserId": "219325371",
+        "assignedUserId": "219325371",
+        "state": "closed",
+        "createdAt": "2025-07-04T17:34:26Z",
+        "closedAt": "2025-08-11T14:32:42Z",
+        "updatedAt": "2025-08-11T14:32:42Z",
+        "title": "Add MD file - Tutorial",
+        "body": "### Explain what you want do to (i.e. create an MD file)\n\ncreate an MD file"
+      },
+      {
+        "issueId": "3221736273",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-07-11T06:33:18Z",
+        "closedAt": "2025-07-23T14:07:06Z",
+        "updatedAt": "2025-07-23T14:07:06Z",
+        "title": "[Feature]: Add Github Display name to the Github JSON file",
+        "body": "## Feature: [Feature Name]\n\n### Description\nClear description of what needs to be built.\n\n### Acceptance Criteria\n- [ ] Given [context], when [action], then [expected result]\n- [ ] Given [context], when [action], then [expected result]\n\n### Technical Details\n- Implementation approach\n- Key technical considerations\n- Performance requirements\n\n### Test Cases\n- [ ] Test case 1\n- [ ] Test case 2\n- [ ] Edge case handling\n\n### Dependencies\n- [ ] #issue-number - Description\n\n### Resources\n- Link to design document section\n- API documentation\n- Related issues\n\n**Estimated Effort**: X days\n**Component**: backend/frontend/devops\n**Difficulty**: beginner/intermediate/advanced"
+      },
+      {
+        "issueId": "3221779004",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "assignedUserId": null,
+        "state": "closed",
+        "createdAt": "2025-07-11T06:51:21Z",
+        "closedAt": "2025-07-23T14:12:41Z",
+        "updatedAt": "2025-07-23T14:12:41Z",
+        "title": "[Feature]: Keep the data in the backend",
+        "body": "So we will ask GithubAPI only for the last day activity\n## Feature: [Feature Name]\n\n### Description\nClear description of what needs to be built.\n\n### Acceptance Criteria\n- [ ] Given [context], when [action], then [expected result]\n- [ ] Given [context], when [action], then [expected result]\n\n### Technical Details\n- Implementation approach\n- Key technical considerations\n- Performance requirements\n\n### Test Cases\n- [ ] Test case 1\n- [ ] Test case 2\n- [ ] Edge case handling\n\n### Dependencies\n- [ ] #issue-number - Description\n\n### Resources\n- Link to design document section\n- API documentation\n- Related issues\n\n**Estimated Effort**: X days\n**Component**: backend/frontend/devops\n**Difficulty**: beginner/intermediate/advanced"
+      },
+      {
+        "issueId": "3288372738",
+        "repoId": "992779830",
+        "authorUserId": "33284345",
+        "assignedUserId": "33284345",
+        "state": "closed",
+        "createdAt": "2025-08-04T07:38:24Z",
+        "closedAt": "2025-09-06T13:48:40Z",
+        "updatedAt": "2025-09-06T13:48:40Z",
+        "title": "[Bug]: how_to_start URL is wrong (missing guides/)",
+        "body": "## Bug: how_to_start URL is wrong (missing guides/)\n\n### Current Behavior\nReaching Page not found\n\n### Expected Behavior\nRouted to the correct url (https://maakaf.com/he/guided/how_to_start/ instead of https://maakaf.com/he/how_to_start/)\n\n### Steps to Reproduce\n1. Navigate to https://maakaf.com/he/\n2. click the link פרויקט התרגול שלנו under מתחילים? כך תעשו את הצעד הראשון\n\n### Possible Solution\nchange url to /he/guided/how_to_start/"
+      }
+    ],
+    "prs": [
+      {
+        "prId": "2880403319",
+        "repoId": "935907511",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-26T06:39:09Z",
+        "mergedAt": null,
+        "closedAt": null,
+        "updatedAt": "2025-02-27T11:55:38Z",
+        "title": "Enhancement: Continued Development on Your COBOL Banking Project",
+        "body": "\r\nI came across your COBOL banking practice project and really enjoyed exploring the code! I recently started learning COBOL, and your project provided a great opportunity for me to dive deeper into the language.\r\n\r\nI forked the repository and continued developing it based on what interested me, and I wanted to share my additions with you through this pull request. I thought you might find it interesting to take a look.\r\n\r\nThank you for your work on this project—it has been incredibly helpful for my learning process! Let me know if you have any feedback.\r\n\r\nBest regards,\r\nUriel",
+        "commits": [
+          "61eeaee76f0fc6f597582b98603aa3142bdd890f",
+          "098e82941dfc9da5e7ead326d7a6022b010914b2",
+          "8c2c34a9893aa1112fb437510a1af5074b6771ee",
+          "d25b10a0cfcff6363bd549b065bc228362529d65",
+          "5b1c787693b1ae67e5c6f9c8271c7010adecadee",
+          "6facf5b6880fe3ae4d55c7040ad1921a62e3f496",
+          "919ca0510907d018353148e8524243d4e90b6124",
+          "2c0be862330cfc792b74692a9f88131509b9b949",
+          "53f2e0362ae2f93151a21dd03026142a0074a19f",
+          "bd39a9a7e43b937c55b18957dbc0f1b3e68fe6e6",
+          "207a31e3090e688c93493f2700c740b42f6be10a",
+          "ef0aa2763acfbf87d33a6f837491d076fd2404fa",
+          "9927b1ceee95dda10f48d8f512374be78edf2ed8",
+          "7de639b53a346fe73df8743f47f4d1dad79185bd",
+          "b5362d893dc713e8d08f508db16b9e776de1966f",
+          "f17e7fded3d6c8d690ee808dc14499c10413328f",
+          "7b37adea9d4bdb1f62831a1dd62af2665a56bd26",
+          "921356d8834d75f68951bfe4c36f1c53c3ed0459",
+          "9f6c636dc2443ef753a4d7b423dc9204529ef278",
+          "a4860e27c0fc1c19bc3cc899d9a493a76c01af0f",
+          "7aea974b18f203e2ecad854d1702b1f7988f00bc",
+          "67f9a9ad7c3f7ca32fc1409a7293ebfef51bc28c",
+          "806bf5537ac5083e3861c088ca0fc4cb175ca4d9",
+          "8f5fa35edaf51b40bb39e4c9cdef0c6eae4ba358",
+          "22e751603b2f97c2ea8f575ed57c340f68efabb6",
+          "39b4c86e71b0460e68d6d8057ada3e6f1edeafb5",
+          "b3da8d3bf041a5cfe0755442db778518b82bcf15",
+          "0783786adfefb175b926fab26595663d72988eaa"
+        ]
+      },
+      {
+        "prId": "2883452328",
+        "repoId": "938622914",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-27T05:10:48Z",
+        "mergedAt": "2025-02-27T11:55:36Z",
+        "closedAt": "2025-02-27T11:55:36Z",
+        "updatedAt": "2025-02-27T11:55:36Z",
+        "title": "Implement user filtering functionality",
+        "body": "Add and modify user filtering capabilities to enhance data retrieval from user and balance databases.",
+        "commits": [
+          "6e38401ce118c915909f0d52a3e79de4e32c8b4b"
+        ]
+      },
+      {
+        "prId": "3102088598",
+        "repoId": "153180924",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-30T04:57:59Z",
+        "mergedAt": null,
+        "closedAt": null,
+        "updatedAt": "2025-06-21T15:35:10Z",
+        "title": "Create he.toml for Hebrew",
+        "body": "Some words don't have good translation to Hebrew so I think it's better to keep them in English. It's common in Israel to use some English in the internet.",
+        "commits": [
+          "50a0d0b9a6a2ea5cd5b4186c97fe4703bbcc9222",
+          "e21496297955d138c3ea89236a8adc51cb1691a9"
+        ]
+      },
+      {
+        "prId": "3203409927",
+        "repoId": "643453344",
+        "authorUserId": "219325371",
+        "createdAt": "2025-07-04T18:03:52Z",
+        "mergedAt": "2025-07-04T18:04:02Z",
+        "closedAt": "2025-07-04T18:04:02Z",
+        "updatedAt": "2025-07-04T18:04:25Z",
+        "title": "os-tutorial",
+        "body": "Resolving #759 ",
+        "commits": []
+      },
+      {
+        "prId": "3205344030",
+        "repoId": "153179091",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T17:59:45Z",
+        "mergedAt": null,
+        "closedAt": "2025-07-05T18:01:28Z",
+        "updatedAt": "2025-07-05T18:01:28Z",
+        "title": "Get GitHub data",
+        "body": null,
+        "commits": []
+      },
+      {
+        "prId": "3205349804",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T18:03:30Z",
+        "mergedAt": null,
+        "closedAt": "2025-07-16T05:17:24Z",
+        "updatedAt": "2025-07-16T05:17:24Z",
+        "title": "Get GitHub data",
+        "body": null,
+        "commits": []
+      },
+      {
+        "prId": "3245189949",
+        "repoId": "153179091",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:28:17Z",
+        "mergedAt": null,
+        "closedAt": "2025-07-19T10:38:00Z",
+        "updatedAt": "2025-07-19T10:38:00Z",
+        "title": "Get_github_data",
+        "body": null,
+        "commits": []
+      },
+      {
+        "prId": "3245201335",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:39:35Z",
+        "mergedAt": "2025-07-19T13:01:07Z",
+        "closedAt": "2025-07-19T13:01:08Z",
+        "updatedAt": "2025-07-19T13:05:54Z",
+        "title": "Get GitHub data",
+        "body": null,
+        "commits": [
+          "0b78228ed2b52f3e61885bc412ef37ed0bc879b5",
+          "d8ac7c1c9d3b5b330abf37fd44e98745aa40738d",
+          "d3faddb6dd1bc232102d27b5fb13db0c5dc6ff29",
+          "b3eb3a603e93f84ca8a8929e2e6eb68cb9d3b289",
+          "2b9b8487aaf8312d28addba858d559ecfb4bb856",
+          "399b6c6cf2caf9e05dd143c31b52097449a70e74",
+          "9c2412cf2a9b08f16a7b02ede238a49c81fabe5d",
+          "92ce8a83429e98e14ce1b94dff4f86ec8ee3efd7",
+          "05eeed0a642a4114a53b7d9a1e601ac9ed48df39",
+          "6f435f5fe44fa2a6efb07a02e13d8aa2d4bb6fd3",
+          "3eb3f15b277aa149e5f1f78b159852754e0aad55",
+          "35f96a24898861e2f3e07bceccd12f27a7f88e02",
+          "92f3eec1ffa424eb4b34fc683c9966fc5f9dfde1",
+          "ff254a75c896e973e7664ae7a33de550dd2ca1b3",
+          "c15511cae04eec28896bf412fc9c0a74c6e4c1d5",
+          "1c8afa9747e7c3053c667d57135c33770a35bd34",
+          "564a1e18363f649b84bc9c02cf060658e8898a74",
+          "68623eee2d4cb585b6e6b19e97e9c15e0927deb3",
+          "7fbd5f92770083a32d5f0429385f9cea956a572f",
+          "6380172ef50365c3804adb5b387b3b4e34e38df9",
+          "19266ff6bb8ab699a08cce1ebae286d5d9f86ac1"
+        ]
+      },
+      {
+        "prId": "3245521916",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T18:14:48Z",
+        "mergedAt": null,
+        "closedAt": "2025-07-26T11:40:49Z",
+        "updatedAt": "2025-07-26T11:40:49Z",
+        "title": "Main",
+        "body": null,
+        "commits": [
+          "093920865c97c65d0c5a3a0f5bb4b9e9283d123f",
+          "0287b0d6acf78635e339d1d1bb9c8bec863b3ff2"
+        ]
+      },
+      {
+        "prId": "3288758490",
+        "repoId": "1031684459",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-04T09:50:01Z",
+        "mergedAt": "2025-09-16T13:57:16Z",
+        "closedAt": "2025-09-16T13:57:16Z",
+        "updatedAt": "2025-09-16T13:57:16Z",
+        "title": "fixed URL",
+        "body": "added guides/ to the how_to_start URL (under content/he index.md file) ",
+        "commits": []
+      },
+      {
+        "prId": "3288804226",
+        "repoId": "992779830",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-04T10:05:44Z",
+        "mergedAt": "2025-08-04T10:07:10Z",
+        "closedAt": "2025-08-04T10:07:10Z",
+        "updatedAt": "2025-08-04T10:07:10Z",
+        "title": "fixed URL",
+        "body": "added guides/ to the how_to_start URL (under content/he index.md file)",
+        "commits": [
+          "608b278ecb43607f6ca4c335248cf1880b51dd75"
+        ]
+      },
+      {
+        "prId": "3289333161",
+        "repoId": "992779830",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-04T12:55:04Z",
+        "mergedAt": "2025-08-11T18:17:32Z",
+        "closedAt": "2025-08-11T18:17:32Z",
+        "updatedAt": "2025-08-11T18:17:32Z",
+        "title": "added my name to config.json",
+        "body": "added my name to config.json",
+        "commits": [
+          "2e241534fdff622fba31d3d1dd850f37619d5e5e"
+        ]
+      },
+      {
+        "prId": "3321900448",
+        "repoId": "992779830",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-14T11:36:27Z",
+        "mergedAt": "2025-08-17T10:48:55Z",
+        "closedAt": "2025-08-17T10:48:55Z",
+        "updatedAt": "2025-08-18T11:12:15Z",
+        "title": "FIX - Undesired Horizontal Scroll On Mobile",
+        "body": "Resolving #51 \r\n\r\nadded css file to override docsy's default layout.",
+        "commits": []
+      },
+      {
+        "prId": "3334229500",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-19T12:39:27Z",
+        "mergedAt": "2025-08-21T11:12:45Z",
+        "closedAt": "2025-08-21T11:12:45Z",
+        "updatedAt": "2025-08-21T11:12:46Z",
+        "title": "Create DB schema: bronze + gold + migration + smoke script",
+        "body": null,
+        "commits": [
+          "df8608ab12f5648ac6d3efdd85c4d45776d43795",
+          "de9fa6416e1c8e9a32df6c7cc4c56d42610fca0f"
+        ]
+      },
+      {
+        "prId": "3342306612",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-21T15:56:15Z",
+        "mergedAt": "2025-08-21T19:18:40Z",
+        "closedAt": "2025-08-21T19:18:40Z",
+        "updatedAt": "2025-08-21T19:18:40Z",
+        "title": "Added github: controller, module, bronze-saver, service and modified …",
+        "body": "…package  and app.module in order to fetch raw data from github and insert it to bronze layer",
+        "commits": [
+          "85043af07bfd0d63264fb32103f5cbd0aee74b13"
+        ]
+      },
+      {
+        "prId": "3349539596",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-24T13:49:21Z",
+        "mergedAt": "2025-08-25T15:39:56Z",
+        "closedAt": "2025-08-25T15:39:57Z",
+        "updatedAt": "2025-08-25T15:39:57Z",
+        "title": "added some error handling",
+        "body": null,
+        "commits": [
+          "e444427128068457a4b5def455aa06ef7ca3d740",
+          "75b6fb475211113078a2757f478fe16f8d66dd14"
+        ]
+      },
+      {
+        "prId": "3356004794",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-26T14:55:45Z",
+        "mergedAt": "2025-08-26T16:10:18Z",
+        "closedAt": "2025-08-26T16:10:18Z",
+        "updatedAt": "2025-08-26T16:10:18Z",
+        "title": "convert to esm",
+        "body": null,
+        "commits": [
+          "e7e09ae61bc71d89ea12bb5813fed0fdef8722fe"
+        ]
+      },
+      {
+        "prId": "3356367911",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-26T16:36:30Z",
+        "mergedAt": "2025-08-26T16:36:39Z",
+        "closedAt": "2025-08-26T16:36:39Z",
+        "updatedAt": "2025-08-26T16:36:57Z",
+        "title": "Migrate to esm - merge to main",
+        "body": null,
+        "commits": [
+          "02c259040e809cd8a9a55f76c21ed0f050d24c05"
+        ]
+      },
+      {
+        "prId": "3358281413",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-27T07:09:56Z",
+        "mergedAt": "2025-08-27T07:25:08Z",
+        "closedAt": "2025-08-27T07:25:08Z",
+        "updatedAt": "2025-08-27T07:25:08Z",
+        "title": "featire/bug-fix: accept users as JSON body and default since/until in…",
+        "body": "… GithubService",
+        "commits": [
+          "e0fb36521812407dc77f019346774477ae762812"
+        ]
+      },
+      {
+        "prId": "3359144975",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-27T12:17:57Z",
+        "mergedAt": "2025-08-27T12:18:05Z",
+        "closedAt": "2025-08-27T12:18:05Z",
+        "updatedAt": "2025-08-27T12:23:10Z",
+        "title": "User list in json",
+        "body": null,
+        "commits": [
+          "83541de6be936453a726507442d980ad25bd8de5"
+        ]
+      },
+      {
+        "prId": "3359467576",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-27T13:53:28Z",
+        "mergedAt": "2025-08-31T10:37:55Z",
+        "closedAt": "2025-08-31T10:37:55Z",
+        "updatedAt": "2025-08-31T10:37:55Z",
+        "title": "fix redundancy",
+        "body": null,
+        "commits": []
+      },
+      {
+        "prId": "3370121145",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-31T10:37:35Z",
+        "mergedAt": "2025-08-31T10:37:54Z",
+        "closedAt": "2025-08-31T10:37:54Z",
+        "updatedAt": "2025-08-31T10:37:54Z",
+        "title": "Add swagger",
+        "body": null,
+        "commits": [
+          "8d3fbc0a9efc2acea617d05a8658ecad23036e81",
+          "46899f552dc860efa016b4d0cc42e7b1665bd9a2"
+        ]
+      },
+      {
+        "prId": "3370447527",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-31T16:10:39Z",
+        "mergedAt": null,
+        "closedAt": "2025-08-31T16:13:13Z",
+        "updatedAt": "2025-08-31T16:13:13Z",
+        "title": "re-structured project to follow separate modules for each layer",
+        "body": null,
+        "commits": []
+      },
+      {
+        "prId": "3370455290",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-31T16:16:40Z",
+        "mergedAt": "2025-09-01T05:29:08Z",
+        "closedAt": "2025-09-01T05:29:08Z",
+        "updatedAt": "2025-09-01T05:29:08Z",
+        "title": "Re-Structure of project",
+        "body": null,
+        "commits": [
+          "50f7986b1d0f31c16d8f3849c42f51300bd34d80",
+          "03c35cee53cd2d39060be67da4391d15f0a13d04"
+        ]
+      },
+      {
+        "prId": "3382659425",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-04T08:18:57Z",
+        "mergedAt": "2025-09-09T14:44:05Z",
+        "closedAt": "2025-09-09T14:44:05Z",
+        "updatedAt": "2025-09-09T14:44:05Z",
+        "title": "Github API rate limits handle using seperate GithubClientService.",
+        "body": "- Handled \"Feature: Handle GitHub API errors with retries and backoff\"\r\n- Handled \"Feature: Respect API rate limits (5000 req/hour)\"\r\n- Added logger to services.",
+        "commits": [
+          "b85d742aa8f9cb08945e24dd69c4b6972a0e1c49",
+          "4e4336687feb1c9479b6ef62a951410606f02fd2"
+        ]
+      },
+      {
+        "prId": "3392816137",
+        "repoId": "1040346838",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-08T06:33:26Z",
+        "mergedAt": null,
+        "closedAt": "2025-09-17T06:54:36Z",
+        "updatedAt": "2025-09-17T06:54:36Z",
+        "title": "מריץ את הפרוייקט ומציע הצעות לשיפור על הדרך.",
+        "body": "Introduce an AppController and AppService to handle health check and greeting requests. Enhance application startup logging to provide clearer information about the running application and Swagger documentation access.\n\nבאופן כללי אני מוסיף דברים לקוד כדי שיהיה יותר קל להריץ אותו.",
+        "commits": [
+          "e58c4f423952b707e3c6d2b97687448f9bad79d5",
+          "08dd7a202d8e2a5abbab62f872855233f5dc7353",
+          "b473d85f4b9c6630cbdcd35adb8cbb75cc427d79",
+          "21b33c1bdc9b07d83bfeb2c3b95b868061d733b6"
+        ]
+      },
+      {
+        "prId": "3402349588",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-10T12:47:32Z",
+        "mergedAt": "2025-09-10T13:42:01Z",
+        "closedAt": "2025-09-10T13:42:01Z",
+        "updatedAt": "2025-09-10T13:42:01Z",
+        "title": "WIP",
+        "body": "### \r\n1. Refactored by Uriel's suggestions (branch - uriel_run)\r\n2. Added logic for silver layer Issues and PRs. \r\n3. Added tests for silver layer Issues and PRs (to be deleted later?).\r\n        npm run test:issues\r\n        npm run test:prs\r\n",
+        "commits": []
+      },
+      {
+        "prId": "3402384412",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-10T12:56:57Z",
+        "mergedAt": null,
+        "closedAt": "2025-09-10T12:58:01Z",
+        "updatedAt": "2025-09-10T12:58:01Z",
+        "title": "WIP",
+        "body": "1. Refactored by Uriel's suggestions (branch - uriel_run)\r\n2. Added logic for silver layer Issues and PRs.\r\n3. Added tests for silver layer Issues and PRs (to be deleted later?).\r\nnpm run test:issues\r\nnpm run test:prs",
+        "commits": [
+          "e07d11f08871fafae4c5d8fa602911109c78eaaa"
+        ]
+      },
+      {
+        "prId": "3407641796",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-11T18:28:52Z",
+        "mergedAt": null,
+        "closedAt": "2025-09-11T18:29:32Z",
+        "updatedAt": "2025-09-11T18:29:32Z",
+        "title": "lidor_run new branch",
+        "body": "Created new branch for curated (gold) layer work.",
+        "commits": []
+      },
+      {
+        "prId": "3407663518",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-11T18:36:25Z",
+        "mergedAt": "2025-09-11T18:38:40Z",
+        "closedAt": "2025-09-11T18:38:40Z",
+        "updatedAt": "2025-09-11T18:38:40Z",
+        "title": "Lidor run",
+        "body": "Created new branch lidor_run for curated (gold) layer work.",
+        "commits": []
+      },
+      {
+        "prId": "3413692643",
+        "repoId": "1040346838",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-13T15:27:57Z",
+        "mergedAt": "2025-09-17T17:12:07Z",
+        "closedAt": "2025-09-17T17:12:07Z",
+        "updatedAt": "2025-09-17T17:12:07Z",
+        "title": "Enhance README with detailed architecture overview and data flow",
+        "body": null,
+        "commits": [
+          "f8791f24fd2d52a40e301600ff0084dd9e9f69f5"
+        ]
+      },
+      {
+        "prId": "3413776595",
+        "repoId": "11180687",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-13T16:24:15Z",
+        "mergedAt": null,
+        "closedAt": null,
+        "updatedAt": "2025-09-13T16:25:29Z",
+        "title": "Add List function for struct field names and map keys",
+        "body": "Introduce a List function that retrieves field names and method names from structs or keys from maps using reflection. This addition enhances the debugging capabilities by providing a way to inspect data structures more effectively. Include tests to validate the functionality across various data types.\n\nResolve #9148",
+        "commits": [
+          "03928f3d5792a8068d59cb73c1abdbe4612f71b6",
+          "659c8561bb6c512d9e9b5e4e3306cadcaecf605e",
+          "edab15bdeaef95396f2c97c87b8526c739886b4f"
+        ]
+      },
+      {
+        "prId": "3422469974",
+        "repoId": "992779830",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-16T14:09:31Z",
+        "mergedAt": "2025-09-17T04:13:57Z",
+        "closedAt": "2025-09-17T04:13:57Z",
+        "updatedAt": "2025-09-17T04:13:57Z",
+        "title": "added friends &  activity post",
+        "body": "added first post for the Friends&Activity feature progress",
+        "commits": [
+          "e05035f59cfcf945067589e95381c3992d28ce4e"
+        ]
+      },
+      {
+        "prId": "3422563036",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-16T14:33:30Z",
+        "mergedAt": "2025-09-16T14:33:41Z",
+        "closedAt": "2025-09-16T14:33:41Z",
+        "updatedAt": "2025-09-16T14:33:41Z",
+        "title": "Analytics development",
+        "body": null,
+        "commits": [
+          "2a9d3e89be89f07e7d0efe4e41f896267eba3b90",
+          "a1ddf4a29831566f3f14629293da5c47fef5ddbd",
+          "3cea31ecdad3851233a030cfc43f1a4761849a33",
+          "2dd5393412ebb0e13c94935cf22adbeb1d8eeb96",
+          "78429f5682a9a5e794483f43679eba214ebc8526",
+          "3fc7a0dc3d53ba4d83c55e750cc0ee7f2978457f",
+          "78f52df53a2c09f26c3858adcbea94367c47cdc6",
+          "752f0d7b2625b15122dc3b51f0af2e43d1121daa",
+          "6ea160c622e5a22effebcd2edc1a5959131eb63f",
+          "30674e67a20337f21b1c569e740d7627b6ef34d0"
+        ]
+      },
+      {
+        "prId": "3425208491",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-17T08:18:49Z",
+        "mergedAt": "2025-09-17T08:26:40Z",
+        "closedAt": "2025-09-17T08:26:40Z",
+        "updatedAt": "2025-09-17T08:26:40Z",
+        "title": "Bar run",
+        "body": null,
+        "commits": [
+          "67c4f9ac319f843d502e9b7c82ee4f3021c77810",
+          "9db999c4ed423a7ee28a5002051843f9699b40be",
+          "125bac6572ff6ac5226c61aa14348f7fe7e2a0fa",
+          "7eafab6252eb35dffdd6339f433f7f62303d75ec"
+        ]
+      },
+      {
+        "prId": "3426051107",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-17T12:18:23Z",
+        "mergedAt": "2025-09-17T12:20:52Z",
+        "closedAt": "2025-09-17T12:20:52Z",
+        "updatedAt": "2025-09-17T12:20:52Z",
+        "title": "implement analytics (gold) layer with full raw->silver->analytics pipeline",
+        "body": "- Add NormalizedModule for proper dependency injection\r\n- Fix TypeORM entity column mappings (camelCase to snake_case)\r\n- Implement activity aggregation to prevent duplicate keys\r\n- Add upsert operations for curated data refresh\r\n- Integrate curated layer into existing ingest endpoint\r\n- Complete end-to-end data pipeline from GitHub API to analytics tables",
+        "commits": [
+          "6150dc68c965be2123fee70161bf693137ce5315"
+        ]
+      }
+    ],
+    "comments": [
+      {
+        "commentId": "2952752523",
+        "repoId": "704479842",
+        "parentId": "3046513815",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T16:57:59Z",
+        "updatedAt": "2025-06-07T16:57:59Z",
+        "body": "We have a new website so this issue isn't relevant anymore."
+      },
+      {
+        "commentId": "2952775915",
+        "repoId": "992779830",
+        "parentId": "3126600190",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T17:16:51Z",
+        "updatedAt": "2025-06-07T17:16:51Z",
+        "body": "I don't know how it is working now.\nThe little problem with the navbar is something I managed to fix.\n\nThank you for your comment :) "
+      },
+      {
+        "commentId": "2953985174",
+        "repoId": "153180924",
+        "parentId": "3102088598",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-08T11:37:52Z",
+        "updatedAt": "2025-06-08T11:37:52Z",
+        "body": "@chalin \nHow can I get a code review for this PR?"
+      },
+      {
+        "commentId": "2957531881",
+        "repoId": "643453344",
+        "parentId": "2518157943",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-10T02:50:24Z",
+        "updatedAt": "2025-06-10T02:50:24Z",
+        "body": "@Ayala-b \nזה סתם עדכון מגיטהאב.\nסגרתי את האישיו והוא שלח לך מייל על זה.\n\nחסר משמעות."
+      },
+      {
+        "commentId": "2962506301",
+        "repoId": "992779830",
+        "parentId": "3129176888",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-11T12:31:44Z",
+        "updatedAt": "2025-06-11T12:31:44Z",
+        "body": "Hi @rivka14 ,\nThanks again for picking this up! Just wondering if you have an estimated time for when you might have a PR ready for this issue? No rush at all, just helps with planning.\n\nThanks!\n"
+      },
+      {
+        "commentId": "2990358580",
+        "repoId": "992779830",
+        "parentId": "3162442696",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-20T09:01:14Z",
+        "updatedAt": "2025-06-20T09:01:14Z",
+        "body": "close #4 "
+      },
+      {
+        "commentId": "2993639034",
+        "repoId": "153180924",
+        "parentId": "3102088598",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-21T15:35:10Z",
+        "updatedAt": "2025-06-21T15:35:10Z",
+        "body": "@precision @aborruso  @johnpaulett @rspier \r\nCan you help me get this PR been reviewed?"
+      },
+      {
+        "commentId": "2998706108",
+        "repoId": "992779830",
+        "parentId": "3129176888",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-24T03:49:31Z",
+        "updatedAt": "2025-06-24T03:49:31Z",
+        "body": "@rivka14 can you give us an update?"
+      },
+      {
+        "commentId": "3000551847",
+        "repoId": "992779830",
+        "parentId": "3165190990",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-24T13:42:28Z",
+        "updatedAt": "2025-06-24T13:42:28Z",
+        "body": "\n> 1. The start point is the users. \nYou are right it should be clearer.\n\n> \n> > Total number of commits made by the member to the repository.\n> \n> I don't think we should count commits. Commits are depends on the individual developer flow, they say nothing about the quality and quantity of the contribution.\n> \n> > Total number of issues opened by the member in the repository.\n> \n> We should consider taking only answered issues or another check, but maybe not in the MVP.\n> \n\nWhat do you think we need check if not commits?\nI don't know what can give as the best view of the activity.\n\n> ### MVP\n> I think maybe we can remove more features from this plan, to make it as lean as possible (for example, count only PRs and not issues). Working in MVP strategy is very important to finish this project, and after that, adding more data and features will be easier.\n\nWe'll start and see how things are going.\n"
+      },
+      {
+        "commentId": "3001237158",
+        "repoId": "992779830",
+        "parentId": "3170269994",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-24T17:06:27Z",
+        "updatedAt": "2025-06-24T17:06:27Z",
+        "body": "It solved by opening this repo:\nhttps://github.com/Maakaf/maakaf_home_backend"
+      },
+      {
+        "commentId": "3006994960",
+        "repoId": "992779830",
+        "parentId": "3129176888",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-26T04:19:55Z",
+        "updatedAt": "2025-06-26T04:19:55Z",
+        "body": "Thanks for the update, @rivka14! I appreciate you letting us know, and please, take care of yourself first.\n\n@liadraz – since you've already started working on this a bit, would you mind taking a look and seeing if you can help @rivka14 out with where that file might be? Thanks!"
+      },
+      {
+        "commentId": "3008034684",
+        "repoId": "992779830",
+        "parentId": "3178658876",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-26T10:42:23Z",
+        "updatedAt": "2025-06-26T10:42:23Z",
+        "body": "תודה ליעד"
+      },
+      {
+        "commentId": "3038995746",
+        "repoId": "992779830",
+        "parentId": "3205000464",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T14:21:31Z",
+        "updatedAt": "2025-07-05T14:21:31Z",
+        "body": "מגניב, ממש תודה!\r\nאיזה כיף שהקהילה נתנה לך את הדחיפה לעשות את זה ושבאמת הצלחת."
+      },
+      {
+        "commentId": "3039502943",
+        "repoId": "153179091",
+        "parentId": "3205344030",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T18:01:28Z",
+        "updatedAt": "2025-07-05T18:01:28Z",
+        "body": "It is a mistake. sorry."
+      },
+      {
+        "commentId": "3047371731",
+        "repoId": "992779830",
+        "parentId": "3170287901",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-08T05:05:28Z",
+        "updatedAt": "2025-07-08T05:05:28Z",
+        "body": "> Hi, I’m new to open source and this looks like a great first issue. May I work on it?\n\nהתחלתי להתקדם עם הפרוייקט. אשמח אם תיצור איתי קשר כדי שנתאם איך אתה יכול להשתלב.\nurielofir@gmail.com \n0506660620"
+      },
+      {
+        "commentId": "3055866662",
+        "repoId": "992779830",
+        "parentId": "3216238074",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-10T06:46:13Z",
+        "updatedAt": "2025-07-10T06:46:13Z",
+        "body": "היי עומרי, אחלה עבודה.\r\nאין לי הערות ספציפיות על הקוד.\r\nהייתי בודק האם יש דברים מובנים בDOCSY שיכולים לעבוד במקום ההגדרות הספציפיות שבנית בCSS, אני תמיד בעד להשתמש בדברים גנריים מאשר להשתמש בקוד ייחודי.\r\n\r\nלגבי התוכן, אשמח לקצת שיפורים-\r\nא. צריך שיופיע שם המשתמש המלא ולא התיוג שלו בגיטהאב, יש מצב שאנחנו לא מקבלים כרגע את המידע הזה מהשרת.\r\nב. אני בעד ששם המשתמש וכמות התרומות שלו יופיעו באמצע התא בטבלה ולא למעלה, אני בעד אמצע גם מבחינת גובה וגם מבחינת רוחב.\r\nג. מידע נוסף שכדאי להוסיף זה כמות הפרוייקטים בהם השתתף כל אחד.\r\n\r\n\r\nמה דעתך?\r\n\r\nועוד הסבר לגבי עבודה עם פול-ריקווסט, ברגע שאתה עושה קומיט בבראנץ' שאתה עובד עליו, זה מעדכן פה את הפול ריקווסט.\r\nאז מה שצריך לעשות כדי להתקדם זה פשוט שתמשיך לכתוב את הקוד ותעשה קומיטים."
+      },
+      {
+        "commentId": "3060832505",
+        "repoId": "992779830",
+        "parentId": "3216238074",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-11T06:43:04Z",
+        "updatedAt": "2025-07-11T06:43:04Z",
+        "body": "for issue #20 "
+      },
+      {
+        "commentId": "3060946348",
+        "repoId": "992779830",
+        "parentId": "3216238074",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-11T07:17:16Z",
+        "updatedAt": "2025-07-11T07:17:16Z",
+        "body": "היי @Omrist12 \r\nאשמח אם תוכל לכתוב מה התוכנית שלך להמשך הפיתוח של צד הפרונטאנד של הפיצ'ר.\r\nבינתיים קישור לתצוגה של הקומיט האחרון:\r\nhttps://deploy-preview-32--maakaf.netlify.app/he/members/"
+      },
+      {
+        "commentId": "3064682495",
+        "repoId": "992779830",
+        "parentId": "3216238074",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-12T04:55:30Z",
+        "updatedAt": "2025-07-12T04:55:30Z",
+        "body": "> היי @UrielOfir הרעיונות העיקריים לתוספות מבחינתי הם:\r\n> \r\n> * פילטור לפי פרויקט - לאפשר לחפש משתתפים בפרויקט מסוים.\r\n> * הוספת אווטר בגיטהאב לטבלה - לשיפור תצוגה חזיתית.\r\n> * שדרוג אפשרויות תצוגה - הוספת אופציות לכמות שורות בתצוגה.\r\n> \r\n> אשמח לשמוע על רעיונות נוספים.\r\n\r\n- איך יהיה הפילטור לפי פרוייקטים? להבנתי זה טבלה חדשה, לא ברור לי איך זה יעבוד בטבלה של חברי הקהילה.\r\n- אווטר זה מעולה.\r\n-לא הבנתי מה זה להוסיף כמה שורות.\r\n\r\nמשהו כללי שחשבתי עליו שאנחנו לא רוצים שבתא אחד יהיה יותר מאשר מידע על משהו אחד.\r\nכלומר מה שכרגע נמצא בDetails יותר נכון לפרק לטורים נפרדים על כל אחד מהפרמטרים: קומיטים, PRs, אישויים וכו'.\r\n\r\nאם אתה בעניין יש עוד דברים לעשות בפרונט:\r\nלשפר את הסקריפט באופן כללי,\r\nלבנות את רשימת חברי הקהילה בקובץ נפרד ממנו הסקריפט לוקח את המערך של החברים ושולח לבקאנד,\r\nלכתוב הסבר איך להוסיף את עצמך לרשימה של חברי הקהילה שאנחנו מוציאים את המידע שלהם מגיטהאב.\r\n\r\nהייתי חוקר מה שיטת העבודה הנכונה כדי לשמור על אחידות בין הפרונט לבק, איך עושים את זה כמה שיותר אוטומטי שהJSON שהפרונט מצפה לקבל יהיה תואם לJSON שהבקאנד שולח.\r\nבטח יש מערכת שמאפשרת לעשות התאמה כזו ומתריעה אם יש פער.\r\n\r\nאשמח לשמוע מה אתה חושב."
+      },
+      {
+        "commentId": "3067011743",
+        "repoId": "992779830",
+        "parentId": "3216238074",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-13T12:13:18Z",
+        "updatedAt": "2025-07-13T12:13:18Z",
+        "body": "@Omrist12 \r\nהכי קריטי לי זה שלא יהיה בתא אחד יותר מאשר מידע אחד. הטור של Details הוא בעייתי לדעתי.\r\n\r\nלגבי פרוייקטים, כרגע אדם אחד יכול לתרום לכמה פרוייקטים, ואם אנחנו לא פותחים לכל פרוייקט שורה, מה שאומר שלאדם אחד יהיו כמה שורות, אז איך אנחנו מאגדים ומציגים על אותה טבלה את הפרוייקטים, לא ממש הצלחתי להבין.\r\n\r\npagination\r\nזה מועיל אבל עדיין לא קריטי במצב הנוכחי של הפיצ'ר, לא אמור להיות כמות גדולה של שורות בשלב ההתחלתי."
+      },
+      {
+        "commentId": "3074718657",
+        "repoId": "992779830",
+        "parentId": "3233193521",
+        "parentType": "Issue",
+        "authorUserId": "219325371",
+        "createdAt": "2025-07-15T17:57:45Z",
+        "updatedAt": "2025-07-15T17:57:45Z",
+        "body": "Join issue attempt."
+      },
+      {
+        "commentId": "3092258321",
+        "repoId": "153179091",
+        "parentId": "3245189949",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:37:59Z",
+        "updatedAt": "2025-07-19T10:37:59Z",
+        "body": "sorry. mistake :)"
+      },
+      {
+        "commentId": "3092522246",
+        "repoId": "992779830",
+        "parentId": "3245557233",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T19:12:18Z",
+        "updatedAt": "2025-07-19T19:12:18Z",
+        "body": "נצטרך לחקור למה הוא לא זיהה את הפעילות שלך"
+      },
+      {
+        "commentId": "3102578997",
+        "repoId": "1007869267",
+        "parentId": "3248945340",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-22T12:49:07Z",
+        "updatedAt": "2025-07-22T12:49:07Z",
+        "body": "אני מבין נכון שזה התוצאה?\r\n<img width=\"830\" height=\"548\" alt=\"image\" src=\"https://github.com/user-attachments/assets/ea426179-f4de-4751-b2b7-1653527aa2c8\" />\r\n\r\n"
+      },
+      {
+        "commentId": "3106380810",
+        "repoId": "1007869267",
+        "parentId": "3248945340",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T08:02:41Z",
+        "updatedAt": "2025-07-23T08:02:41Z",
+        "body": "הכוונה היא לטיפול יותר מעמיק.\r\nחשבתי על חיבור לספרייה שנותנת תצוגה ללוגים בווב.\r\nיש קובץ לוגים שאוסף את המידע טוב ואפשר להסתכל בו, אבל יהיה שדרוג רציני אם תהיה תצוגה ממש טובה.\r\n\r\n\r\nוצעד יותר מתקדם זה לטפל בלוגים בפרודקשן.\r\nאנחנו מריצים את הפרוייקט עם railway.\r\nאם אתה רוצה להיכנס לך אתן לך הרשאה שתוכל להיכנס למערכת פרודקשן."
+      },
+      {
+        "commentId": "3111952308",
+        "repoId": "1007869267",
+        "parentId": "3248945340",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-24T04:50:03Z",
+        "updatedAt": "2025-07-24T04:50:03Z",
+        "body": "אענה בדיסקורד "
+      },
+      {
+        "commentId": "3113063075",
+        "repoId": "992779830",
+        "parentId": "3258942047",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-24T11:15:07Z",
+        "updatedAt": "2025-07-24T11:15:07Z",
+        "body": "אתה יכול לעשות שהפול ריקווסט ישנה רק את הקובץ של fetch-data?"
+      },
+      {
+        "commentId": "3121462793",
+        "repoId": "992779830",
+        "parentId": "3265298679",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T07:45:35Z",
+        "updatedAt": "2025-07-26T07:45:47Z",
+        "body": "נראה סבבה,\r\nיש בעיה באזור אחר בקוד.\r\nברגע שהאתר יעלה באופן תקין זה יעלה עם הפוסט שלך"
+      },
+      {
+        "commentId": "3121489921",
+        "repoId": "992779830",
+        "parentId": "3258942047",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T08:21:21Z",
+        "updatedAt": "2025-07-26T08:21:21Z",
+        "body": "הקוד נראה לי סבבה\r\nיצא שאתה עשית שינויים ביחס לקובץ github_data.json\r\n\r\nמה שצריך שתעשה זה שתיקח את הקובץ הכי מעודכן שיש עכשיו בבראנץ' main ותשים אותו אצלך,\r\nואז לא יהיה הבדל בין מה שאתה שולח לבין מה שיש בבראנץ', לא יהיה קונפליט ונוכל למרג'ג'.\r\n\r\nתודה על העבודה המעולה!"
+      },
+      {
+        "commentId": "3121656636",
+        "repoId": "992779830",
+        "parentId": "3258942047",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T11:32:02Z",
+        "updatedAt": "2025-07-26T11:32:02Z",
+        "body": "הצלחתי להתגבר על הקטע שנתקע עם github_data.json\r\n\r\nתודה על שיפור הקוד!"
+      },
+      {
+        "commentId": "3151100922",
+        "repoId": "992779830",
+        "parentId": "3289333161",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-04T14:48:41Z",
+        "updatedAt": "2025-08-04T14:48:41Z",
+        "body": "בואי נעשה את המרג' כשתהיה ריצה מקומית תקינה אצלך."
+      },
+      {
+        "commentId": "3155386320",
+        "repoId": "992779830",
+        "parentId": "3292885918",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-05T14:06:35Z",
+        "updatedAt": "2025-08-05T14:06:35Z",
+        "body": "תודה אורנית על התיקון!"
+      },
+      {
+        "commentId": "3178469262",
+        "repoId": "992779830",
+        "parentId": "3289343291",
+        "parentType": "Issue",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-12T09:15:16Z",
+        "updatedAt": "2025-08-12T09:15:16Z",
+        "body": "Hi, can you assign me to this issue? @UrielOfir "
+      },
+      {
+        "commentId": "3194294554",
+        "repoId": "992779830",
+        "parentId": "3321900448",
+        "parentType": "Issue",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-17T10:31:40Z",
+        "updatedAt": "2025-08-17T10:31:40Z",
+        "body": "Hi Roy, I've committed changes to my fix, removed the use of \"important\" statements and fixed the bug using alternative css commands. What do you think?"
+      },
+      {
+        "commentId": "3194302382",
+        "repoId": "992779830",
+        "parentId": "3321900448",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-17T10:48:39Z",
+        "updatedAt": "2025-08-17T10:48:39Z",
+        "body": "נראה לי מספיק טוב.\nאני ממרג'ג'.\n\n@RoyTennenbaum אשמח גם לחוות הדעת שלך."
+      },
+      {
+        "commentId": "3199058062",
+        "repoId": "992779830",
+        "parentId": "3331609228",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-19T03:07:25Z",
+        "updatedAt": "2025-08-19T03:07:25Z",
+        "body": "כפי שדיברנו נעשה תיאום עם בר ולידור כדי לשלב קוד חדש באופן מסודר."
+      },
+      {
+        "commentId": "3211800894",
+        "repoId": "1040346838",
+        "parentId": "3342306612",
+        "parentType": "Issue",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-21T19:18:36Z",
+        "updatedAt": "2025-08-21T19:18:36Z",
+        "body": "Merging."
+      },
+      {
+        "commentId": "2326502184",
+        "repoId": "1040346838",
+        "parentId": "3382659425",
+        "parentType": "PR",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-06T04:39:12Z",
+        "updatedAt": "2025-09-06T05:14:27Z",
+        "body": "Rate-limit handling\r\n* Don’t retry all 4xx. Only retry:\r\n1. network errors (no status)\r\n2. 5xx (500–599)\r\n3. rate-limit/abuse (403 with remaining===0 or 429 with Retry-After).\r\n* Don’t retry permanent errors like 401/404/403 (non–rate-limit).\r\n\r\nHeaders\r\n*I f Retry-After present then sleep that many seconds (+~250 ms buffer).\r\n* If X-RateLimit-Remaining === 0 and X-RateLimit-Reset present then sleep until reset (+~500 ms buffer).\r\n* Add jitter on exponential backoff for transient errors (avoids thundering herd).\r\n\r\nPagination\r\n* Wrapping octokit.paginate() in one retry means a failure on page N re-fetches from page 1. Bettersolution: use for await (const page of octokit.paginate.iterator()) and retry per page. this will help us to avoids wasted calls."
+      },
+      {
+        "commentId": "2326504925",
+        "repoId": "1040346838",
+        "parentId": "3382659425",
+        "parentType": "PR",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-06T04:42:15Z",
+        "updatedAt": "2025-09-06T05:14:27Z",
+        "body": "it might be useful to log how many rows were inserted per repo/event type, not just the repo count. it will help us  to monitor ingestion quality. "
+      },
+      {
+        "commentId": "2326525467",
+        "repoId": "1040346838",
+        "parentId": "3382659425",
+        "parentType": "PR",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-06T05:13:24Z",
+        "updatedAt": "2025-09-06T05:14:27Z",
+        "body": "I thought that the decision was that silver stays in the app and not in the DB.  you created these tables in the DB. \r\nSo I think we need to create TypeScript interfaces + zod schemas and keep Silver in memory:\r\n1. types.ts (TypeScript interfaces (DTOs)\r\n2. schema.ts (zod for validation),- this is optionally, we can leave it under a flag\r\n3. mappers.ts (bronze to silver logic),\r\n\r\nIf we do want Silver in the DB now, let’s call it out explicitly and add: FKs (repoId, authorUserId, polymorphic parent for comments), indexes (repoId, authorUserId, createdAt), enums/constraints (visibility, parentType), and proper migrations (no synchronize in prod). Otherwise lets proceed with in-app DTOs + mappers only.\r\n\r\n-------------------------------------------------------------------------------------------------------------\r\nThere is also issue with naming consistency (plural vs singular, and CreateAt vs createdAt - but I guess this is because I wrote it that way, so I should fix this). \r\n\r\nCommit.pushEventId: I noticed we don't save this field. I will add it to our task list and handle this so it will be available. \r\n\r\n\r\n\r\n"
+      },
+      {
+        "commentId": "3260868109",
+        "repoId": "992779830",
+        "parentId": "3388598708",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-06T05:13:54Z",
+        "updatedAt": "2025-09-06T05:13:54Z",
+        "body": "היי שמואל, תודה על התיקון :)\r\nהפיצ'ר של חברים ופעילות נמצא בבנייה, אז אני לא בטוח שהכנסת השם שלך לרשימה תוצג באתר באופן מיידי.\r\nמחכה להמשך הפעילות שלך בקהילה שלנו!"
+      },
+      {
+        "commentId": "3262203010",
+        "repoId": "992779830",
+        "parentId": "3390205070",
+        "parentType": "Issue",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-06T13:47:57Z",
+        "updatedAt": "2025-09-06T13:47:57Z",
+        "body": "תודה הראל :)"
+      }
+    ],
+    "commits": [
+      {
+        "commitId": "54a76efffebeba916f979523401931e9e9d1fdc6",
+        "repoId": "704479842",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-01T18:17:24Z",
+        "message": "הוספת פרוייקט מפתח.ישראל"
+      },
+      {
+        "commitId": "4f41444e791d3180e5cc47e07719f2c17e7d005b",
+        "repoId": "704479842",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T07:42:32Z",
+        "message": "remove emoji project and fix il-developer"
+      },
+      {
+        "commitId": "6eb899a627f8df61622275bcbcd9ae5d507e20bb",
+        "repoId": "704479842",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T07:52:59Z",
+        "message": "revert last commit"
+      },
+      {
+        "commitId": "aaea8a972c996d16fc5f675f4173bbbb123e9976",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T08:05:33Z",
+        "message": "first commit"
+      },
+      {
+        "commitId": "255010030ee8995a4ebe1f8981d4b1da27e1955c",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T08:09:58Z",
+        "message": "add package start scripts"
+      },
+      {
+        "commitId": "25c5320bbb9d7a8420c436640849ee8d3f77cd20",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T09:39:20Z",
+        "message": "first good run on my local host"
+      },
+      {
+        "commitId": "96c499747feaf18a7f43c6a148821b102d5e1663",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T09:55:12Z",
+        "message": "fix importing projects JSON"
+      },
+      {
+        "commitId": "e775b30c968fc9e35a76a445182c31f65a21599e",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T11:25:27Z",
+        "message": "add cors"
+      },
+      {
+        "commitId": "82a51c58bfba927278936b3686c1ad31b860cef0",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T11:28:24Z",
+        "message": "allow any origin in CORS"
+      },
+      {
+        "commitId": "31165698d310806b68ae05c1ccafaca498026715",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T14:31:26Z",
+        "message": "updateGist is working"
+      },
+      {
+        "commitId": "f7f69bc128a9c550aa8b8e503e6ca9e2fc8804e6",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T15:04:10Z",
+        "message": "update only after day without update"
+      },
+      {
+        "commitId": "cbe0caf066c2ebd1a87bff22835641082c62fbc9",
+        "repoId": "704479842",
+        "authorUserId": "30144878",
+        "createdAt": "2025-02-02T15:08:59Z",
+        "message": "get projects from projectsAPI"
+      },
+      {
+        "commitId": "eee6c251ebf9132e7d2dfebefe785cd6d2340634",
+        "repoId": "704479842",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-24T14:57:10Z",
+        "message": "start cleaning the projects list"
+      },
+      {
+        "commitId": "b271c7b79ea17b847ff921b17c83a35ac2121aed",
+        "repoId": "925971413",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-24T17:10:02Z",
+        "message": "Start clean the projects list"
+      },
+      {
+        "commitId": "a0c54a90aeba920217990f5003a5c7688aca73a9",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-24T17:59:28Z",
+        "message": "Upgrade to a new version of docsy"
+      },
+      {
+        "commitId": "e5e4cd82d4f89082cb974b233cb06658853accbc",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-25T04:55:37Z",
+        "message": "clean the people folder"
+      },
+      {
+        "commitId": "8b02ed7171443fb024d253997633104b1af28adf",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-27T04:03:32Z",
+        "message": "Revise personal history narrative for clarity and detail; add new sections for 2024 and 2025 milestones."
+      },
+      {
+        "commitId": "ab35c322688d19ff59f0932ccb51cc9e0427d318",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-27T04:11:32Z",
+        "message": "Refactor section blocks to lead blocks for consistency; update 2025 milestone details."
+      },
+      {
+        "commitId": "9ae3df8e74cc56162483f50187dcd5a1824b5967",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-27T13:28:59Z",
+        "message": "Update personal milestones for 2024 and 2025; adjust formatting and add new image."
+      },
+      {
+        "commitId": "97024a4d55e84b469de6d8320db67aa4e84f8d99",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-05-27T13:43:29Z",
+        "message": "Update site description and enable light/dark mode menu in configuration"
+      },
+      {
+        "commitId": "fe0af06ecad8692edcddc81776de19164bb323e9",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T05:34:13Z",
+        "message": "fix file name"
+      },
+      {
+        "commitId": "4f9e7b982943ed3073972e07f1f3847954f37174",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T05:40:56Z",
+        "message": "Add multiple personal README files for new contributors, restore them after they where deleted."
+      },
+      {
+        "commitId": "dff46157cc3952f460e7dbc31dceab9b3a11d759",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T05:45:47Z",
+        "message": "restore old files of people"
+      },
+      {
+        "commitId": "978f6ea077d89bb9d2dbf588924627e28b4315b4",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T05:46:00Z",
+        "message": "little fix"
+      },
+      {
+        "commitId": "bf44618c0c2538b751b074c7433a042995a3394e",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T05:47:39Z",
+        "message": "Fix LinkedIn link formatting in Meir Crombie's profile"
+      },
+      {
+        "commitId": "f99695c33d9cf9945c9b1111a4d06279d5596052",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T05:50:34Z",
+        "message": "delete problematic files"
+      },
+      {
+        "commitId": "a00fff9a64bd9b3142a1c30638bad03a6e513c59",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T05:53:07Z",
+        "message": "Delete more problematic files"
+      },
+      {
+        "commitId": "a3ee17560c1a524f0128de16419f07b09bb672bb",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T05:55:31Z",
+        "message": "delete another problematic file"
+      },
+      {
+        "commitId": "388ee83700d31d1eeb8f7affe02e6ef00448081d",
+        "repoId": "643453344",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T06:12:22Z",
+        "message": "remove Shaked's profile due to issues"
+      },
+      {
+        "commitId": "03f3841f366dc02cd04c7f87558f6935f665c63d",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T17:23:57Z",
+        "message": "Update dependabot.yml"
+      },
+      {
+        "commitId": "81e9bc35f86040e7d6390d2166c15abe96c44d55",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-07T21:18:57Z",
+        "message": "Merge pull request #34 from UrielOfir/dependabot/npm_and_yarn/hugo-extended-0.147.6\n\nBump hugo-extended from 0.147.5 to 0.147.6"
+      },
+      {
+        "commitId": "accc88d3a5c90d4c4d74793ab81b37cf1c9fd946",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-09T13:44:31Z",
+        "message": "Update footer links: remove social media and developer communication options; update GitHub link to personal repository."
+      },
+      {
+        "commitId": "bb1e98f8609eee5803dc2b61a11153099ed60c9e",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-13T12:30:01Z",
+        "message": "Merge pull request #35 from UrielOfir/dependabot/npm_and_yarn/hugo-extended-0.147.8\n\nBump hugo-extended from 0.147.6 to 0.147.8"
+      },
+      {
+        "commitId": "52f8914d140a197196da5d7bae3d8ad2ca17f2d2",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-14T20:30:04Z",
+        "message": "Add Google Analytics configuration to hugo.yaml for tracking"
+      },
+      {
+        "commitId": "4c26c6262cc8627060e7c8cb1152fb3c4922f8f7",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-14T20:30:06Z",
+        "message": "Merge branch 'main' of https://github.com/UrielOfir/personal-website into main"
+      },
+      {
+        "commitId": "b92605275c3a3ddd86fe4c55bc4713f2293d48bb",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-15T15:08:30Z",
+        "message": "Refactor Google Analytics configuration in hugo.yaml to nest under services"
+      },
+      {
+        "commitId": "5403e3d188f83a28723f81cdcaea4ddb6d97f086",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-15T15:41:43Z",
+        "message": "Refactor indentation for Google Analytics configuration in hugo.yaml"
+      },
+      {
+        "commitId": "f3567c118dbe26407462da5b342881b3c983c2af",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-17T14:05:11Z",
+        "message": "Add social media links to hugo.yaml footer, including YouTube, TikTok, Facebook, X, and Instagram profiles, while updating existing LinkedIn and GitHub links."
+      },
+      {
+        "commitId": "781026cc416dbacd63b1fc20255ca47416b190e8",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-24T06:56:29Z",
+        "message": "Remove the 'About Myself' section from the website, including all personal history and milestones previously documented in index.md."
+      },
+      {
+        "commitId": "5a313c2f4d8d284bed1d025bcf3000574694881a",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-24T16:53:12Z",
+        "message": "Initial commit"
+      },
+      {
+        "commitId": "441034ddd0940d6eae73d7daa57cc59320dcf5d0",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-24T17:05:25Z",
+        "message": "Update README.md to provide project overview, structure, getting started instructions, and contribution guidelines for the Ma'akaf Community Website Backend."
+      },
+      {
+        "commitId": "77ea593fbf3aac97251a1725b9f90714f1e84b93",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-24T17:07:52Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "2985a9daf27edb769492bb619bfef6e35afd4446",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-25T10:15:47Z",
+        "message": "Add COBOL and Mainframe section, update weights for existing sections"
+      },
+      {
+        "commitId": "eb3e63bc6214322900baa32fa8edc51582802fab",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-25T11:38:37Z",
+        "message": "Add first_step.md to document my journey as a COBOL developer on the mainframe, including insights, questions, and learning goals."
+      },
+      {
+        "commitId": "aeabf52a8772ab8b04ae2d3a58ba1c2c4155ca94",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-26T04:36:43Z",
+        "message": "Initialize NestJS backend with updated project structure, TypeScript configuration, and API documentation. Add .gitignore, package.json, and package-lock.json with necessary dependencies. Remove outdated README and community members configuration."
+      },
+      {
+        "commitId": "1af7b7bda09430fd3d462a07196c8fe53316209e",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-26T15:59:22Z",
+        "message": "Update package.json and package-lock.json to add new dependencies: @nestjs/axios, @nestjs/config, class-transformer, and class-validator, ensuring compatibility with the latest NestJS framework."
+      },
+      {
+        "commitId": "ea225feec718bdefbd36510c051fed27099489e5",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-26T16:17:32Z",
+        "message": "Add GithubController to handle user data retrieval from GitHub API and update package dependencies for axios and or"
+      },
+      {
+        "commitId": "3ee0932f1910c7853fbcd77f85f86e939d542434",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-26T16:24:49Z",
+        "message": "Add POST endpoint in GithubController to fetch multiple GitHub user details and create GithubUsersDto for request validation. Enable global validation pipe in main.ts for improved data handling."
+      },
+      {
+        "commitId": "b04aefcb3146a89b24f5d762c739f7a30803d3eb",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-26T16:40:18Z",
+        "message": "Remove AppController and its associated endpoint, and clean up GithubController by removing the unused GET endpoint for user retrieval."
+      },
+      {
+        "commitId": "e2fdad4987288eb718540acc2e2a1ee8200f2016",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T04:16:27Z",
+        "message": "Add GithubActivityService to handle user activity retrieval from GitHub API and refactor GithubController to utilize this service for fetching user activity data."
+      },
+      {
+        "commitId": "2006abfe0df33d2207fc9aec985a71230fc88cdd",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T04:23:45Z",
+        "message": "Refactor GithubActivityService to improve repository activity filtering by changing contributor count checks to fork count. Update GraphQL queries to include author information for pull requests and issues, enhancing user activity tracking."
+      },
+      {
+        "commitId": "0817403ce0c165c17f1047a649cf5ba10922f9cc",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T06:41:42Z",
+        "message": "Enhance logging and user activity tracking by integrating Winston for logging in the application. Update package dependencies to include nest-winston and winston, and refactor GithubActivityService to improve activity data retrieval from GitHub API."
+      },
+      {
+        "commitId": "8a7eb158c35017ed14708d8934952a2d6b59c23c",
+        "repoId": "456416341",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:26:28Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "35571d8b96d65caa6bc603dd4881ed604e5699ff",
+        "repoId": "456416341",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:27:38Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "d928b61534ed993609c6783c6d9fb92606259d27",
+        "repoId": "456416341",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:29:27Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "dd96c6dae597ae487b0c6568c8ebaf7f72142bd8",
+        "repoId": "456416341",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:30:39Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "a63f521f4edf7ed92677e228f65d0121c163b546",
+        "repoId": "456416341",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:31:34Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "64b5cd413cebfbbb3e701448aaba0175e73aade9",
+        "repoId": "456416341",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:32:39Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "360b3c325613f3c80fe1255bb5ae8774fcc4db74",
+        "repoId": "456416341",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:33:16Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "010e3492c7e12d520aecf199aa44619e83905f0b",
+        "repoId": "456416341",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:34:42Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "c5553bb9c44bf9325c7c335de772167e052cdddb",
+        "repoId": "1009535098",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:37:50Z",
+        "message": "Initial commit"
+      },
+      {
+        "commitId": "24bb07e0b3a77bdff4ac87c04ede13f73c885a82",
+        "repoId": "1009535098",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:38:20Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "78dd85537d3ecd405a516ea4e6a8794574de23e8",
+        "repoId": "1009535098",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:41:26Z",
+        "message": "Create README.md"
+      },
+      {
+        "commitId": "58eadc1541465e43e11e2d772c893e2e309dff1a",
+        "repoId": "1009535098",
+        "authorUserId": "30144878",
+        "createdAt": "2025-06-27T09:41:51Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "dd5f0037e2c61805303bc662f78b7e9be7943e5b",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T05:58:52Z",
+        "message": "Rename getUsers method to getUsersData in GithubController for clarity and consistency in naming conventions."
+      },
+      {
+        "commitId": "805f66eec4e7aaf3db0f0b586223eb2eaa0119e9",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T06:11:37Z",
+        "message": "Add README.md to document the Maakaf Home Backend service, detailing its purpose, features, tech stack, installation instructions, API usage, and contribution guidelines."
+      },
+      {
+        "commitId": "f78f9b7e5522b4d7e267bca823e3434c67237036",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T11:35:59Z",
+        "message": "Update example in GithubUsersDto to reflect a specific user, changing from a generic list to ['urielofir'] for improved clarity in API documentation."
+      },
+      {
+        "commitId": "7ebc7a5c6df189f9ba1fccf85b5d528de9ee1c0f",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T12:25:25Z",
+        "message": "Refactor GithubActivityService for improved readability and maintainability by standardizing string quotes, enhancing error logging, and restructuring activity data retrieval logic. Update GithubUsersDto example to reflect a specific user for better API documentation clarity."
+      },
+      {
+        "commitId": "a2164e83fb12247f084205ff905233329a05fd2e",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T13:11:14Z",
+        "message": "Update @nestjs/axios dependency from version 3.0.2 to 4.0.0 in package.json and package-lock.json for improved functionality and compatibility."
+      },
+      {
+        "commitId": "6f57731e6662cd2c12cde437862eee177aead2f9",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-05T19:44:30Z",
+        "message": "Merge pull request #31 from Idosh3d/patch-1\n\nthe link for the tutorial series was wrong I replaced it with the rea…"
+      },
+      {
+        "commitId": "4d42c119dd089ad02fab25206ebf4e4b1b4222e3",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-06T06:36:19Z",
+        "message": "Update weight for 'Stop Misusing Open Source Contributions!' and add new document 'איך יצאתי מהבועה?' discussing personal growth and community building in open source."
+      },
+      {
+        "commitId": "164bac6b79195fbe49307f3332d0fabc96e5c3ef",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-06T06:42:27Z",
+        "message": "Update lo_techni.md to include a hyperlink to the latest podcast episode, enhancing accessibility and context for readers."
+      },
+      {
+        "commitId": "fe57c822f995ec480d1192705555dc84cadc12fc",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-06T07:12:21Z",
+        "message": "Update lo_techni.md to specify the episode number of the podcast, improving clarity and context for readers."
+      },
+      {
+        "commitId": "cddff07870338d594b469d5100e78df5817fa133",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-11T06:09:26Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "066d1e4d5b3b5435b9e50a6de9a5282c5f8201b4",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-12T14:18:32Z",
+        "message": "Create CODE_OF_CONDUCT.md"
+      },
+      {
+        "commitId": "6744dd953a1ac481dafa9593941045fa5970cd67",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-12T14:21:24Z",
+        "message": "Update CODE_OF_CONDUCT.md"
+      },
+      {
+        "commitId": "53122784825bb68439e147c2fec159699b2138af",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-13T04:45:51Z",
+        "message": "Refactor GithubActivityService to improve activity data handling by renaming variable for clarity and ensuring only repositories with recent activity are included in the results. This change enhances the logic for filtering repositories based on user activity in the last six months."
+      },
+      {
+        "commitId": "48aeb1229aa9ab7b21860c6d8e26661cb6c371a9",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-13T04:45:55Z",
+        "message": "Merge branch 'main' of github.com:Maakaf/maakaf_home_backend into main"
+      },
+      {
+        "commitId": "b186b97836b31674ac534e4a469d51694eb379a1",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-14T09:32:46Z",
+        "message": "feat: integrate MongoDB with Mongoose and add environment variable validation\n\n- Added @nestjs/mongoose and mongodb dependencies to package.json.\n- Created env.validation.ts for environment variable validation.\n- Removed old GithubActivityService and replaced it with a new implementation that integrates with MongoDB.\n- Implemented Comment, Commit, Issue, and PullRequest schemas with Mongoose.\n- Created services for handling comments, commits, issues, and pull requests.\n- Added GithubController to handle user activity requests.\n- Updated main.ts to include Mongoose connection and environment validation.\n- Implemented bulk upsert functionality for comments, commits, issues, and pull requests.\n- Added Swagger documentation for Github user data retrieval."
+      },
+      {
+        "commitId": "3de41abf1dc2c594de23d3cc32ff3069b98cc47d",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-14T09:41:43Z",
+        "message": "refactor: optimize activity data retrieval by consolidating cached data checks and improving parallel processing of user activity types"
+      },
+      {
+        "commitId": "4b40c8426668705825e5fdda284b6670dc4f7fd6",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-14T10:12:55Z",
+        "message": "fix: update commit identifier from 'sha' to 'oid' for consistency with GitHub API"
+      },
+      {
+        "commitId": "94c7111ca8e67a993b76fb30f7d6b53703f331c5",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-14T10:54:53Z",
+        "message": "feat: implement application configuration service and health check controller"
+      },
+      {
+        "commitId": "b4e0163c122675bd363510c96bb0069b6cf82e8a",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-14T11:06:39Z",
+        "message": "refactor: remove unused commit endpoints and streamline commits service"
+      },
+      {
+        "commitId": "3f391f9415ee1b5144a91aaf82f86a92e39ed103",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-14T11:39:42Z",
+        "message": "feat: add user profiles service and schema for GitHub user data management"
+      },
+      {
+        "commitId": "c0c11bbfbc067936f9dccce2a5678ef3e78bdbde",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-14T14:24:00Z",
+        "message": "feat: enhance GitHub activity service with comprehensive user activity tracking and caching\n\n- Updated package.json to include Jest for testing and added related scripts.\n- Refactored GithubActivityService tests to improve mocking and coverage.\n- Implemented detailed global summary calculation in GithubActivityService.\n- Enhanced error handling for GitHub API responses in getUserActivity method.\n- Improved caching logic for user profiles and activity data.\n- Updated GithubController to log the correct number of users returned."
+      },
+      {
+        "commitId": "3732876fdc7e306097f9d94d7ab46a0e008d33a1",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-15T07:37:15Z",
+        "message": "Merge pull request #35 from Maakaf/dependabot/npm_and_yarn/hugo-extended-0.148.1\n\nBump hugo-extended from 0.147.9 to 0.148.1"
+      },
+      {
+        "commitId": "c5e3b464fe157f06abe1ea18731f285083b5e831",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-15T07:39:54Z",
+        "message": "Merge pull request #37 from UrielOfir/dependabot/npm_and_yarn/hugo-extended-0.148.1\n\nBump hugo-extended from 0.147.8 to 0.148.1"
+      },
+      {
+        "commitId": "093c85c7fe4a81f7ed6e3ee34301512596c3411b",
+        "repoId": "1020847107",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-16T13:37:34Z",
+        "message": "feat: Initialize Playwright AI Agent with setup script and showcase examples\n\n- Added package.json for project dependencies and scripts\n- Created setup.sh for environment setup and dependency installation\n- Implemented showcase.js demonstrating various Playwright capabilities\n- Developed simple-demo.js for basic browser automation examples\n- Added test.js for testing Playwright AI functionalities\n- Introduced utils/BrowserUtils.js for reusable browser utility functions"
+      },
+      {
+        "commitId": "24ab12d9c33fc19bcc99ce6bb3b854c94d64a865",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-18T11:31:15Z",
+        "message": "Add YouTube channel and Meetup links to the homepage"
+      },
+      {
+        "commitId": "3eb3f15b277aa149e5f1f78b159852754e0aad55",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:27:47Z",
+        "message": "feat: enhance contributors table with improved search functionality and user details display"
+      },
+      {
+        "commitId": "35f96a24898861e2f3e07bceccd12f27a7f88e02",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:29:46Z",
+        "message": "feat: update contributors table by removing total column and enhancing sorting logic for contributions"
+      },
+      {
+        "commitId": "92f3eec1ffa424eb4b34fc683c9966fc5f9dfde1",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:40:06Z",
+        "message": "Merge branch 'main' into get_github_data"
+      },
+      {
+        "commitId": "ff254a75c896e973e7664ae7a33de550dd2ca1b3",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:48:58Z",
+        "message": "feat: simplify search controls and enhance sorting functionality in contributors table"
+      },
+      {
+        "commitId": "c15511cae04eec28896bf412fc9c0a74c6e4c1d5",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:49:04Z",
+        "message": "feat: add github data file for user contributions and repository summaries"
+      },
+      {
+        "commitId": "1c8afa9747e7c3053c667d57135c33770a35bd34",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T10:50:24Z",
+        "message": "Merge branch 'get_github_data' of github.com:Maakaf/maakaf_home into get_github_data"
+      },
+      {
+        "commitId": "564a1e18363f649b84bc9c02cf060658e8898a74",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T11:30:50Z",
+        "message": "feat: enhance members page with dynamic content and improved search functionality"
+      },
+      {
+        "commitId": "68623eee2d4cb585b6e6b19e97e9c15e0927deb3",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T11:45:38Z",
+        "message": "feat: add dynamic labels and improve community summary display in members page"
+      },
+      {
+        "commitId": "7fbd5f92770083a32d5f0429385f9cea956a572f",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T11:54:23Z",
+        "message": "feat: migrate configuration from .env to config.json and enhance members page with development notices and profile addition instructions"
+      },
+      {
+        "commitId": "6380172ef50365c3804adb5b387b3b4e34e38df9",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T11:55:47Z",
+        "message": "feat: remove total column from members table and related calculations"
+      },
+      {
+        "commitId": "19266ff6bb8ab699a08cce1ebae286d5d9f86ac1",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T12:57:20Z",
+        "message": "feat: enhance sortable table headers with improved styles and dark theme support"
+      },
+      {
+        "commitId": "c2a64a4da4892c7e5ff797837582db5e6486b980",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T13:01:07Z",
+        "message": "Merge pull request #41 from Maakaf/get_github_data\n\nGet GitHub data"
+      },
+      {
+        "commitId": "6d6d0d1a34ce76bba59b3cf1390ca6a1f66cd2a3",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T15:30:03Z",
+        "message": "feat: add table information section with title and description to members page"
+      },
+      {
+        "commitId": "093920865c97c65d0c5a3a0f5bb4b9e9283d123f",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T18:14:17Z",
+        "message": "feat: enhance GitHub and health controllers with detailed API documentation and response DTOs"
+      },
+      {
+        "commitId": "c4c2d91ee8202a48634c836e37cb1ecb982fffaf",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-19T19:12:33Z",
+        "message": "Merge pull request #42 from moshe-stein24/patch-1\n\nUpdate config.json"
+      },
+      {
+        "commitId": "a1a112d0e2f7432802e01a234fa2f83f7bf7f30d",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-22T14:59:43Z",
+        "message": "Add Giscus comments integration and update various markdown files to include comment sections"
+      },
+      {
+        "commitId": "cb9b88decbc3e0cab8705f8bbc23e077ad0104ec",
+        "repoId": "1024855676",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T10:51:23Z",
+        "message": "feat: Add main JavaScript file for Banking Modernization Report\n\n- Implemented strategy management for cloud migration strategies including rehost, replatform, refactor, rebuild, retire, and retain.\n- Developed vendor management to display information about major cloud vendors (AWS, IBM, Google Cloud, Azure, Micro Focus).\n- Created utility functions for debouncing and screen reader announcements.\n- Integrated chart management for benefits and maintenance cost visualization using Chart.js.\n- Added animation management for section fade-in effects on scroll.\n- Implemented smooth scrolling and active section highlighting in navigation."
+      },
+      {
+        "commitId": "01acddea1d5f086a4be5478c42e32fcd7046cb8d",
+        "repoId": "1024855676",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T11:11:33Z",
+        "message": "refactor: Remove legacy HTML structure and update meta description for SEO"
+      },
+      {
+        "commitId": "73ac2d1ab36365e8d5bba599b2ff4965945eaef0",
+        "repoId": "1024855676",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T11:42:46Z",
+        "message": "Add full research report on core banking modernization and update index for navigation\n\n- Created a new HTML file 'article_ChatGPT.html' containing a comprehensive analysis of core banking system modernization strategies, including case studies, vendor comparisons, and regulatory context.\n- Updated 'index.html' to include a link to the new analysis, enhancing user navigation and access to detailed insights."
+      },
+      {
+        "commitId": "23e99d6102fde13d8966a32c9f254875afd7ba9e",
+        "repoId": "1024855676",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T12:02:53Z",
+        "message": "Update button labels for ChatGPT and Gemini articles in index.html"
+      },
+      {
+        "commitId": "de8710101dd5d022cf6ad2a8b6faf68c8ed99a0d",
+        "repoId": "1024855676",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T12:11:00Z",
+        "message": "refactor: Remove Cost & ROI Analysis section from index.html"
+      },
+      {
+        "commitId": "0f9ca86885478194cbc252739ead07ea91d4edba",
+        "repoId": "1024855676",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T12:30:37Z",
+        "message": "fix comments in the article"
+      },
+      {
+        "commitId": "1e09b6840792401c36873b9a930778541a17aaee",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T14:21:54Z",
+        "message": "fix: update language setting in Giscus comments to Hebrew"
+      },
+      {
+        "commitId": "951767099bb6e580dad0aac1d075799eebd2fe92",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-23T14:34:54Z",
+        "message": "feat: add feature update documentation for community members page"
+      },
+      {
+        "commitId": "3422b55cc7985b40eb89764e9744ef78cd8fe2a9",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T07:45:55Z",
+        "message": "Merge pull request #45 from krasnoff/main\n\nnew blog post -- kobi krasnoff post about AI"
+      },
+      {
+        "commitId": "d5b1f2306c09364c7f4c3407e2a2bfe04a85175b",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T07:47:22Z",
+        "message": "feat: update user data and add new user to GitHub data"
+      },
+      {
+        "commitId": "4b269a8a690600839d5bd7af3ad7008a6b12e597",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T07:59:32Z",
+        "message": "feat: add comments section to feature updates and new AI application blog posts"
+      },
+      {
+        "commitId": "0287b0d6acf78635e339d1d1bb9c8bec863b3ff2",
+        "repoId": "1007869267",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T08:07:36Z",
+        "message": "feat: update API documentation with production server URL and correct contact information"
+      },
+      {
+        "commitId": "68b4733e70db21f25ccbf5fb55a6f170fdc2a417",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T11:30:22Z",
+        "message": "Update fetch-data.ts and github data before merge"
+      },
+      {
+        "commitId": "b097fbea930c4a92927a2d7ebdca880ed0c66e89",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-26T11:31:06Z",
+        "message": "Merge branch 'temp-merge'"
+      },
+      {
+        "commitId": "b5891b481339b4a4d8de429c2d5a1854108c347e",
+        "repoId": "1027097156",
+        "authorUserId": "33284345",
+        "createdAt": "2025-07-27T10:02:38Z",
+        "message": "Add files via upload"
+      },
+      {
+        "commitId": "d2b8765318de3a1363f2747c5239b77ee4c93299",
+        "repoId": "1027097156",
+        "authorUserId": "33284345",
+        "createdAt": "2025-07-27T10:05:58Z",
+        "message": "Create README.md\n\nCreated ReadMe file"
+      },
+      {
+        "commitId": "e4a6c73c119557d8d7e59160a3f573a854881c9f",
+        "repoId": "1027097156",
+        "authorUserId": "33284345",
+        "createdAt": "2025-07-27T10:06:26Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "11c04728f14a9b133e8d7b8388a9d201f527b726",
+        "repoId": "1027097156",
+        "authorUserId": "33284345",
+        "createdAt": "2025-07-27T10:12:24Z",
+        "message": "Delete requirements.md"
+      },
+      {
+        "commitId": "99f6a372b9c13e8224d61094ff28023e64bb425a",
+        "repoId": "1027097156",
+        "authorUserId": "33284345",
+        "createdAt": "2025-07-27T10:12:49Z",
+        "message": "Update and rename requirements_V2.md to requirements.md"
+      },
+      {
+        "commitId": "a4045955a489f4c6428657116f145fa04d0426c7",
+        "repoId": "1027097156",
+        "authorUserId": "33284345",
+        "createdAt": "2025-07-27T10:14:07Z",
+        "message": "Update requirements.md"
+      },
+      {
+        "commitId": "8161992f347a9f2343bc0684164ae9636af0b28a",
+        "repoId": "1027097156",
+        "authorUserId": "33284345",
+        "createdAt": "2025-07-27T13:59:41Z",
+        "message": "Add files via upload\n\nupdated design file"
+      },
+      {
+        "commitId": "48d371a370af1a08cf74665a5c2467d13de7ae34",
+        "repoId": "1027097156",
+        "authorUserId": "33284345",
+        "createdAt": "2025-07-28T05:42:29Z",
+        "message": "Update design_V2.md\n\nadded Iterative Human-in-the-Loop Resolution"
+      },
+      {
+        "commitId": "9b6df642583024f89f19a67aae4789b482bdcddf",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-29T14:25:41Z",
+        "message": "feat: add slug fields to various markdown files for better URL structure"
+      },
+      {
+        "commitId": "bd0a9da738157a93cad2b1160e527bb3a8218c6e",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-30T06:47:21Z",
+        "message": "Merge pull request #39 from UrielOfir/dependabot/npm_and_yarn/cross-env-10.0.0\n\nBump cross-env from 7.0.3 to 10.0.0"
+      },
+      {
+        "commitId": "48a5d647c2e0fa652d103ce15d80006a6c3ed362",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-30T06:47:52Z",
+        "message": "Merge pull request #47 from Maakaf/dependabot/npm_and_yarn/hugo-extended-0.148.2\n\nBump hugo-extended from 0.148.1 to 0.148.2"
+      },
+      {
+        "commitId": "b41f7058b725798032511623275e8c9fcbf77295",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-30T07:17:06Z",
+        "message": "Merge pull request #46 from Maakaf/dependabot/npm_and_yarn/cross-env-10.0.0\n\nBump cross-env from 7.0.3 to 10.0.0"
+      },
+      {
+        "commitId": "149a683db73bdfb086fc1b1e6d09a27086827a5e",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-30T07:17:33Z",
+        "message": "Merge pull request #38 from UrielOfir/dependabot/npm_and_yarn/hugo-extended-0.148.2\n\nBump hugo-extended from 0.148.1 to 0.148.2"
+      },
+      {
+        "commitId": "7c4e0a94464472a83c4cc076b6140ffb1a3843ec",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-07-31T14:18:34Z",
+        "message": "feat: add July 2025 community summary with updates on activities and events"
+      },
+      {
+        "commitId": "13234bb313633d029e7fddc06fcbda800b50c58f",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-01T14:45:53Z",
+        "message": "Add Telegram link to footer social media section"
+      },
+      {
+        "commitId": "4f0e3ad571b262153a04e302fdb16aaa63f14aad",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-01T14:53:31Z",
+        "message": "Add blog post on the significance of Tisha B'Av and Independence Day"
+      },
+      {
+        "commitId": "b340edb5ad7aea7fe461205e7f23f15b55a6041c",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-01T15:27:59Z",
+        "message": "feat: update community registration links and add registration page"
+      },
+      {
+        "commitId": "fd0039f62e5b161bea5f26bb8b5175a21986c1bc",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T03:09:09Z",
+        "message": "feat: add GitHub Copilot instructions for Docsy Hugo website"
+      },
+      {
+        "commitId": "c6a0421e989cb879459e184ddd203c76cc1c8b18",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T03:10:42Z",
+        "message": "fix: improve iframe styling for registration form"
+      },
+      {
+        "commitId": "214c337d5b21dfbac6541aa3da7e98c5a07228a0",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T03:35:34Z",
+        "message": "feat: add new guides for open source contributions and mentorship program"
+      },
+      {
+        "commitId": "16ba218545e59083607651d2fa458cb749389f60",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T03:39:16Z",
+        "message": "feat: update project links and add call-to-action for practice project"
+      },
+      {
+        "commitId": "8083348ff7613677c670e33906cc819404b199bd",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T05:53:14Z",
+        "message": "Add blog post on decision-making guidance for youth aged 18-30"
+      },
+      {
+        "commitId": "c2946706b3f4e799c98489d440686fe8b5eed317",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T05:53:49Z",
+        "message": "feat: update registration link to point to the new community registration page"
+      },
+      {
+        "commitId": "ba976a83d02fa92d340f54d47936a2eddd4f770f",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T05:55:10Z",
+        "message": "feat: add comprehensive GitHub Copilot instructions for Docsy Hugo website"
+      },
+      {
+        "commitId": "5183b094dcffbe7c20921af3523b9eb46def2b48",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T06:01:17Z",
+        "message": "Add GitHub Copilot instructions for Hugo configuration and best practices"
+      },
+      {
+        "commitId": "749c523ee9eda3869d95deb964165f6ea99eab28",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-02T06:06:38Z",
+        "message": "Add slugs and descriptions to Hebrew blog posts; update hugo.yaml to sanitize URLs"
+      },
+      {
+        "commitId": "652d857d09fcafdbbff0aca18e66eb1642f0dd83",
+        "repoId": "1031281650",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-03T12:13:17Z",
+        "message": "Add initial HTML structure and styles for the clinic website"
+      },
+      {
+        "commitId": "608b278ecb43607f6ca4c335248cf1880b51dd75",
+        "repoId": "1031684459",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-04T09:33:12Z",
+        "message": "fixed URL"
+      },
+      {
+        "commitId": "5bc2d21a7ee98cfb707088dc52148ef3ae6281db",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-04T10:07:10Z",
+        "message": "Merge pull request #49 from barlavi1/fix-how_to_start-URL\n\nfixed URL"
+      },
+      {
+        "commitId": "2e241534fdff622fba31d3d1dd850f37619d5e5e",
+        "repoId": "1031684459",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-04T12:47:44Z",
+        "message": "added my name to config.json"
+      },
+      {
+        "commitId": "d0fe0fcca46f3cc621931018781b7030e45178d4",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-05T13:47:53Z",
+        "message": "fix: comment out prebuild command in Netlify configuration"
+      },
+      {
+        "commitId": "1f1b4382e926a73fcf65273f81a02bbf20432f28",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-05T14:06:16Z",
+        "message": "Merge pull request #52 from ornitcg/main\n\nFix typo in Hebrew about page"
+      },
+      {
+        "commitId": "8c39c837d9911860865851aeaff64fb8d1dcd4c2",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-05T18:12:04Z",
+        "message": "Merge pull request #53 from supervxn/patch-1\n\nUpdate _index.md"
+      },
+      {
+        "commitId": "bde25a802eb9fb8575555407d4ba7fb945c5ddf3",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-06T07:45:11Z",
+        "message": "fix: update build command syntax in Netlify configuration"
+      },
+      {
+        "commitId": "73e462308a23b09b3c3f2c55e8020de5290bd591",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-06T07:47:45Z",
+        "message": "fix: correct build command syntax in Netlify configuration"
+      },
+      {
+        "commitId": "7562f64dc82898fba6158b36a4243068ed551d64",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-06T07:49:49Z",
+        "message": "fix: update build command syntax in Netlify configuration"
+      },
+      {
+        "commitId": "43a2da1059caf15d952c0f5d22aa76e6ece1d186",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-06T07:52:40Z",
+        "message": "fix: update title for contribution guide in Hebrew documentation"
+      },
+      {
+        "commitId": "8def300baef5303f80cb6b50061cc8d3aab766f8",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-06T07:52:47Z",
+        "message": "fix: update link title for community members page"
+      },
+      {
+        "commitId": "84c6851276a45ed834ef37236cf61c2766863e28",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-11T14:34:14Z",
+        "message": "Update _index.md"
+      },
+      {
+        "commitId": "0261e5ce6b1a8a41ca3cc694d503561b1afe764f",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-11T18:17:32Z",
+        "message": "Merge pull request #50 from barlavi1/add-my-name-to-json-file\n\nadded my name to config.json"
+      },
+      {
+        "commitId": "580ae5e7d7c35344835657432e2cc4f8d86379a7",
+        "repoId": "1036599861",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-12T10:30:40Z",
+        "message": "Add files via upload\n\nInitial Commit - Rick and Morty Project"
+      },
+      {
+        "commitId": "11dfce092eeec7cd1a996747bdc1f457f59338ae",
+        "repoId": "1036643903",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-12T11:37:30Z",
+        "message": "Create README.md"
+      },
+      {
+        "commitId": "eea392b8d37725aab0f3cca55c0faa233ed15afc",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-17T10:48:55Z",
+        "message": "Merge pull request #54 from Lidor57/Undesired-Horizontal-Scroll-On-Mobile\n\nFIX - Undesired Horizontal Scroll On Mobile"
+      },
+      {
+        "commitId": "0de2e932f595f768166e46f22c3300a74f26ca69",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-18T21:46:08Z",
+        "message": "Initial Commit: NestJS + Fastify setup"
+      },
+      {
+        "commitId": "df8608ab12f5648ac6d3efdd85c4d45776d43795",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-19T12:37:25Z",
+        "message": "Create DB schema: bronze + gold + migration + smoke script"
+      },
+      {
+        "commitId": "de9fa6416e1c8e9a32df6c7cc4c56d42610fca0f",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-19T14:53:46Z",
+        "message": "Create DB schema: added user profile table"
+      },
+      {
+        "commitId": "e96c138c8f03ac2da53ec5630bcb2fd10117695a",
+        "repoId": "107890515",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-21T03:12:32Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "86abb71be214f1bc8db6f954be37b7487acb683f",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-21T11:12:45Z",
+        "message": "Merge pull request #1 from barlavi1/CreateDBSchema\n\nCreate DB schema: bronze + gold + migration + smoke script"
+      },
+      {
+        "commitId": "85043af07bfd0d63264fb32103f5cbd0aee74b13",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-21T15:41:19Z",
+        "message": "Added github: controller, module, bronze-saver, service and modified package  and app.module in order to fetch raw data from github and insert it to bronze layer"
+      },
+      {
+        "commitId": "dfbc164240d669cc50a6f2fd01d5072f16adc70b",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-21T19:18:40Z",
+        "message": "Merge pull request #2 from barlavi1/AddBronzeLayer2DB\n\nAdded github: controller, module, bronze-saver, service and modified …"
+      },
+      {
+        "commitId": "44cfcde76540039e10e407001ca13f1cd3f158f0",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-22T05:51:49Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "22c523bf0e3afa6f5684b03d59cf498c3449d151",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-23T13:12:59Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "e444427128068457a4b5def455aa06ef7ca3d740",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-24T13:48:05Z",
+        "message": "added some error handling"
+      },
+      {
+        "commitId": "75b6fb475211113078a2757f478fe16f8d66dd14",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-25T12:40:58Z",
+        "message": "Added an option to call for repos by user (not by organization)"
+      },
+      {
+        "commitId": "717e8d7efeaa9b4ba4c5829ee1785cc2560d7e64",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-25T15:39:56Z",
+        "message": "Merge pull request #3 from barlavi1/AddBronzeLayer2DB\n\nadded some error handling"
+      },
+      {
+        "commitId": "e7e09ae61bc71d89ea12bb5813fed0fdef8722fe",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-26T14:51:52Z",
+        "message": "convert to esm"
+      },
+      {
+        "commitId": "02c259040e809cd8a9a55f76c21ed0f050d24c05",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-26T16:10:18Z",
+        "message": "Merge pull request #4 from barlavi1/chore/migrate-to-esm\n\nconvert to esm"
+      },
+      {
+        "commitId": "499b80076e102571d3770520d64afa277072da9e",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-26T16:36:39Z",
+        "message": "Merge pull request #5 from Maakaf/migrate-to-esm\n\nMigrate to esm - merge to main"
+      },
+      {
+        "commitId": "e0fb36521812407dc77f019346774477ae762812",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-27T07:06:06Z",
+        "message": "featire/bug-fix: accept users as JSON body and default since/until in GithubService"
+      },
+      {
+        "commitId": "83541de6be936453a726507442d980ad25bd8de5",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-27T07:25:07Z",
+        "message": "Merge pull request #6 from barlavi1/feature/user-list-in-json-body\n\nfeatire/bug-fix: accept users as JSON body and default since/until in…"
+      },
+      {
+        "commitId": "60c8318dc60e5ad67cd8760ed150455d2f22d034",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-27T12:18:05Z",
+        "message": "Merge pull request #7 from Maakaf/user-list-in-json\n\nUser list in json"
+      },
+      {
+        "commitId": "8d3fbc0a9efc2acea617d05a8658ecad23036e81",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-27T13:51:35Z",
+        "message": "fix redundancy"
+      },
+      {
+        "commitId": "1bb5b3aebccccea253f4ad29521e9cfc363d9954",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-30T05:28:59Z",
+        "message": "Merge pull request #56 from Maakaf/dependabot/npm_and_yarn/hugo-extended-0.149.0\n\nbuild(deps-dev): bump hugo-extended from 0.148.2 to 0.149.0"
+      },
+      {
+        "commitId": "bf9c84fa37e90f7925d6017c4fc893ed1088e35b",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-08-30T07:16:27Z",
+        "message": "feat: add AutoKitteh project to recommended projects list"
+      },
+      {
+        "commitId": "46899f552dc860efa016b4d0cc42e7b1665bd9a2",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-31T10:36:58Z",
+        "message": "Added swagger"
+      },
+      {
+        "commitId": "d6a487940d3e35d38eb21d7ea3f96edd5ca5c142",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-31T10:37:54Z",
+        "message": "Merge pull request #9 from barlavi1/add-swagger\n\nAdd swagger"
+      },
+      {
+        "commitId": "f9aca7b243e373bdcb20117c522390c3d11fd68d",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-31T12:18:57Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "6a288056bca3ab5a676c432f077feb7ecc2e4a21",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-08-31T12:21:30Z",
+        "message": "Update README.md"
+      },
+      {
+        "commitId": "50f7986b1d0f31c16d8f3849c42f51300bd34d80",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-31T16:08:53Z",
+        "message": "re-structured project to follow separate modules for each layer"
+      },
+      {
+        "commitId": "03c35cee53cd2d39060be67da4391d15f0a13d04",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-08-31T16:13:36Z",
+        "message": "Merge remote-tracking branch 'origin/main'\n\n# Conflicts:\n#\tsrc/bronzeLayer/bronze.controller.ts"
+      },
+      {
+        "commitId": "6f61dc8f9ba0e6d7c3bcd58a5798bc0267d505e4",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-01T05:29:08Z",
+        "message": "Merge pull request #11 from Lidor57/main\n\nRe-Structure of project"
+      },
+      {
+        "commitId": "b85d742aa8f9cb08945e24dd69c4b6972a0e1c49",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-04T08:16:23Z",
+        "message": "- Handled \"Feature: Handle GitHub API errors with retries and backoff\"\n- Handled \"Feature: Respect API rate limits (5000 req/hour)\"\n- Added logger to services."
+      },
+      {
+        "commitId": "4e4336687feb1c9479b6ef62a951410606f02fd2",
+        "repoId": "1045555145",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-05T12:00:24Z",
+        "message": "Added entities to silver layer, added service according to typeORM and nestJS ETL process"
+      },
+      {
+        "commitId": "70c76d5f563f69c5bfb470fad8bed24f6dbb49b0",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-06T05:14:02Z",
+        "message": "Merge pull request #58 from SamuraiPolix/main\n\nadded missing '/guides' to specific broken URLs"
+      },
+      {
+        "commitId": "6070f47077ad4976c48d9e855bc6ed2173ccf2a7",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-06T13:48:20Z",
+        "message": "Merge pull request #59 from c-vibe/patch-1\n\nCreate cvibe.md"
+      },
+      {
+        "commitId": "c4b606f2cef56e85560b18ce99aff5bdb315a18e",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-06T13:51:03Z",
+        "message": "add date and slug to post"
+      },
+      {
+        "commitId": "55116a41cc52d50eca86140b55e4b45643b8c0bc",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-06T13:59:20Z",
+        "message": "fix: update CVibe.md to enhance clarity and formatting"
+      },
+      {
+        "commitId": "a79ba67697ace0fb1c295085ac9d496eea6094c3",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-07T11:20:09Z",
+        "message": "🚀 אתר מנהלי קהילות טכנולוגיות - גרסה ראשונה\n\n✨ תכונות חדשות:\n- אתר בעברית עם תמיכה מלאה ב-RTL\n- 4 מאמרים מקצועיים בתחום ניהול קהילות\n- עיצוב מותאם לעברית עם פונטים מתאימים\n- תמיכה ב-GitHub Pages עם פריסה אוטומטית\n- מבנה SEO מתקדם עם sitemap ו-meta tags\n\n📝 תוכן:\n- מאמרים על טיפים לניהול קהילות\n- סקירת כלים מקצועיים\n- מדריכים לבניית מעורבות\n- עמודי מידע על הקהילה ויצירת קשר\n\n🛠️ טכנולוגיות:\n- Jekyll עם GitHub Pages\n- Minima theme עם התאמות Hebrew RTL\n- GitHub Actions לפריסה אוטומטית\n- תמיכה ב-SEO ו-Analytics"
+      },
+      {
+        "commitId": "68030e8adcbc5bc30bd055cc2ac6dc370539c46a",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-07T11:21:38Z",
+        "message": "🚀 הוספת קבצי הוראות להעלאה ל-GitHub Pages"
+      },
+      {
+        "commitId": "7a5427c7ea5d90905e3144fd92722bdb650690ac",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-07T12:01:55Z",
+        "message": "🗑️ הסרת קובץ פקודות להעלאה ל-GitHub Pages"
+      },
+      {
+        "commitId": "2200d6fd1ac804cf5084ff16dffe9f59a5d34949",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-07T12:12:25Z",
+        "message": "🚀 הוספת קובץ פקודות להעלאה ל-GitHub Pages ושדרוג תוכן באתר"
+      },
+      {
+        "commitId": "39ae5d042d980cdb04af8cb783ee82c45f90e32f",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-07T12:15:41Z",
+        "message": "🗑️ הסרת קובץ אודות קבוצת מנהלי הקהילות הטכנולוגיות"
+      },
+      {
+        "commitId": "bca4dd83ad5cce8354af443a4c42559b954a1d68",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-07T12:17:28Z",
+        "message": "🚀 עדכון שם המשתמש של GitHub ל-UrielOfir בקובץ ההגדרות"
+      },
+      {
+        "commitId": "732aefa2378d3f6048dfd5958e413e777d235d2e",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-07T12:32:48Z",
+        "message": "🗑️ הסרת מספר פוסטים ישנים מהאתר"
+      },
+      {
+        "commitId": "9ef971d1e784c4cc03b514066962f826f12de120",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-07T13:19:46Z",
+        "message": "🔧 תיקון תקלת Ruby/Bundler ב-GitHub Actions\n\n- עדכון Ruby מגרסה 3.1 ל-3.2 ב-workflow\n- עדכון Bundler לגרסה תואמת (2.5.0)\n- תיקון בעיית התאמה בין גרסאות Ruby ו-Bundler\n\nזה אמור לפתור את השגיאה:\nbundler-2.7.1 requires Ruby version >= 3.2.0"
+      },
+      {
+        "commitId": "ad3a88abef1124ef7ad07c169207c3d5e65225ea",
+        "repoId": "1052083068",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-08T04:14:06Z",
+        "message": "🚀 הוספת קישור לפוסט בלינקדין עם ניסוח אחר של התוכן"
+      },
+      {
+        "commitId": "d91368293a63176caedeecb96b5f86a3fece1dfe",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-09T04:22:07Z",
+        "message": "Merge pull request #41 from UrielOfir/dependabot/npm_and_yarn/hugo-extended-0.149.1\n\nBump hugo-extended from 0.148.2 to 0.149.1"
+      },
+      {
+        "commitId": "b6986ad4c155445c16dd8619bb634ed8b2a66362",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-09T04:23:09Z",
+        "message": "Merge pull request #60 from Maakaf/dependabot/npm_and_yarn/hugo-extended-0.149.1\n\nbuild(deps-dev): bump hugo-extended from 0.149.0 to 0.149.1"
+      },
+      {
+        "commitId": "01647d0f001946ce5ac5dfff31ab30dc360180ea",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-09T14:44:05Z",
+        "message": "Merge pull request #12 from Lidor57/main\n\nGithub API rate limits handle using seperate GithubClientService."
+      },
+      {
+        "commitId": "87838ca7c5d7d80221cc945e294a6e209f2ea92e",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-10T09:39:58Z",
+        "message": "Merge pull request #61 from Maakaf/dependabot/npm_and_yarn/hugo-extended-0.150.0\n\nbuild(deps-dev): bump hugo-extended from 0.149.1 to 0.150.0"
+      },
+      {
+        "commitId": "5906716430cd7afe6d74895b7c70cfd87bab2388",
+        "repoId": "698059874",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-10T09:40:16Z",
+        "message": "Merge pull request #42 from UrielOfir/dependabot/npm_and_yarn/hugo-extended-0.150.0\n\nBump hugo-extended from 0.149.1 to 0.150.0"
+      },
+      {
+        "commitId": "e07d11f08871fafae4c5d8fa602911109c78eaaa",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-10T12:43:35Z",
+        "message": "WIP"
+      },
+      {
+        "commitId": "2a9d3e89be89f07e7d0efe4e41f896267eba3b90",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-10T13:41:08Z",
+        "message": "WIP"
+      },
+      {
+        "commitId": "a1ddf4a29831566f3f14629293da5c47fef5ddbd",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-10T13:42:01Z",
+        "message": "Merge pull request #14 from barlavi1/CreateSilverLayer\n\nWIP\n\n1. Refactored by Uriel's suggestions (branch - uriel_run)\n2. Added logic for silver layer Issues and PRs.\n3. Added tests for silver layer Issues and PRs (to be deleted later?).\nnpm run test:issues\nnpm run test:prs"
+      },
+      {
+        "commitId": "3cea31ecdad3851233a030cfc43f1a4761849a33",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-11T09:54:09Z",
+        "message": "added comments and commits. User is not finished yet and will be changed in the next commit (data should be enriched from bronze)"
+      },
+      {
+        "commitId": "2dd5393412ebb0e13c94935cf22adbeb1d8eeb96",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-11T12:07:18Z",
+        "message": "Added Users & Repos tables to bronze. Added Repos table to gold. Fill Users & Repos tables in the bronze layer (Using GitHub API)"
+      },
+      {
+        "commitId": "3fc7a0dc3d53ba4d83c55e750cc0ee7f2978457f",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-11T18:38:40Z",
+        "message": "Merge pull request #16 from Lidor57/lidor_run\n\nmerging to lidor_run branch"
+      },
+      {
+        "commitId": "78f52df53a2c09f26c3858adcbea94367c47cdc6",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-12T11:35:52Z",
+        "message": "Finished with Silver ETL tables, ESM compatibility, and TypeScript errors"
+      },
+      {
+        "commitId": "752f0d7b2625b15122dc3b51f0af2e43d1121daa",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-12T11:41:58Z",
+        "message": "Resolve merge conflicts with lidor_run branch"
+      },
+      {
+        "commitId": "6ea160c622e5a22effebcd2edc1a5959131eb63f",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-12T12:31:48Z",
+        "message": "finished silver ETL and created orchestrator for it and tests"
+      },
+      {
+        "commitId": "30674e67a20337f21b1c569e740d7627b6ef34d0",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-12T12:35:03Z",
+        "message": "changed some notes"
+      },
+      {
+        "commitId": "f8791f24fd2d52a40e301600ff0084dd9e9f69f5",
+        "repoId": "1040346838",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-13T09:37:07Z",
+        "message": "Enhance README with detailed architecture overview and data flow"
+      },
+      {
+        "commitId": "e05035f59cfcf945067589e95381c3992d28ce4e",
+        "repoId": "1031684459",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-16T14:06:53Z",
+        "message": "added friends &  activity post"
+      },
+      {
+        "commitId": "67c4f9ac319f843d502e9b7c82ee4f3021c77810",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-16T14:31:59Z",
+        "message": "finished curated layer. Test missing"
+      },
+      {
+        "commitId": "9db999c4ed423a7ee28a5002051843f9699b40be",
+        "repoId": "1040346838",
+        "authorUserId": "219325371",
+        "createdAt": "2025-09-16T14:33:41Z",
+        "message": "Merge pull request #18 from Lidor57/analytics_development\n\nAnalytics development"
+      },
+      {
+        "commitId": "21121aed39702f4c7f431ac565e8a9e6e7a8c63a",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-17T04:13:57Z",
+        "message": "Merge pull request #62 from barlavi1/main\n\nadded friends &  activity post"
+      },
+      {
+        "commitId": "068ab0c350a46862a4c80fb5e2594914103c4cb7",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-17T04:32:27Z",
+        "message": "refactor: update weekly summary structure for \"Friends & Activity\" feature"
+      },
+      {
+        "commitId": "805e9f950458a8692e33097b1a9a9c5910640c33",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-17T04:40:20Z",
+        "message": "docs: add invitation to join feature development and Discord discussion channel"
+      },
+      {
+        "commitId": "685df2370158fe206c72abfea1dbfb957f47a9aa",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-17T05:28:01Z",
+        "message": "docs: add project repository link to \"Friends & Activity\" feature update"
+      },
+      {
+        "commitId": "c082cdb2247574a82e65586ea78175729d55db93",
+        "repoId": "992779830",
+        "authorUserId": "30144878",
+        "createdAt": "2025-09-17T05:38:47Z",
+        "message": "fix: correct formatting and bullet points in upcoming tasks section"
+      },
+      {
+        "commitId": "125bac6572ff6ac5226c61aa14348f7fe7e2a0fa",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-17T07:38:06Z",
+        "message": "WIP: Current work before merging analytics_development"
+      },
+      {
+        "commitId": "7eafab6252eb35dffdd6339f433f7f62303d75ec",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-17T07:38:45Z",
+        "message": "Merge analytics_development into bar_run"
+      },
+      {
+        "commitId": "6150dc68c965be2123fee70161bf693137ce5315",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-17T12:11:25Z",
+        "message": "implement analytics (gold) layer with full raw->silver->curated pipeline\n\n- Add NormalizedModule for proper dependency injection\n- Fix TypeORM entity column mappings (camelCase to snake_case)\n- Implement activity aggregation to prevent duplicate keys\n- Add upsert operations for curated data refresh\n- Integrate curated layer into existing ingest endpoint\n- Complete end-to-end data pipeline from GitHub API to analytics tables"
+      }
+    ]
+  }
+}

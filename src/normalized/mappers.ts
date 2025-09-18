@@ -69,17 +69,18 @@ export function mapPR(b: BronzeRow): PR | null {
   if (id == null) return null;
 
   const createdAt: ISO8601 | null = b.created_at ?? rp.created_at ?? null;
-
+  
   return {
     prId: String(id),
     repoId: b.repo_node ?? null,
     authorUserId: rp.user?.id != null ? String(rp.user.id) : (b.actor_user_node ?? null),
     createdAt,
-    mergedAt: rp.merged_at ?? null,
+    mergedAt: rp.merged_at ?? rp.pull_request?.merged_at ?? null,
     closedAt: rp.closed_at ?? null,
     updatedAt: rp.updated_at ?? null,
     title: rp.title ?? null,
     body: rp.body ?? null,
+    commits: [], // Will be populated later with commit SHAs
   };
 }
 
@@ -96,6 +97,7 @@ export function mergePR(prev: PR, next: PR): PR {
     ...next,
     title: next.title ?? prev.title ?? null,
     body:  next.body  ?? prev.body  ?? null,
+    commits: next.commits ?? prev.commits ?? [],
   };
 }
 
@@ -202,6 +204,11 @@ export function mapUserFromPayload(u: any): User | null {
     company: u.company ?? null,
     location: u.location ?? null,
     bio: u.bio ?? null,
+    blog: u.blog ?? null,
+    twitterUsername: u.twitter_username ?? null,
+    publicRepos: u.public_repos ?? null,
+    followers: u.followers ?? null,
+    following: u.following ?? null,
     siteAdmin: u.site_admin ?? null,
     type: u.type ?? null,
     ghCreatedAt: u.created_at ?? null,
@@ -316,9 +323,12 @@ export function mapRepositoryFromPayload(r: any): Repository | null {
     repoId,
     ownerUserId,
     repoName: r.name ?? null,
+    description: r.description ?? null,
+    htmlUrl: r.html_url ?? null,
     visibility,
     defaultBranch: r.default_branch ?? null,
     forkCount: typeof r.forks_count === 'number' ? r.forks_count : null,
+    parentRepoId: r.parent?.id ? String(r.parent.id) : null,
     lastActivity,
     ghCreatedAt: r.created_at ?? null,
   };
@@ -353,6 +363,7 @@ export function mapRepoFromBronzeRow(row: {
         : null,
     defaultBranch: null,
     forkCount: null,
+    parentRepoId: null,
     lastActivity: null,
     fetchedAt: row.fetched_at,
     ghCreatedAt: null,

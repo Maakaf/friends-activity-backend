@@ -30,6 +30,21 @@ export class UserProfileEntity {
   bio!: string | null;
 
   @Column('text', { nullable: true })
+  blog!: string | null;
+
+  @Column('text', { nullable: true, name: 'twitter_username' })
+  twitterUsername!: string | null;
+
+  @Column('integer', { nullable: true, name: 'public_repos' })
+  publicRepos!: number | null;
+
+  @Column('integer', { nullable: true })
+  followers!: number | null;
+
+  @Column('integer', { nullable: true })
+  following!: number | null;
+
+  @Column('text', { nullable: true })
   type!: string | null;
 
   @Column('boolean', { nullable: true, name: 'site_admin' })
