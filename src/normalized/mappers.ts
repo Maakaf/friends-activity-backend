@@ -84,12 +84,40 @@ export function mapPR(b: BronzeRow): PR | null {
   };
 }
 
-/** Keep the fresher snapshot (by updatedAt/createdAt) and carry non-null fields forward. */
+/** Keep the fresher snapshot (by updatedAt/createdAt) and carry non-null fields forward. 
+ * Prioritize PRs with commits over empty ones. */
 export function mergePR(prev: PR, next: PR): PR {
   const prevT = prev.updatedAt ?? prev.createdAt ?? null;
   const nextT = next.updatedAt ?? next.createdAt ?? null;
   const useNext = !prevT || (nextT != null && nextT > prevT);
 
+  // If one has commits and the other doesn't, prefer the one with commits
+  const prevHasCommits = prev.commits && prev.commits.length > 0;
+  const nextHasCommits = next.commits && next.commits.length > 0;
+  
+  if (prevHasCommits && !nextHasCommits) {
+    // Keep prev even if it's older, but update other fields from next
+    return {
+      ...next,
+      ...prev,
+      title: next.title ?? prev.title ?? null,
+      body:  next.body  ?? prev.body  ?? null,
+      commits: prev.commits, // Keep the commits from prev
+    };
+  }
+  
+  if (!prevHasCommits && nextHasCommits) {
+    // Use next since it has commits
+    return {
+      ...prev,
+      ...next,
+      title: next.title ?? prev.title ?? null,
+      body:  next.body  ?? prev.body  ?? null,
+      commits: next.commits,
+    };
+  }
+
+  // Both have commits or both are empty, use timestamp logic
   if (!useNext) return prev;
 
   return {
