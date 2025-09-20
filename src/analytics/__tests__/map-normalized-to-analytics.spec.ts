@@ -1,4 +1,4 @@
-import { mapSilverToCurated } from '../mappers/map-normalized-to-curated.js';
+import { mapSilverToCurated } from '../mappers/map-normalized-to-analytics.js';
 
 describe('mapSilverToCurated', () => {
   it('maps users, repos, and activities correctly', () => {

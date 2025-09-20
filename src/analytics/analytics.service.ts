@@ -5,7 +5,7 @@ import { SilverOrchestratorService } from '../normalized/orchestrator.js';
 import { UserProfileEntity } from './user_profile/user_profile.entity.js';
 import { UserActivityEntity } from './user_activity/user_activity.entity.js';
 import { RepositoryEntity } from './repository/repository.entity.js';
-import { mapSilverToCurated } from './mappers/map-normalized-to-curated.js';
+import { mapSilverToCurated } from './mappers/map-normalized-to-analytics.js';
 
 @Injectable()
 export class CuratedService {
