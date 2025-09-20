@@ -187,13 +187,7 @@ export class GithubService {
     }
   }
 
-  private async listRepos(org: string) {
-    return this.octokit.paginate(
-      this.octokit.repos.listForOrg,
-      { org, type: 'all', per_page: 100 },
-      (r) => r.data,
-    );
-  }
+
 
   /** Build { issue/PR number -> id } for one repo (since watermark) */
   private async buildNumberToIdMap(owner: string, repo: string, sinceIso: string) {
@@ -623,52 +617,5 @@ export class GithubService {
     return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until };
   }
 
-  /**
-   * Fetch commits for a specific PR
-   */
-  async fetchPRCommits(owner: string, repo: string, pullNumber: number): Promise<string[]> {
-    try {
-      const commits = await this.retryWithBackoff(
-        () => this.octokit.paginate(
-          this.octokit.pulls.listCommits,
-          { owner, repo, pull_number: pullNumber, per_page: 100 },
-          (r) => r.data,
-        ),
-        `PR commits for ${owner}/${repo}#${pullNumber}`
-      );
-      return commits.map((c: any) => c.sha);
-    } catch (error) {
-      this.logger.warn(`❌ Failed to fetch PR commits for ${owner}/${repo}#${pullNumber}: ${error}`);
-      return [];
-    }
-  }
 
-  // ==============
-  // Org orchestrator (kept as-is for org-scoped runs)
-  // ==============
-  async ingestOrgForUsers(org: string, usersCsv = '', sinceIso?: string, untilIso?: string) {
-    const users = this.toSet(usersCsv);
-    const since = sinceIso ?? new Date(Date.now() - 7 * 86400e3).toISOString();
-
-    const repos = await this.listRepos(org);
-    for (const r of repos) {
-      const owner = r.owner?.login;
-      const name  = r.name;
-      try {
-        const rid   = r.id as number | undefined;
-        const priv  = r.private as boolean | undefined;
-
-        const numberToId = await this.buildNumberToIdMap(owner, name, since);
-
-        await this.ingestIssuesAndPRsByCreator(owner, name, rid, priv, users, since);
-        await this.ingestIssueComments(owner, name, rid, priv, users, since, numberToId);
-        await this.ingestPRReviewComments(owner, name, rid, priv, users, since, numberToId);
-        await this.ingestCommitsForUsers(owner, name, rid, priv, users, since, untilIso);
-      } catch (error) {
-        this.logger.warn(`❌ Failed to ingest data for repo ${owner}/${name}, continuing: ${error}`);
-      }
-    }
-
-    return { org, users: [...users], since, until: untilIso ?? null, repos: repos.length };
-  }
 }

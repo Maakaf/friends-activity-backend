@@ -59,12 +59,15 @@ export class GithubController {
   }
 
   @Post('analytics/report')
-  @ApiOperation({ summary: 'Generate frontend analytics report from gold tables (last 180 days, fork_count >= 3)' })
+  @ApiOperation({ summary: 'Generate frontend analytics report from normalized data (last 180 days, fork_count >= 3)' })
   @ApiBody({ type: IngestUsersDto })
   async getAnalyticsReport(@Body() body: IngestUsersBody) {
     if (!body || !Array.isArray(body.users) || body.users.length === 0) {
       throw new BadRequestException('Body must be { "users": string[] } with at least one username.');
     }
+    
+    // Refresh curated data from normalized layer before generating report
+    await this.curated.refreshAll();
     
     return this.analytics.generateFrontendReport(body.users);
   }
