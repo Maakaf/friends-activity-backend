@@ -1,15 +1,15 @@
 {
   "metadata": {
-    "timestamp": "2025-09-18T13:27:50.987Z",
+    "timestamp": "2025-09-18T17:47:47.562Z",
     "since": "2025-01-01T00:00:00Z",
-    "until": "2025-09-18T13:24:25Z",
+    "until": "2025-09-18T17:44:56Z",
     "counts": {
       "users": 3,
       "repos": 24,
       "issues": 20,
-      "prs": 36,
+      "prs": 37,
       "comments": 42,
-      "commits": 232
+      "commits": 233
     }
   },
   "data": {
@@ -89,7 +89,7 @@
         "defaultBranch": "main",
         "forkCount": 3,
         "parentRepoId": null,
-        "lastActivity": "2025-09-17T17:12:07Z",
+        "lastActivity": "2025-09-18T13:47:17Z",
         "ghCreatedAt": "2025-08-18T20:47:55Z",
         "fetchedAt": null
       },
@@ -143,9 +143,9 @@
         "htmlUrl": "https://github.com/gohugoio/hugo",
         "visibility": "public",
         "defaultBranch": "master",
-        "forkCount": 8019,
+        "forkCount": 8018,
         "parentRepoId": null,
-        "lastActivity": "2025-09-18T13:22:39Z",
+        "lastActivity": "2025-09-18T16:02:13Z",
         "ghCreatedAt": "2013-07-04T15:26:26Z",
         "fetchedAt": null
       },
@@ -1210,6 +1210,20 @@
         "body": "- Add NormalizedModule for proper dependency injection\r\n- Fix TypeORM entity column mappings (camelCase to snake_case)\r\n- Implement activity aggregation to prevent duplicate keys\r\n- Add upsert operations for curated data refresh\r\n- Integrate curated layer into existing ingest endpoint\r\n- Complete end-to-end data pipeline from GitHub API to analytics tables",
         "commits": [
           "6150dc68c965be2123fee70161bf693137ce5315"
+        ]
+      },
+      {
+        "prId": "3430470278",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-18T13:46:44Z",
+        "mergedAt": "2025-09-18T13:47:17Z",
+        "closedAt": "2025-09-18T13:47:17Z",
+        "updatedAt": "2025-09-18T13:47:17Z",
+        "title": "WIP: Fix PR merged_at mapping and implement commit filtering for merged PR. added json for frontend",
+        "body": "TBD: I still need to clean unnecessary files and functions",
+        "commits": [
+          "7f11e6cd642bea98e957d69a294dca2ade51a3b3"
         ]
       }
     ],
@@ -3259,6 +3273,13 @@
         "authorUserId": "33284345",
         "createdAt": "2025-09-17T12:11:25Z",
         "message": "implement analytics (gold) layer with full raw->silver->curated pipeline\n\n- Add NormalizedModule for proper dependency injection\n- Fix TypeORM entity column mappings (camelCase to snake_case)\n- Implement activity aggregation to prevent duplicate keys\n- Add upsert operations for curated data refresh\n- Integrate curated layer into existing ingest endpoint\n- Complete end-to-end data pipeline from GitHub API to analytics tables"
+      },
+      {
+        "commitId": "7f11e6cd642bea98e957d69a294dca2ade51a3b3",
+        "repoId": "1040346838",
+        "authorUserId": "33284345",
+        "createdAt": "2025-09-18T13:44:06Z",
+        "message": "Fix PR merged_at mapping and implement commit filtering for merged PRs only. added output json for frontend"
       }
     ]
   }
