@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { GithubService } from '../raw/raw.service.js';
 import { SilverOrchestratorService } from '../normalized/orchestrator.js';
-import { CuratedService } from '../analytics/analytics.service.js';
+import { AnalyticsService } from '../analytics/analytics.service.js';
 import { AnalyticsReportService } from '../analytics/analytics-report.service.js';
 
 @Injectable()
@@ -9,8 +9,8 @@ export class PipelineService {
   constructor(
     private readonly github: GithubService,
     private readonly silver: SilverOrchestratorService,
-    private readonly curated: CuratedService,
-    private readonly analytics: AnalyticsReportService,
+    private readonly analytics: AnalyticsService,
+    private readonly analyticsReport: AnalyticsReportService,
   ) {}
 
   /**
@@ -33,10 +33,10 @@ export class PipelineService {
     });
 
     // 3. Curated/Gold: refresh analytics tables
-    await this.curated.refreshAll();
+    await this.analytics.refreshAll();
 
     // 4. Analytics report for the frontend
-    return this.analytics.generateFrontendReport(users);
+    return this.analyticsReport.generateFrontendReport(users);
   }
 
   /**
@@ -49,7 +49,7 @@ export class PipelineService {
       );
     }
 
-    await this.curated.refreshAll();
-    return this.analytics.generateFrontendReport(users);
+    await this.analytics.refreshAll();
+    return this.analyticsReport.generateFrontendReport(users);
   }
 }
