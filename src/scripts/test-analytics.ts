@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module.js';
-import { CuratedService } from '../analytics/analytics.service.js';
+import { AnalyticsService } from '../analytics/analytics.service.js';
 import { GithubService } from '../raw/raw.service.js';
 
 async function main() {
@@ -12,12 +12,12 @@ async function main() {
     const githubService = app.get(GithubService);
     await githubService.ingestEachUserInTheirRepos(['barlavi1'], '2025-01-01T00:00:00Z');
     
-    console.log('✅ Sample data ingested. Running curated refresh...');
+    console.log('✅ Sample data ingested. Running analytics refresh...');
 
-    const curatedService = app.get(CuratedService);
+    const curatedService = app.get(AnalyticsService);
     await curatedService.refreshAll();
 
-    console.log('✅ Curated refresh completed successfully!');
+    console.log('✅ Analytics refresh completed successfully!');
 
   } finally {
     await app.close();
@@ -26,6 +26,6 @@ async function main() {
 }
 
 main().catch((e) => { 
-  console.error('❌ Error while testing curated layer:', e);
+  console.error('❌ Error while testing analytics layer:', e);
   process.exit(1);
 });

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GithubController } from './raw.controller.js';
 import { GithubService } from './raw.service.js';
 import { RawMemoryStore } from './raw-memory.store.js';
 
