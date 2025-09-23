@@ -18,7 +18,7 @@
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
     "test:cov": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
-    "test:analyzed": "tsx src/scripts/test-curated.ts",
+    "test:analytics": "tsx src/scripts/test-analytics.ts",
     "test:normalized": "tsx src/scripts/test-normalized.ts",
     "silver:dump": "tsx src/scripts/dump-normalized.ts",
     "ingest:sample": "tsx src/scripts/ingest-sample-data.ts",

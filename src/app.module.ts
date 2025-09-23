@@ -1,13 +1,14 @@
 // src/app.module.ts
 import 'dotenv/config';
-import { Module, Provider } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-
-
-
-
 import dataSource from './database/data-source.js';
+import { AppController } from './app.controller.js';
+import { GithubModule } from './raw/raw.module.js';
+import { NormalizedModule } from './normalized/normalized.module.js';
+import { AnalyticsModule } from './analytics/analytics.module.js';
+import { PipelineModule } from './pipeline/pipeline.module.js';  // <-- if you created it
 
 function pgConfig() {
   if (process.env.DATABASE_URL) {
@@ -26,24 +27,16 @@ function pgConfig() {
   };
 }
 
-
-
-import { AppController } from './app.controller.js';
-import { GithubController } from './raw/raw.controller.js';
-import { GithubModule } from './raw/raw.module.js';
-import { NormalizedModule } from './normalized/normalized.module.js';
-
-import { CuratedModule } from './analytics/analytics.module.js';
-
 @Module({
   imports: [
-    TypeOrmModule.forRoot(pgConfig()), // keep: raw ingest still writes to DB
-    GithubModule,                      // exports RawMemoryStore
+    TypeOrmModule.forRoot(pgConfig()),
+    GithubModule,
     NormalizedModule,
-    CuratedModule
+    AnalyticsModule,
+    PipelineModule,
   ],
-  controllers: [AppController, GithubController],
-  providers: [],
-  exports: [],
+  controllers: [
+    AppController
+  ],
 })
 export class AppModule {}

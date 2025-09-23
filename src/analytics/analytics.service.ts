@@ -8,8 +8,8 @@ import { RepositoryEntity } from './repository/repository.entity.js';
 import { mapSilverToCurated } from './mappers/map-normalized-to-analytics.js';
 
 @Injectable()
-export class CuratedService {
-  private readonly logger = new Logger(CuratedService.name);
+export class AnalyticsService {
+  private readonly logger = new Logger(AnalyticsService.name);
 
   constructor(
     @Inject(SilverOrchestratorService) private readonly silver: SilverOrchestratorService,
@@ -22,7 +22,7 @@ export class CuratedService {
    * Fetch normalized (silver) bundle and populate curated tables.
    */
   async refreshAll(): Promise<void> {
-    this.logger.log('Starting curated refresh…');
+    this.logger.log('Starting Analytics refresh…');
 
     const bundle = await this.silver.buildBundle(); // optional args since/until
 
@@ -36,7 +36,7 @@ export class CuratedService {
       this.upsertRepositories(repos),
     ]);
 
-    this.logger.log('Curated refresh complete.');
+    this.logger.log('Analytics refresh complete.');
   }
 
   private async upsertUserProfiles(profiles: UserProfileEntity[]) {
