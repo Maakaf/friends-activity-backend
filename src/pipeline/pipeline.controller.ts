@@ -8,7 +8,7 @@ import { IngestUsersDto } from '../raw/dto/ingest-users.dto.js'; // reuse same D
 export class PipelineController {
   constructor(private readonly pipeline: PipelineService) {}
 
-  @Post('ingest/users-strict')
+  @Post('stats')
   @ApiOperation({
     summary: 'Run full Raw → Silver → Curated → Analytics pipeline for given users',
   })
