@@ -1,21 +1,12 @@
 // src/app.module.ts
 import 'dotenv/config';
-import { Module } from '@nestjs/common';
+import { Module, Provider } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AppController } from './app.controller.js';
 
-import { GithubModule } from './raw/raw.module.js';
-import { IssueBronzeRepo } from './normalized/issue/issue.repo.js';
-import { IssueSilverService } from './normalized/issue/issue.service.js';
-import { PRBronzeRepo } from './normalized/pr/pr.repo.js';
-import { PRSilverService } from './normalized/pr/pr.service.js';
-import { CommentBronzeRepo } from './normalized/comment/comment.repo.js';
-import { CommentSilverService } from './normalized/comment/comment.service.js';
-import { CommitBronzeRepo } from './normalized/commit/commit.repo.js';
-import { CommitSilverService } from './normalized/commit/commit.service.js';
-import { UserBronzeRepo } from './normalized/user/user.repo.js';
-import { UserSilverService } from './normalized/user/user.service.js';
+
+
+
 import dataSource from './database/data-source.js';
 
 function pgConfig() {
@@ -24,42 +15,35 @@ function pgConfig() {
       type: 'postgres' as const,
       url: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false },
-      autoLoadEntities: false,
+      autoLoadEntities: true,
       synchronize: false,
     };
   }
   return {
     ...dataSource.options,
-    autoLoadEntities: false,
+    autoLoadEntities: true,
     synchronize: false,
   };
 }
 
+
+
+import { AppController } from './app.controller.js';
+import { GithubController } from './raw/raw.controller.js';
+import { GithubModule } from './raw/raw.module.js';
+import { NormalizedModule } from './normalized/normalized.module.js';
+
+import { CuratedModule } from './analytics/analytics.module.js';
+
 @Module({
   imports: [
-    TypeOrmModule.forRoot(pgConfig()),
-    GithubModule,
+    TypeOrmModule.forRoot(pgConfig()), // keep: raw ingest still writes to DB
+    GithubModule,                      // exports RawMemoryStore
+    NormalizedModule,
+    CuratedModule
   ],
-  controllers: [AppController],
-  providers: [
-    //AppService,
-    IssueBronzeRepo,
-    IssueSilverService,
-    PRBronzeRepo,
-    PRSilverService,
-    CommentBronzeRepo,
-    CommentSilverService,
-    CommitBronzeRepo, 
-    CommitSilverService,
-    UserBronzeRepo,
-    UserSilverService,
-  ],
-  exports: [
-    IssueSilverService,
-    PRSilverService,
-    CommentSilverService,
-    CommitSilverService,
-    UserSilverService,
-  ],
+  controllers: [AppController, GithubController],
+  providers: [],
+  exports: [],
 })
 export class AppModule {}

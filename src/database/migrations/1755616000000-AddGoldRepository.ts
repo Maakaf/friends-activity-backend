@@ -9,6 +9,8 @@ export class AddGoldRepository1755616000000 implements MigrationInterface {
         repo_id         TEXT PRIMARY KEY,             -- GitHub numeric ID as text
         owner_id        TEXT,                         -- optional foreign key to gold.user_profile(user_id)
         repo_name       TEXT NOT NULL,
+        description     TEXT,
+        html_url        TEXT,
         visibility      TEXT,                         -- e.g. 'public' | 'private' | 'internal'
         default_branch  TEXT,
         fork_count      INTEGER,

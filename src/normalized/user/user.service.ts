@@ -1,38 +1,29 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { UserBronzeRepo } from './user.repo.js';
-import { mapUserFromPayload, pickUserObjectForActor, mergeUser } from '../mappers.js';
+import { mapUserFromBronzeRow, pickUserObjectForActor, mergeUser } from '../mappers.js';
 import type { User } from '../types.js';
 
 @Injectable()
-export class UserSilverService {
-  private readonly log = new Logger(UserSilverService.name);
+export class UsersSilverService {
+  private readonly log = new Logger(UsersSilverService.name);
   constructor(@Inject(UserBronzeRepo) private readonly repo: UserBronzeRepo) {}
 
-  /**
-   * Build Silver users by taking the latest bronze row per actor_user_node
-   * and mapping the *actor*'s user object from that payload (fallback {id}).
-   */
-  async getUsersByLatestActor(params: {
-    sinceIso: string;
+  async getUsersSince(params: {
+    sinceIso?: string;
     untilIso?: string;
-    repoId?: string;
+    userIds?: string[];
+    logins?: string[];
+    limit?: number;
   }): Promise<User[]> {
-    const rows = await this.repo.loadLatestByActor(params);
+    const rows = await this.repo.loadFromBronzeUsers(params);
+    const users: User[] = [];
 
-    const byId = new Map<string, User>();
-    for (const r of rows) {
-      const actorId = String(r.actor_user_node);
-      const uObj = pickUserObjectForActor(r.raw_payload, actorId);
-      const mapped = mapUserFromPayload(uObj);
-      if (!mapped) continue;
-
-      const prev = byId.get(mapped.userId);
-      if (!prev) byId.set(mapped.userId, mapped);
-      else byId.set(mapped.userId, mergeUser(prev, mapped));
+    for (const row of rows) {
+      const u = mapUserFromBronzeRow(row);
+      if (u) users.push(u);
     }
 
-    const out = [...byId.values()];
-    this.log.debug(`silver.users (latest-actor): ${out.length} users from ${rows.length} actor rows`);
-    return out;
+    this.log.debug(`silver.users: ${users.length} (from ${rows.length} bronze rows)`);
+    return users;
   }
 }

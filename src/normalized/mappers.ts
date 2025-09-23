@@ -1,6 +1,6 @@
 import {
   Issue, PR, Comment, Commit,
-  Repository, User, IssueState, ParentType, RepoId, UserId, ISO8601
+  Repository, User, IssueState, ParentType, RepoId, UserId, ISO8601, Visibility
 } from './types.js';
 
 export interface BronzeRow {
@@ -69,26 +69,55 @@ export function mapPR(b: BronzeRow): PR | null {
   if (id == null) return null;
 
   const createdAt: ISO8601 | null = b.created_at ?? rp.created_at ?? null;
-
+  
   return {
     prId: String(id),
     repoId: b.repo_node ?? null,
     authorUserId: rp.user?.id != null ? String(rp.user.id) : (b.actor_user_node ?? null),
     createdAt,
-    mergedAt: rp.merged_at ?? null,
+    mergedAt: rp.merged_at ?? rp.pull_request?.merged_at ?? null,
     closedAt: rp.closed_at ?? null,
     updatedAt: rp.updated_at ?? null,
     title: rp.title ?? null,
     body: rp.body ?? null,
+    commits: [], // Will be populated later with commit SHAs
   };
 }
 
-/** Keep the fresher snapshot (by updatedAt/createdAt) and carry non-null fields forward. */
+/** Keep the fresher snapshot (by updatedAt/createdAt) and carry non-null fields forward. 
+ * Prioritize PRs with commits over empty ones. */
 export function mergePR(prev: PR, next: PR): PR {
   const prevT = prev.updatedAt ?? prev.createdAt ?? null;
   const nextT = next.updatedAt ?? next.createdAt ?? null;
   const useNext = !prevT || (nextT != null && nextT > prevT);
 
+  // If one has commits and the other doesn't, prefer the one with commits
+  const prevHasCommits = prev.commits && prev.commits.length > 0;
+  const nextHasCommits = next.commits && next.commits.length > 0;
+  
+  if (prevHasCommits && !nextHasCommits) {
+    // Keep prev even if it's older, but update other fields from next
+    return {
+      ...next,
+      ...prev,
+      title: next.title ?? prev.title ?? null,
+      body:  next.body  ?? prev.body  ?? null,
+      commits: prev.commits, // Keep the commits from prev
+    };
+  }
+  
+  if (!prevHasCommits && nextHasCommits) {
+    // Use next since it has commits
+    return {
+      ...prev,
+      ...next,
+      title: next.title ?? prev.title ?? null,
+      body:  next.body  ?? prev.body  ?? null,
+      commits: next.commits,
+    };
+  }
+
+  // Both have commits or both are empty, use timestamp logic
   if (!useNext) return prev;
 
   return {
@@ -96,6 +125,7 @@ export function mergePR(prev: PR, next: PR): PR {
     ...next,
     title: next.title ?? prev.title ?? null,
     body:  next.body  ?? prev.body  ?? null,
+    commits: next.commits ?? prev.commits ?? [],
   };
 }
 
@@ -202,9 +232,49 @@ export function mapUserFromPayload(u: any): User | null {
     company: u.company ?? null,
     location: u.location ?? null,
     bio: u.bio ?? null,
+    blog: u.blog ?? null,
+    twitterUsername: u.twitter_username ?? null,
+    publicRepos: u.public_repos ?? null,
+    followers: u.followers ?? null,
+    following: u.following ?? null,
     siteAdmin: u.site_admin ?? null,
+    type: u.type ?? null,
     ghCreatedAt: u.created_at ?? null,
     ghUpdatedAt: u.updated_at ?? null,
+  };
+}
+
+/** Map directly from bronze.github_users row */
+export function mapUserFromBronzeRow(row: {
+  user_node: string;
+  login: string | null;
+  fetched_at: string | null;
+  raw_payload: any;
+}): User | null {
+  const fromPayload = mapUserFromPayload(row.raw_payload);
+  if (fromPayload) {
+    return {
+      ...fromPayload,
+      fetchedAt: row.fetched_at,
+    };
+  }
+
+  // fallback minimal mapping if payload is missing or empty
+  return {
+    userId: String(row.user_node),
+    login: row.login ?? null,
+    fetchedAt: row.fetched_at,
+    name: null,
+    avatarUrl: null,
+    htmlUrl: null,
+    email: null,
+    company: null,
+    location: null,
+    bio: null,
+    siteAdmin: null,
+    type: null,
+    ghCreatedAt: null,
+    ghUpdatedAt: null,
   };
 }
 
@@ -251,7 +321,79 @@ export function mergeUser(prev: User, next: User): User {
     location:    pick(prev.location,    next.location),
     bio:         pick(prev.bio,         next.bio),
     siteAdmin:   pick(prev.siteAdmin,   next.siteAdmin),
+    type:        pick(prev.type,        next.type),
+    fetchedAt:   pick(prev.fetchedAt,   next.fetchedAt),
     ghCreatedAt: pick(prev.ghCreatedAt, next.ghCreatedAt),
     ghUpdatedAt: pick(prev.ghUpdatedAt, next.ghUpdatedAt),
+  };
+}
+
+
+/** Map a GitHub repo JSON payload to Silver Repository shape */
+export function mapRepositoryFromPayload(r: any): Repository | null {
+  if (!r || r.id == null) return null;
+
+  const repoId: RepoId = String(r.id);
+  const ownerUserId: UserId | null = r.owner?.id != null ? String(r.owner.id) : null;
+
+  const visibility: Visibility | null =
+    typeof r.visibility === 'string'
+      ? (r.visibility as Visibility)
+      : r.private === true
+      ? 'private'
+      : r.private === false
+      ? 'public'
+      : null;
+
+  const lastActivity: ISO8601 | null = r.pushed_at ?? r.updated_at ?? null;
+
+  return {
+    repoId,
+    ownerUserId,
+    repoName: r.name ?? null,
+    description: r.description ?? null,
+    htmlUrl: r.html_url ?? null,
+    visibility,
+    defaultBranch: r.default_branch ?? null,
+    forkCount: typeof r.forks_count === 'number' ? r.forks_count : null,
+    parentRepoId: r.parent?.id ? String(r.parent.id) : null,
+    lastActivity,
+    ghCreatedAt: r.created_at ?? null,
+  };
+}
+
+/** Map directly from bronze.github_repos row */
+export function mapRepoFromBronzeRow(row: {
+  repo_node: string;
+  name: string | null;
+  is_private: boolean | null;
+  fetched_at: string | null;
+  raw_payload: any;
+}): Repository | null {
+  const fromPayload = mapRepositoryFromPayload(row.raw_payload);
+  if (fromPayload) {
+    return {
+      ...fromPayload,
+      fetchedAt: row.fetched_at,
+    };
+  }
+
+  // fallback minimal mapping if payload is missing or empty
+  return {
+    repoId: String(row.repo_node),
+    ownerUserId: null,
+    repoName: row.name ?? null,
+    visibility:
+      row.is_private === true
+        ? 'private'
+        : row.is_private === false
+        ? 'public'
+        : null,
+    defaultBranch: null,
+    forkCount: null,
+    parentRepoId: null,
+    lastActivity: null,
+    fetchedAt: row.fetched_at,
+    ghCreatedAt: null,
   };
 }

@@ -20,7 +20,7 @@ export class AddBronzeUsersAndRepos1755615000000 implements MigrationInterface {
       CREATE TABLE IF NOT EXISTS bronze.github_repos (
         repo_node     TEXT PRIMARY KEY,         -- GitHub numeric id as text
         provider      TEXT NOT NULL DEFAULT 'github',
-        full_name     TEXT UNIQUE NOT NULL,     -- owner/name
+        full_name     TEXT UNIQUE NOT NULL,   
         owner_login   TEXT,
         name          TEXT,
         is_private    BOOLEAN,
