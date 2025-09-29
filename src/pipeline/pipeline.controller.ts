@@ -6,8 +6,10 @@ import { IngestUsersDto } from '../raw/dto/ingest-users.dto.js'; // reuse same D
 @ApiTags('pipeline')
 @Controller('pipeline')
 export class PipelineController {
-  constructor(private readonly pipeline: PipelineService) {}
-
+  constructor(private readonly pipeline: PipelineService) {
+      // TEMP sanity check
+    console.log('PipelineController DI ok?', !!pipeline);
+  }
   @Post('stats')
   @ApiOperation({
     summary: 'Run full Raw → Silver → Curated → Analytics pipeline for given users',
