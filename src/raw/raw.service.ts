@@ -79,6 +79,10 @@ export class GithubService {
     return new Date(Date.now() - days * 86400e3).toISOString().replace(/\.\d{3}Z$/, 'Z');
   }
 
+  private isoHoursAgo(hours: number): string {
+    return new Date(Date.now() - hours * 3600e3).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  }
+
   private repoKey(owner: string, repo: string) {
     return `${owner}/${repo}`;
   }
@@ -149,6 +153,55 @@ export class GithubService {
       id: Number((data as any).id),
       private: is_private,
     };
+  }
+
+  private async fetchMultipleReposMeta(repos: Array<{owner: string, repo: string}>) {
+    const BATCH_SIZE = 3; // Conservative to avoid rate limits
+    const results = new Map<string, { owner: string; name: string; id?: number; private?: boolean } | null>();
+    
+    this.logger.log(`Fetching metadata for ${repos.length} repos in batches of ${BATCH_SIZE}`);
+    
+    for (let i = 0; i < repos.length; i += BATCH_SIZE) {
+      const batch = repos.slice(i, i + BATCH_SIZE);
+      const batchPromises = batch.map(async ({owner, repo}) => {
+        try {
+          const meta = await this.retryWithBackoff(
+            () => this.fetchRepoMeta(owner, repo),
+            `Repo metadata ${owner}/${repo}`
+          );
+          return { key: this.repoKey(owner, repo), meta };
+        } catch (error) {
+          this.logger.warn(`❌ Failed to fetch repo metadata for ${owner}/${repo}: ${error}`);
+          return { key: this.repoKey(owner, repo), meta: null };
+        }
+      });
+      
+      const batchResults = await Promise.allSettled(batchPromises);
+      
+      for (const result of batchResults) {
+        if (result.status === 'fulfilled' && result.value) {
+          results.set(result.value.key, result.value.meta);
+        }
+      }
+      
+      // Small delay between batches to be respectful
+      if (i + BATCH_SIZE < repos.length) {
+        await this.sleep(500);
+      }
+    }
+    
+    return results;
+  }
+
+  private async checkUsersInGoldProfile(userLogins: string[]): Promise<Set<string>> {
+    if (!userLogins.length) return new Set();
+    
+    const result = await this.ds.query(
+      'SELECT login FROM gold.user_profile WHERE login = ANY($1)',
+      [userLogins]
+    );
+    
+    return new Set(result.map((row: any) => row.login));
   }
 
   private async upsertUserProfilesToBronze(logins: string[]) {
@@ -354,11 +407,11 @@ export class GithubService {
 }
 
 
-  /** repo -> set(users) map for all users since `sinceIso` */
-  private async buildRepoUsersMap(allUsers: Set<string>, sinceIso: string) {
+  /** repo -> set(users) map for all users with user-specific time windows */
+  private async buildRepoUsersMap(userTimeWindows: Map<string, string>) {
     const map = new Map<string, { owner: string; repo: string; users: Set<string> }>();
 
-    const userRepoPromises = Array.from(allUsers).map(async (login) => {
+    const userRepoPromises = Array.from(userTimeWindows.entries()).map(async ([login, sinceIso]) => {
       const repos = await this.discoverReposForUser(login, sinceIso);
       return { login, repos };
     });
@@ -589,32 +642,61 @@ export class GithubService {
     
     if (!users.size) throw new Error('users list is required');
 
-    const since = sinceIso ?? this.isoDaysAgo(180);
     const until = untilIso ?? this.isoNow();
 
+    // Check which users exist in gold.user_profile
+    const existingUsers = await this.checkUsersInGoldProfile([...users]);
+    
+    // Create user-specific time windows
+    const userTimeWindows = new Map<string, string>();
+    for (const user of users) {
+      if (existingUsers.has(user)) {
+        // Existing user: last 48 hours
+        userTimeWindows.set(user, sinceIso ?? this.isoHoursAgo(48));
+        this.logger.log(`📅 User ${user}: fetching last 2 days (existing user)`);
+      } else {
+        // New user: last 6 months
+        userTimeWindows.set(user, sinceIso ?? this.isoDaysAgo(180));
+        this.logger.log(`📅 User ${user}: fetching last 180 days (new user)`);
+      }
+    }
+
     await this.upsertUserProfilesToBronze([...users]);
-    const repoUsers = await this.buildRepoUsersMap(users, since);
+    const repoUsers = await this.buildRepoUsersMap(userTimeWindows);
+
+    // Fetch all repo metadata in parallel
+    const repoList = Array.from(repoUsers.values());
+    const repoMetaMap = await this.fetchMultipleReposMeta(
+      repoList.map(({owner, repo}) => ({owner, repo}))
+    );
 
     let ingestedRepos = 0;
     for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
-      let meta: { owner: string; name: string; id?: number; private?: boolean } | null = null;
-      try {
-        const m = await this.fetchRepoMeta(owner, repo);
-        meta = { owner: m.owner, name: m.name, id: m.id, private: m.private };
-      } catch (error) {
-        this.logger.warn(`❌ Failed to fetch repo metadata for ${owner}/${repo}, skipping: ${error}`);
+      const meta = repoMetaMap.get(this.repoKey(owner, repo));
+      if (!meta) {
+        this.logger.warn(`❌ No metadata found for ${owner}/${repo}, skipping`);
         continue;
       }
 
-      const numberToId = await this.buildNumberToIdMap(meta.owner, meta.name, since);
-      await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since);
-      await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
-      await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
-      await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, until);
+      // Use the earliest time window among users for this repo
+      const repoSince = Math.min(...Array.from(usersForRepo).map(user => 
+        new Date(userTimeWindows.get(user) || this.isoDaysAgo(180)).getTime()
+      ));
+      const repoSinceIso = new Date(repoSince).toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+      const numberToId = await this.buildNumberToIdMap(meta.owner, meta.name, repoSinceIso);
+      await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, repoSinceIso);
+      await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, repoSinceIso, numberToId);
+      await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, repoSinceIso, numberToId);
+      await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, repoSinceIso, until);
       ingestedRepos++;
     }
 
-    return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until };
+    // For backward compatibility, use the earliest time window as 'since'
+    const earliestSince = Math.min(...Array.from(userTimeWindows.values()).map(iso => new Date(iso).getTime()));
+    const since = new Date(earliestSince).toISOString().replace(/\.\d{3}Z$/, 'Z');
+    
+    return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until, userTimeWindows: Object.fromEntries(userTimeWindows) };
   }
 
 
