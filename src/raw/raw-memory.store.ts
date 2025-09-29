@@ -66,6 +66,18 @@ export class RawMemoryStore {
     return Array.from(this.repos.values());
   }
 
+  removeUserData(userNode: string) {
+    // Remove user
+    this.users.delete(userNode);
+    
+    // Remove events by this user
+    for (const [eventId, event] of this.events.entries()) {
+      if (event.actor_user_node === userNode) {
+        this.events.delete(eventId);
+      }
+    }
+  }
+
   clear() {
     this.events.clear();
     this.users.clear();

@@ -43,15 +43,20 @@ export class GithubService {
       } catch (error: any) {
         lastError = error;
         const isRateLimit = error?.status === 403 && error?.message?.includes('rate limit');
+        const isServerError = error?.status >= 500; // 502, 504, etc.
         
         if (attempt === maxRetries) {
+          if (isServerError) {
+            this.logger.warn(`⚠️ ${operation} failed with server error after ${maxRetries} attempts, skipping: ${error?.status}`);
+            return [] as any; // Return empty array for pagination failures
+          }
           this.logger.warn(`❌ ${operation} failed after ${maxRetries} attempts: ${error?.message}`);
           throw error;
         }
         
-        if (isRateLimit) {
+        if (isRateLimit || isServerError) {
           const delay = baseDelay * Math.pow(2, attempt - 1); // exponential backoff
-          this.logger.warn(`⏳ ${operation} rate limited, attempt ${attempt}/${maxRetries}, waiting ${delay}ms`);
+          this.logger.warn(`⏳ ${operation} ${isServerError ? 'server error' : 'rate limited'}, attempt ${attempt}/${maxRetries}, waiting ${delay}ms`);
           await this.sleep(delay);
         } else {
           // For non-rate-limit errors, shorter delay
@@ -202,6 +207,65 @@ export class GithubService {
     );
     
     return new Set(result.map((row: any) => row.login));
+  }
+
+  private async removeUsersNotInInputList(inputUsers: string[]) {
+    if (!inputUsers.length) return;
+
+    // Get all users currently in gold.user_profile
+    const allDbUsers = await this.ds.query('SELECT login FROM gold.user_profile');
+    const dbUserLogins = allDbUsers.map((row: any) => row.login);
+    
+    // Find users in DB but not in input list
+    const usersToRemove = dbUserLogins.filter((login: string) => !inputUsers.includes(login));
+    
+    if (!usersToRemove.length) {
+      this.logger.log('🔍 No users to remove from database');
+      return;
+    }
+
+    this.logger.log(`🗑️ Removing ${usersToRemove.length} users from database: ${usersToRemove.join(', ')}`);
+
+    // Get user_nodes from bronze.github_users for proper cleanup
+    const userNodes = await this.ds.query(
+      'SELECT login, user_node FROM bronze.github_users WHERE login = ANY($1)',
+      [usersToRemove]
+    );
+    const userNodeMap = new Map(userNodes.map((row: any) => [row.login, row.user_node]));
+    const userNodeValues = Array.from(userNodeMap.values()).filter(Boolean);
+
+    // Remove from Gold layer
+    await this.ds.query(
+      'DELETE FROM gold.user_profile WHERE login = ANY($1)',
+      [usersToRemove]
+    );
+    
+    if (userNodeValues.length > 0) {
+      await this.ds.query(
+        'DELETE FROM gold.user_activity WHERE user_id = ANY($1)',
+        [userNodeValues]
+      );
+      await this.ds.query(
+        'DELETE FROM bronze.github_events WHERE actor_user_node = ANY($1)',
+        [userNodeValues]
+      );
+    }
+
+    // Remove from Bronze layer
+    await this.ds.query(
+      'DELETE FROM bronze.github_users WHERE login = ANY($1)',
+      [usersToRemove]
+    );
+
+    // Remove from memory store
+    for (const login of usersToRemove) {
+      const userNode = userNodeMap.get(login);
+      if (userNode && typeof userNode === 'string') {
+        this.mem.removeUserData(userNode);
+      }
+    }
+
+    this.logger.log(`✅ Removed ${usersToRemove.length} users from all layers`);
   }
 
   private async upsertUserProfilesToBronze(logins: string[]) {
@@ -642,6 +706,9 @@ export class GithubService {
     
     if (!users.size) throw new Error('users list is required');
 
+    // STEP 1: Remove users who are in DB but not in input list
+    await this.removeUsersNotInInputList(Array.from(users));
+
     const until = untilIso ?? this.isoNow();
 
     // Check which users exist in gold.user_profile
@@ -671,7 +738,9 @@ export class GithubService {
     );
 
     let ingestedRepos = 0;
+    const totalRepos = Array.from(repoUsers.values()).length;
     for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
+      this.logger.log(`🔄 Processing repo ${ingestedRepos + 1}/${totalRepos}: ${owner}/${repo}`);
       const meta = repoMetaMap.get(this.repoKey(owner, repo));
       if (!meta) {
         this.logger.warn(`❌ No metadata found for ${owner}/${repo}, skipping`);
@@ -690,6 +759,7 @@ export class GithubService {
       await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, repoSinceIso, numberToId);
       await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, repoSinceIso, until);
       ingestedRepos++;
+      this.logger.log(`✅ Completed repo ${ingestedRepos}/${totalRepos}: ${owner}/${repo}`);
     }
 
     // For backward compatibility, use the earliest time window as 'since'

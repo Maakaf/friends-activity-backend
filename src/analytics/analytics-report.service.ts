@@ -163,9 +163,20 @@ export class AnalyticsReportService {
       return sum;
     }, { totalCommits: 0, totalPRs: 0, totalIssues: 0, totalPRComments: 0, totalIssueComments: 0 });
 
+    // Count unique repositories from user data
+    const uniqueRepoUrls = new Set<string>();
+    users.forEach(user => {
+      const userRepos = this.getUserRepos(user.userId, repos, activities);
+      userRepos.forEach(repo => {
+        if (repo && repo.url) {
+          uniqueRepoUrls.add(repo.url);
+        }
+      });
+    });
+
     return {
       ...totalCounts,
-      totalRepos: repos.length,
+      totalRepos: uniqueRepoUrls.size,
       successfulUsers: users.length,
       failedUsers: 0,
       totalUsers: users.length,
