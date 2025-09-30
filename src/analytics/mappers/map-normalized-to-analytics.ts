@@ -47,7 +47,7 @@ export function mapSilverToCurated(bundle: SilverBundle): {
   /* ---------- curated.repository ---------- */
   const repoEntities: RepositoryEntity[] = (repos ?? []).map(r => ({
     repoId: r.repoId,
-    // ownerUserId: r.ownerUserId ?? null,
+    ownerUserId: r.ownerUserId ?? null,
     repoName: r.repoName ?? null,
     description: r.description ?? null,
     htmlUrl: r.htmlUrl ?? null,

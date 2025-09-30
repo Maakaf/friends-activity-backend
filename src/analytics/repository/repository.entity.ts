@@ -3,7 +3,7 @@ import { Entity, Column, PrimaryColumn } from 'typeorm';
 @Entity({ schema: 'gold', name: 'repository' })
 export class RepositoryEntity {
   @PrimaryColumn('text', { name: 'repo_id' }) repoId: string;
-  // @Column('text', { nullable: true, name: 'owner_user_id' }) ownerUserId: string | null;
+  @Column('text', { nullable: true, name: 'owner_user_id' }) ownerUserId: string | null;
   @Column('text', { nullable: true, name: 'repo_name' }) repoName: string | null;
   @Column('text', { nullable: true }) description: string | null;
   @Column('text', { nullable: true, name: 'html_url' }) htmlUrl: string | null;
