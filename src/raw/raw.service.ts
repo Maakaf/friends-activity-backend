@@ -1,21 +1,24 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, QueryFailedError } from 'typeorm';
 import { Octokit } from '@octokit/rest';
 import { paginateRest } from '@octokit/plugin-paginate-rest';
-import { insertBronze, BronzeRow,  upsertBronzeUser, upsertBronzeRepo } from './raw-saver.js';
+import { insertBronze, BronzeRow, upsertBronzeUser, upsertBronzeRepo } from './raw-saver.js';
 import { RawMemoryStore, BronzeEventsRow, BronzeUsersRow, BronzeReposRow } from './raw-memory.store.js';
+import { RequestError as OctokitRequestError } from '@octokit/request-error';
 
 const MyOctokit = Octokit.plugin(paginateRest);
-  
+
 const ISSUE_NUM_RE = /\/issues\/(\d+)$/;
-const PR_NUM_RE    = /\/pulls\/(\d+)$/;
+const PR_NUM_RE = /\/pulls\/(\d+)$/;
 
 @Injectable()
 export class GithubService {
   private readonly logger = new Logger(GithubService.name);
   private readonly octokit = new MyOctokit({
-    auth: process.env.GITHUB_TOKEN || (() => { throw new Error('GITHUB_TOKEN environment variable is required') })(),
+    auth: process.env.GITHUB_TOKEN || (() => {
+      throw new Error('GITHUB_TOKEN environment variable is required');
+    })(),
     userAgent: 'friends-activity-backend/1.0',
     request: { headers: { accept: 'application/vnd.github+json' } },
   });
@@ -23,7 +26,8 @@ export class GithubService {
   constructor(
     @InjectDataSource() private readonly ds: DataSource,
     @Inject(RawMemoryStore) private readonly mem: RawMemoryStore,
-  ) {}
+  ) {
+  }
 
   private async sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -33,22 +37,22 @@ export class GithubService {
     fn: () => Promise<T>,
     operation: string,
     maxRetries = 5,
-    baseDelay = 2000
+    baseDelay = 2000,
   ): Promise<T> {
     let lastError: any;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await fn();
       } catch (error: any) {
         lastError = error;
         const isRateLimit = error?.status === 403 && error?.message?.includes('rate limit');
-        
+
         if (attempt === maxRetries) {
           this.logger.warn(`❌ ${operation} failed after ${maxRetries} attempts: ${error?.message}`);
           throw error;
         }
-        
+
         if (isRateLimit) {
           const delay = baseDelay * Math.pow(2, attempt - 1); // exponential backoff
           this.logger.warn(`⏳ ${operation} rate limited, attempt ${attempt}/${maxRetries}, waiting ${delay}ms`);
@@ -59,7 +63,7 @@ export class GithubService {
         }
       }
     }
-    
+
     throw lastError;
   }
 
@@ -82,18 +86,21 @@ export class GithubService {
   private repoKey(owner: string, repo: string) {
     return `${owner}/${repo}`;
   }
+
   private parseOwnerRepoFromRepoUrl(repoUrl?: string) {
     if (!repoUrl) return null;
     const parts = repoUrl.split('/').slice(-2);
     if (parts.length < 2) return null;
     return { owner: parts[0], repo: parts[1] };
   }
+
   private parseOwnerRepoFromHtmlUrl(htmlUrl?: string) {
     if (!htmlUrl) return null;
     const m = htmlUrl.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
     if (!m) return null;
     return { owner: m[1], repo: m[2] };
   }
+
   // Dual write helper
   private async writeEventBoth(row: Omit<BronzeRow, 'received_at'> & { received_at?: string | null }) {
     const fullRow: BronzeRow = {
@@ -109,13 +116,13 @@ export class GithubService {
     this.logger.log(`Fetching repo metadata: ${owner}/${repo}`);
     const { data } = await this.octokit.repos.get({ owner, repo });
     this.logger.log(`✅ Repo metadata fetched: ${owner}/${repo}`);
-    
+
     const repo_node = String((data as any).id);
     const full_name = (data as any).full_name ?? `${owner}/${repo}`;
     const owner_login = (data as any).owner?.login ?? owner;
     const name = (data as any).name ?? repo;
     const is_private = Boolean((data as any).private);
-    
+
     try {
       // DB write
       await upsertBronzeRepo(this.ds, {
@@ -126,7 +133,7 @@ export class GithubService {
         is_private,
         raw_payload: data,
       });
-      
+
       // Memory write
       const memRepo: BronzeReposRow = {
         repo_node,
@@ -142,7 +149,7 @@ export class GithubService {
     } catch (error) {
       this.logger.warn(`❌ Failed to save repo metadata: ${owner}/${repo} - ${error}`);
     }
-    
+
     return {
       owner,
       name: repo,
@@ -161,7 +168,7 @@ export class GithubService {
         const user_node = String((data as any).id);
         const userLogin = (data as any).login ?? login;
         const name = (data as any).name ?? null;
-        
+
         // DB write
         await upsertBronzeUser(this.ds, {
           user_node,
@@ -169,7 +176,7 @@ export class GithubService {
           name,
           raw_payload: data,
         });
-        
+
         // Memory write
         const memUser: BronzeUsersRow = {
           user_node,
@@ -188,7 +195,6 @@ export class GithubService {
   }
 
 
-
   /** Build { issue/PR number -> id } for one repo (since watermark) */
   private async buildNumberToIdMap(owner: string, repo: string, sinceIso: string) {
     const map = new Map<string, string>();
@@ -199,14 +205,14 @@ export class GithubService {
     );
     for (const it of items) {
       const num = (it as any).number;
-      const id  = (it as any).id;
+      const id = (it as any).id;
       if (num != null && id != null) map.set(String(num), String(id));
     }
     return map;
   }
 
   private async resolveIssueParentId(
-    owner: string, repo: string, comment: any, numberToId: Map<string, string>
+    owner: string, repo: string, comment: any, numberToId: Map<string, string>,
   ) {
     const issueUrl = comment.issue_url ?? '';
     const m = issueUrl.match(ISSUE_NUM_RE);
@@ -227,7 +233,7 @@ export class GithubService {
   }
 
   private async resolvePRParentId(
-    owner: string, repo: string, comment: any, numberToId: Map<string, string>
+    owner: string, repo: string, comment: any, numberToId: Map<string, string>,
   ) {
     const prUrl = comment.pull_request_url ?? '';
     const m = prUrl.match(PR_NUM_RE);
@@ -254,7 +260,7 @@ export class GithubService {
     isPrivate: boolean | undefined,
     prNumber: number,
     prId: string,
-    users: Set<string>
+    users: Set<string>,
   ) {
     const commits = await this.retryWithBackoff(
       () => this.octokit.paginate(
@@ -262,13 +268,13 @@ export class GithubService {
         { owner, repo, pull_number: prNumber, per_page: 100 },
         r => r.data,
       ),
-      `PR commits for ${owner}/${repo}#${prNumber}`
+      `PR commits for ${owner}/${repo}#${prNumber}`,
     );
 
     for (const c of commits) {
       const authorLogin = (c as any).author?.login;
       if (users.size && (!authorLogin || !users.has(authorLogin))) continue;
-      
+
       const row: BronzeRow = {
         event_ulid: `commit:${(c as any).sha}`,
         provider: 'github',
@@ -291,67 +297,67 @@ export class GithubService {
 
   /** Repos a single user has activity in (issues/PRs/comments + commits) since `sinceIso`. */
   private async discoverReposForUser(login: string, sinceIso: string) {
-  const found = new Map<string, { owner: string; repo: string }>();
-  this.logger.log(`Discovering repos for user: ${login}`);
+    const found = new Map<string, { owner: string; repo: string }>();
+    this.logger.log(`Discovering repos for user: ${login}`);
 
-  // A) Issues/PRs the user is involved in (author/comment/assignee/mentioned)
-  const qIssues = `involves:${login} created:>=${sinceIso}`;
-  try {
-    this.logger.log(`Searching issues/PRs: ${qIssues}`);
-    const issues = await this.retryWithBackoff(
-      () => this.octokit.paginate(
-        this.octokit.search.issuesAndPullRequests,
-        { q: qIssues, per_page: 100, advanced_search: 'true'}
-      ),
-      `Issues/PRs search for ${login}`
-    );
-    this.logger.log(`✅ Found ${issues.length} issues/PRs for ${login}`);
+    // A) Issues/PRs the user is involved in (author/comment/assignee/mentioned)
+    const qIssues = `involves:${login} created:>=${sinceIso}`;
+    try {
+      this.logger.log(`Searching issues/PRs: ${qIssues}`);
+      const issues = await this.retryWithBackoff(
+        () => this.octokit.paginate(
+          this.octokit.search.issuesAndPullRequests,
+          { q: qIssues, per_page: 100, advanced_search: 'true' },
+        ),
+        `Issues/PRs search for ${login}`,
+      );
+      this.logger.log(`✅ Found ${issues.length} issues/PRs for ${login}`);
 
-    for (const it of issues as any[]) {
-      const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
-      if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
-    }
-  } catch (error) {
-    this.logger.warn(`❌ Failed to search issues/PRs for ${login}: ${error}`);
-  }
-
-  // B) Commits authored by the user
-  const qCommits = `author:${login} committer-date:>=${sinceIso}`;
-  try {
-    this.logger.log(`Searching commits: ${qCommits}`);
-    const commits = await this.retryWithBackoff(
-      () => this.octokit.paginate(
-        this.octokit.search.commits,
-        {
-          q: qCommits,
-          per_page: 100,
-          headers: { accept: 'application/vnd.github.cloak-preview+json' },
-        } as any
-      ),
-      `Commits search for ${login}`,
-      5,
-      5000 // longer delay for commit searches
-    );
-    this.logger.log(`✅ Found ${commits.length} commits for ${login}`);
-
-    for (const c of commits as any[]) {
-      const full = c.repository?.full_name as string | undefined;
-      if (full && full.includes('/')) {
-        const [owner, repo] = full.split('/');
-        found.set(this.repoKey(owner, repo), { owner, repo });
-      } else {
-        const parsed = this.parseOwnerRepoFromHtmlUrl(c.html_url);
+      for (const it of issues as any[]) {
+        const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
         if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
       }
+    } catch (error) {
+      this.logger.warn(`❌ Failed to search issues/PRs for ${login}: ${error}`);
     }
-  } catch (error) {
-    this.logger.warn(`❌ Failed to search commits for ${login}: ${error}`);
-  }
 
-  const repos = Array.from(found.values());
-  this.logger.log(`✅ Discovered ${repos.length} repos for ${login}: ${repos.map(r => r.owner + '/' + r.repo).join(', ')}`);
-  return repos;
-}
+    // B) Commits authored by the user
+    const qCommits = `author:${login} committer-date:>=${sinceIso}`;
+    try {
+      this.logger.log(`Searching commits: ${qCommits}`);
+      const commits = await this.retryWithBackoff(
+        () => this.octokit.paginate(
+          this.octokit.search.commits,
+          {
+            q: qCommits,
+            per_page: 100,
+            headers: { accept: 'application/vnd.github.cloak-preview+json' },
+          } as any,
+        ),
+        `Commits search for ${login}`,
+        5,
+        5000, // longer delay for commit searches
+      );
+      this.logger.log(`✅ Found ${commits.length} commits for ${login}`);
+
+      for (const c of commits as any[]) {
+        const full = c.repository?.full_name as string | undefined;
+        if (full && full.includes('/')) {
+          const [owner, repo] = full.split('/');
+          found.set(this.repoKey(owner, repo), { owner, repo });
+        } else {
+          const parsed = this.parseOwnerRepoFromHtmlUrl(c.html_url);
+          if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
+        }
+      }
+    } catch (error) {
+      this.logger.warn(`❌ Failed to search commits for ${login}: ${error}`);
+    }
+
+    const repos = Array.from(found.values());
+    this.logger.log(`✅ Discovered ${repos.length} repos for ${login}: ${repos.map(r => r.owner + '/' + r.repo).join(', ')}`);
+    return repos;
+  }
 
 
   /** repo -> set(users) map for all users since `sinceIso` */
@@ -364,7 +370,7 @@ export class GithubService {
     });
 
     const userRepoResults = await Promise.all(userRepoPromises);
-    
+
     for (const { login, repos } of userRepoResults) {
       for (const r of repos) {
         const key = this.repoKey(r.owner, r.repo);
@@ -395,7 +401,7 @@ export class GithubService {
             { owner, repo, state: 'all', per_page: 100, since: sinceIso, ...(login ? { creator: login } : {}) } as any,
             (r) => r.data,
           ),
-          `Issues/PRs for ${owner}/${repo} ${login ? `(creator: ${login})` : ''}`
+          `Issues/PRs for ${owner}/${repo} ${login ? `(creator: ${login})` : ''}`,
         );
 
         for (const it of pages) {
@@ -422,7 +428,7 @@ export class GithubService {
             raw_payload: payload,
           };
           rows.push(row);
-          
+
           if (isPR) {
             const prNumber = (it as any).number;
             const prId = String((it as any).id);
@@ -451,7 +457,7 @@ export class GithubService {
           { owner, repo, per_page: 100, since: sinceIso },
           (r) => r.data,
         ),
-        `Issue comments for ${owner}/${repo}`
+        `Issue comments for ${owner}/${repo}`,
       );
 
       for (const c of comments) {
@@ -495,7 +501,7 @@ export class GithubService {
           { owner, repo, per_page: 100, since: sinceIso },
           (r) => r.data,
         ),
-        `PR review comments for ${owner}/${repo}`
+        `PR review comments for ${owner}/${repo}`,
       );
 
       for (const c of comments) {
@@ -544,7 +550,7 @@ export class GithubService {
           ),
           `Commits for ${owner}/${repo} ${login ? `(author: ${login})` : ''}`,
           5,
-          3000 // longer delay for commits
+          3000, // longer delay for commits
         );
 
         for (const c of commits) {
@@ -586,36 +592,49 @@ export class GithubService {
     untilIso?: string,
   ) {
     const users = new Set(usersArray.map((s) => s.trim()).filter(Boolean));
-    
+
     if (!users.size) throw new Error('users list is required');
+    try {
+      const since = sinceIso ?? this.isoDaysAgo(180);
+      const until = untilIso ?? this.isoNow();
 
-    const since = sinceIso ?? this.isoDaysAgo(180);
-    const until = untilIso ?? this.isoNow();
+      await this.upsertUserProfilesToBronze([...users]);
+      const repoUsers = await this.buildRepoUsersMap(users, since);
 
-    await this.upsertUserProfilesToBronze([...users]);
-    const repoUsers = await this.buildRepoUsersMap(users, since);
+      let ingestedRepos = 0;
+      for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
+        let meta: { owner: string; name: string; id?: number; private?: boolean } | null = null;
+        try {
+          const m = await this.fetchRepoMeta(owner, repo);
+          meta = { owner: m.owner, name: m.name, id: m.id, private: m.private };
+        } catch (error) {
+          this.logger.warn(`❌ Failed to fetch repo metadata for ${owner}/${repo}, skipping: ${error}`);
+          continue;
+        }
 
-    let ingestedRepos = 0;
-    for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
-      let meta: { owner: string; name: string; id?: number; private?: boolean } | null = null;
-      try {
-        const m = await this.fetchRepoMeta(owner, repo);
-        meta = { owner: m.owner, name: m.name, id: m.id, private: m.private };
-      } catch (error) {
-        this.logger.warn(`❌ Failed to fetch repo metadata for ${owner}/${repo}, skipping: ${error}`);
-        continue;
+        const numberToId = await this.buildNumberToIdMap(meta.owner, meta.name, since);
+        await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since);
+        await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
+        await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
+        await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, until);
+        ingestedRepos++;
       }
 
-      const numberToId = await this.buildNumberToIdMap(meta.owner, meta.name, since);
-      await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since);
-      await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
-      await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
-      await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, until);
-      ingestedRepos++;
+      return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until };
+    } catch (err) {
+      if (err instanceof OctokitRequestError) {
+        // Network / GitHub API
+        this.logger.error(`GitHub API error: ${err.status} – ${err.message}`, err);
+        throw new Error(`GitHub API failure: ${err.message}`);
+      }
+      if (err instanceof QueryFailedError) {
+        // Database constraint/connection
+        this.logger.error(`Database error during ingestion`, err);
+        throw new Error('Database operation failed');
+      }
+      // Any other unexpected errors
+      this.logger.error('Unexpected error in ingestEachUserInTheirRepos', err as Error);
+      throw err;
     }
-
-    return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until };
   }
-
-
 }
