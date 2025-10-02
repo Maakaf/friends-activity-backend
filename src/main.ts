@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
@@ -21,6 +22,8 @@ async function bootstrap() {
 
   await app.listen(3000, '0.0.0.0');
 
+    console.log('🚀 Application is running on: http://localhost:3000');
+    console.log('📚 Swagger documentation: http://localhost:3000/docs');
 }
 bootstrap().catch(err => {
   console.error('Application failed to start:', err);

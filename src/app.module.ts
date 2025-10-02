@@ -3,24 +3,40 @@ import 'dotenv/config';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
-
-import { BronzeModule } from './bronzeLayer/bronze.module.js';
 import dataSource from './database/data-source.js';
+import { AppController } from './app.controller.js';
+import { GithubModule } from './raw/raw.module.js';
+import { NormalizedModule } from './normalized/normalized.module.js';
+import { AnalyticsModule } from './analytics/analytics.module.js';
+import { PipelineModule } from './pipeline/pipeline.module.js';  // <-- if you created it
+
+function pgConfig() {
+  if (process.env.DATABASE_URL) {
+    return {
+      type: 'postgres' as const,
+      url: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      autoLoadEntities: true,
+      synchronize: false,
+    };
+  }
+  return {
+    ...dataSource.options,
+    autoLoadEntities: true,
+    synchronize: false,
+  };
+}
 
 @Module({
   imports: [
-    // Use the same options as the CLI (data-source.ts)
-    TypeOrmModule.forRoot({
-      ...dataSource.options,     // includes type, url, ssl, schema, migrations, etc.
-      autoLoadEntities: false,
-      // Never sync in prod; migrations handle schema
-      synchronize: false,
-    }),
-    BronzeModule,
+    TypeOrmModule.forRoot(pgConfig()),
+    GithubModule,
+    NormalizedModule,
+    AnalyticsModule,
+    PipelineModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [
+    AppController
+  ],
 })
 export class AppModule {}
