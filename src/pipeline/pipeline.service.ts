@@ -36,7 +36,7 @@ export class PipelineService {
     await this.analytics.refreshAll();
 
     // 4. Analytics report for the frontend
-    return this.analyticsReport.generateFrontendReport(users);
+    return this.analyticsReport.generateFrontendReport(users, ingestResult.excludedUsers);
   }
 
   /**
@@ -50,6 +50,19 @@ export class PipelineService {
     }
 
     await this.analytics.refreshAll();
-    return this.analyticsReport.generateFrontendReport(users);
+    return this.analyticsReport.generateFrontendReport(users, []);
+  }
+
+  /**
+   * Remove users and their data from all database tables.
+   */
+  async removeUsers(users: string[]): Promise<unknown> {
+    if (!users || !Array.isArray(users) || users.length === 0) {
+      throw new BadRequestException(
+        'Body must be { "users": string[] } with at least one username.',
+      );
+    }
+
+    return this.github.removeUsers(users);
   }
 }
