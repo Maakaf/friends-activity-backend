@@ -64,8 +64,13 @@ export function mapSilverToCurated(bundle: SilverBundle): {
   const activityMap = new Map<string, UserActivityEntity>();
 
   const addActivity = (userId: string | null, repoId: string | null, dateIso: string | null, type: string) => {
+    if (!userId || !repoId || !dateIso) return;
+    
     const day = toDate(dateIso);
-    const key = `${userId}-${day?.toISOString().split('T')[0]}-${repoId}-${type}`;
+    if (!day) return;
+    
+    const dayStr = day.toISOString().split('T')[0];
+    const key = `${userId}-${dayStr}-${repoId}-${type}`;
     
     const existing = activityMap.get(key);
     if (existing) {
@@ -89,7 +94,19 @@ export function mapSilverToCurated(bundle: SilverBundle): {
   });
   commits.forEach(c  => addActivity(c.authorUserId, c.repoId, c.createdAt, 'commit'));
 
-  const activities = Array.from(activityMap.values());
+  // Final deduplication step to prevent constraint violations
+  const uniqueActivities = new Map<string, UserActivityEntity>();
+  Array.from(activityMap.values()).forEach(activity => {
+    const key = `${activity.userId}-${activity.day?.toISOString().split('T')[0]}-${activity.repoId}-${activity.activityType}`;
+    const existing = uniqueActivities.get(key);
+    if (existing) {
+      existing.activityCount = (existing.activityCount || 0) + (activity.activityCount || 0);
+    } else {
+      uniqueActivities.set(key, { ...activity });
+    }
+  });
+  
+  const activities = Array.from(uniqueActivities.values());
 
   return { profiles, activities, repos: repoEntities };
 }
