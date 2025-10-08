@@ -46,7 +46,11 @@ export class AnalyticsService {
 
   private async upsertUserActivities(activities: UserActivityEntity[]) {
     if (activities.length === 0) return;
-    return this.userActivityRepo.upsert(activities, ['userId', 'day', 'repoId', 'activityType']);
+    
+    // Process activities one by one to avoid batch duplicates
+    for (const activity of activities) {
+      await this.userActivityRepo.upsert([activity], ['userId', 'day', 'repoId', 'activityType']);
+    }
   }
 
   private async upsertRepositories(repos: RepositoryEntity[]) {
