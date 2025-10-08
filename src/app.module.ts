@@ -2,13 +2,15 @@
 import 'dotenv/config';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
 
 import dataSource from './database/data-source.js';
 import { AppController } from './app.controller.js';
 import { GithubModule } from './raw/raw.module.js';
 import { NormalizedModule } from './normalized/normalized.module.js';
 import { AnalyticsModule } from './analytics/analytics.module.js';
-import { PipelineModule } from './pipeline/pipeline.module.js';  // <-- if you created it
+import { PipelineModule } from './pipeline/pipeline.module.js';
+import { ApiKeyGuard } from './auth/api-key.guard.js';
 
 function pgConfig() {
   if (process.env.DATABASE_URL) {
@@ -35,8 +37,12 @@ function pgConfig() {
     AnalyticsModule,
     PipelineModule,
   ],
-  controllers: [
-    AppController
+  controllers: [AppController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ApiKeyGuard,
+    },
   ],
 })
 export class AppModule {}

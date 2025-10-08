@@ -1,15 +1,17 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody, ApiSecurity } from '@nestjs/swagger';
 import { PipelineService } from './pipeline.service.js';
-import { IngestUsersDto } from '../raw/dto/ingest-users.dto.js'; // reuse same DTO
+import { IngestUsersDto } from '../raw/dto/ingest-users.dto.js';
 
 @ApiTags('pipeline')
+@ApiSecurity('X-API-Key')  // Add this
 @Controller('pipeline')
 export class PipelineController {
   constructor(private readonly pipeline: PipelineService) {
       // TEMP sanity check
     console.log('PipelineController DI ok?', !!pipeline);
   }
+  
   @Post('stats')
   @ApiOperation({
     summary: 'Run full Raw → Silver → Curated → Analytics pipeline for given users',
