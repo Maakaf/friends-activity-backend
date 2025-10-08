@@ -13,7 +13,7 @@ export class AnalyticsReportService {
     @InjectRepository(RepositoryEntity) private readonly repoRepo: Repository<RepositoryEntity>,
   ) {}
 
-  async generateFrontendReport(usernames: string[]) {
+  async generateFrontendReport(usernames: string[], excludedUsers: string[] = []) {
     const since180Days = new Date();
     since180Days.setDate(since180Days.getDate() - 180);
 
@@ -45,7 +45,8 @@ export class AnalyticsReportService {
     // Build response
     const result = {
       users: users.map(user => this.buildUserData(user, repos, activities)),
-      globalSummary: this.buildGlobalSummary(users, repos, activities, since180Days)
+      globalSummary: this.buildGlobalSummary(users, repos, activities, since180Days),
+      excludedUsers
     };
 
     return result;

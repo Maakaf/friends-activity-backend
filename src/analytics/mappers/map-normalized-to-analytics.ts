@@ -82,15 +82,7 @@ export function mapSilverToCurated(bundle: SilverBundle): {
   };
 
   issues.forEach(i   => addActivity(i.authorUserId, i.repoId, i.createdAt, 'issue'));
-  prs.forEach(p      => {
-    addActivity(p.authorUserId, p.repoId, p.createdAt, 'pr');
-    // Count commits within PRs as commit activities
-    if (p.commits && Array.isArray(p.commits)) {
-      p.commits.forEach(() => {
-        addActivity(p.authorUserId, p.repoId, p.createdAt, 'commit');
-      });
-    }
-  });
+  prs.forEach(p      => addActivity(p.authorUserId, p.repoId, p.createdAt, 'pr'));
   comments.forEach(c => {
     const commentType = c.parentType === 'PR' ? 'pr_comment' : 'issue_comment';
     addActivity(c.authorUserId, c.repoId, c.createdAt, commentType);

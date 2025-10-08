@@ -29,4 +29,13 @@ export class PipelineController {
   getAnalyticsReport(@Body() body: IngestUsersDto) {
     return this.pipeline.generateReport(body.users);
   }
+
+  @Post('removeUsers')
+  @ApiOperation({
+    summary: 'Remove users and their data from all database tables',
+  })
+  @ApiBody({ type: IngestUsersDto })
+  removeUsers(@Body() body: IngestUsersDto) {
+    return this.pipeline.removeUsers(body.users);
+  }
 }

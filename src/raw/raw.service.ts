@@ -209,20 +209,17 @@ export class GithubService {
     return new Set(result.map((row: any) => row.login));
   }
 
-  private async removeUsersNotInInputList(inputUsers: string[]) {
-    if (!inputUsers.length) return;
+  private async getAllDbUsers(): Promise<string[]> {
+    const result = await this.ds.query('SELECT login FROM gold.user_profile');
+    return result.map((row: any) => row.login);
+  }
 
-    // Get all users currently in gold.user_profile
-    const allDbUsers = await this.ds.query('SELECT login FROM gold.user_profile');
-    const dbUserLogins = allDbUsers.map((row: any) => row.login);
-    
-    // Find users in DB but not in input list
-    const usersToRemove = dbUserLogins.filter((login: string) => !inputUsers.includes(login));
-    
-    if (!usersToRemove.length) {
-      this.logger.log('🔍 No users to remove from database');
-      return;
-    }
+  private findExcludedUsers(allDbUsers: string[], inputUsers: string[]): string[] {
+    return allDbUsers.filter(login => !inputUsers.includes(login));
+  }
+
+  private async removeSpecificUsers(usersToRemove: string[]) {
+    if (!usersToRemove.length) return { eventsDeleted: 0, activitiesDeleted: 0 };
 
     this.logger.log(`🗑️ Removing ${usersToRemove.length} users from database: ${usersToRemove.join(', ')}`);
 
@@ -234,6 +231,9 @@ export class GithubService {
     const userNodeMap = new Map(userNodes.map((row: any) => [row.login, row.user_node]));
     const userNodeValues = Array.from(userNodeMap.values()).filter(Boolean);
 
+    let eventsDeleted = 0;
+    let activitiesDeleted = 0;
+
     // Remove from Gold layer
     await this.ds.query(
       'DELETE FROM gold.user_profile WHERE login = ANY($1)',
@@ -241,14 +241,17 @@ export class GithubService {
     );
     
     if (userNodeValues.length > 0) {
-      await this.ds.query(
-        'DELETE FROM gold.user_activity WHERE user_id = ANY($1)',
+      const activitiesResult = await this.ds.query(
+        'DELETE FROM gold.user_activity WHERE user_id = ANY($1) RETURNING *',
         [userNodeValues]
       );
-      await this.ds.query(
-        'DELETE FROM bronze.github_events WHERE actor_user_node = ANY($1)',
+      activitiesDeleted = activitiesResult.length;
+
+      const eventsResult = await this.ds.query(
+        'DELETE FROM bronze.github_events WHERE actor_user_node = ANY($1) RETURNING *',
         [userNodeValues]
       );
+      eventsDeleted = eventsResult.length;
     }
 
     // Remove from Bronze layer
@@ -266,6 +269,107 @@ export class GithubService {
     }
 
     this.logger.log(`✅ Removed ${usersToRemove.length} users from all layers`);
+    return { eventsDeleted, activitiesDeleted };
+  }
+
+  async removeUsers(users: string[]) {
+    const inputUsers = users.map(s => s.trim()).filter(Boolean);
+    if (!inputUsers.length) {
+      throw new Error('Users list cannot be empty');
+    }
+
+    // Check which users exist in DB
+    const existingUsers = await this.checkUsersInGoldProfile(inputUsers);
+    const existingUsersList = Array.from(existingUsers);
+    const notFoundUsers = inputUsers.filter(user => !existingUsers.has(user));
+    
+    const removedUsers: string[] = [];
+    const failedUsers: string[] = [];
+
+    // Process each user individually for proper failure tracking
+    for (const user of existingUsersList) {
+      try {
+        // Get user_node for this specific user
+        const userNodeResult = await this.ds.query(
+          'SELECT user_node FROM bronze.github_users WHERE login = $1',
+          [user]
+        );
+        
+        if (userNodeResult.length === 0) {
+          this.logger.warn(`⚠️ User ${user} not found in bronze.github_users, skipping`);
+          continue;
+        }
+        
+        const userNode = userNodeResult[0].user_node;
+        
+        // Delete events for this user
+        await this.ds.query(
+          'DELETE FROM bronze.github_events WHERE actor_user_node = $1',
+          [userNode]
+        );
+        
+        // Delete activities for this user
+        await this.ds.query(
+          'DELETE FROM gold.user_activity WHERE user_id = $1',
+          [userNode]
+        );
+        
+        // Delete from gold.user_profile
+        await this.ds.query(
+          'DELETE FROM gold.user_profile WHERE login = $1',
+          [user]
+        );
+        
+        // Delete from bronze.github_users
+        await this.ds.query(
+          'DELETE FROM bronze.github_users WHERE login = $1',
+          [user]
+        );
+        
+        // Remove from memory store
+        this.mem.removeUserData(userNode);
+        
+        // Track successful removal
+        removedUsers.push(user);
+        
+        this.logger.log(`✅ Successfully removed user ${user}`);
+        
+      } catch (error) {
+        this.logger.warn(`❌ Failed to remove user ${user}: ${error}`);
+        failedUsers.push(user);
+      }
+    }
+
+    return {
+      message: 'User removal completed',
+      summary: {
+        requested: inputUsers.length,
+        removed: removedUsers.length,
+        notFound: notFoundUsers.length,
+        failed: failedUsers.length
+      },
+      removedUsers,
+      notFoundUsers,
+      failedUsers
+    };
+  }
+
+  private async removeUsersNotInInputList(inputUsers: string[]) {
+    if (!inputUsers.length) return;
+
+    // Get all users currently in gold.user_profile
+    const allDbUsers = await this.ds.query('SELECT login FROM gold.user_profile');
+    const dbUserLogins = allDbUsers.map((row: any) => row.login);
+    
+    // Find users in DB but not in input list
+    const usersToRemove = dbUserLogins.filter((login: string) => !inputUsers.includes(login));
+    
+    if (!usersToRemove.length) {
+      this.logger.log('🔍 No users to remove from database');
+      return;
+    }
+
+    await this.removeSpecificUsers(usersToRemove);
   }
 
   private async upsertUserProfilesToBronze(logins: string[]) {
@@ -702,21 +806,29 @@ export class GithubService {
     sinceIso?: string,
     untilIso?: string,
   ) {
-    const users = new Set(usersArray.map((s) => s.trim()).filter(Boolean));
+    const inputUsers = new Set(usersArray.map((s) => s.trim()).filter(Boolean));
     
-    if (!users.size) throw new Error('users list is required');
-
-    // STEP 1: Remove users who are in DB but not in input list
-    await this.removeUsersNotInInputList(Array.from(users));
+    if (!inputUsers.size) throw new Error('users list is required');
 
     const until = untilIso ?? this.isoNow();
 
-    // Check which users exist in gold.user_profile
-    const existingUsers = await this.checkUsersInGoldProfile([...users]);
+    // Get all users in DB and find excluded users
+    const allDbUsers = await this.getAllDbUsers();
+    const excludedUsers = this.findExcludedUsers(allDbUsers, Array.from(inputUsers));
     
-    // Create user-specific time windows
+    if (excludedUsers.length > 0) {
+      this.logger.log(`📋 Found ${excludedUsers.length} excluded users (in DB but not in input): ${excludedUsers.join(', ')}`);
+    }
+    
+    // Combine input users + excluded users for data collection
+    const allUsersToProcess = new Set([...inputUsers, ...excludedUsers]);
+    
+    // Check which users exist in gold.user_profile (all users)
+    const existingUsers = await this.checkUsersInGoldProfile([...allUsersToProcess]);
+    
+    // Create user-specific time windows for ALL users
     const userTimeWindows = new Map<string, string>();
-    for (const user of users) {
+    for (const user of allUsersToProcess) {
       if (existingUsers.has(user)) {
         // Existing user: last 48 hours
         userTimeWindows.set(user, sinceIso ?? this.isoHoursAgo(48));
@@ -728,7 +840,7 @@ export class GithubService {
       }
     }
 
-    await this.upsertUserProfilesToBronze([...users]);
+    await this.upsertUserProfilesToBronze([...allUsersToProcess]);
     const repoUsers = await this.buildRepoUsersMap(userTimeWindows);
 
     // Fetch all repo metadata in parallel
@@ -766,7 +878,15 @@ export class GithubService {
     const earliestSince = Math.min(...Array.from(userTimeWindows.values()).map(iso => new Date(iso).getTime()));
     const since = new Date(earliestSince).toISOString().replace(/\.\d{3}Z$/, 'Z');
     
-    return { mode: 'per-user-repos', users: [...users], repos: ingestedRepos, since, until, userTimeWindows: Object.fromEntries(userTimeWindows) };
+    return { 
+      mode: 'per-user-repos', 
+      users: [...inputUsers], 
+      excludedUsers, 
+      repos: ingestedRepos, 
+      since, 
+      until, 
+      userTimeWindows: Object.fromEntries(userTimeWindows) 
+    };
   }
 
 
