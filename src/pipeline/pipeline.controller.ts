@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody, ApiSecurity } from '@nestjs/swagger';
 import { PipelineService } from './pipeline.service.js';
 import { IngestUsersDto } from '../raw/dto/ingest-users.dto.js';
@@ -37,5 +37,22 @@ export class PipelineController {
   @ApiBody({ type: IngestUsersDto })
   removeUsers(@Body() body: IngestUsersDto) {
     return this.pipeline.removeUsers(body.users);
+  }
+
+  @Post('addNewUsers')
+  @ApiOperation({
+    summary: 'Add new users with async processing (last 6 months data)',
+  })
+  @ApiBody({ type: IngestUsersDto })
+  addNewUsers(@Body() body: IngestUsersDto) {
+    return this.pipeline.addNewUsers(body.users);
+  }
+
+  @Get('listUsers')
+  @ApiOperation({
+    summary: 'List all users grouped by their processing status',
+  })
+  listUsers() {
+    return this.pipeline.listUsers();
   }
 }
