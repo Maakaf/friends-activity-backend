@@ -30,7 +30,7 @@ const BronzeRepoBindings: Provider[] = [
   { provide: IssueBronzeRepo, useClass: IssueRawMemoryRepo },
   { provide: PRBronzeRepo, useClass: PRRawMemoryRepo },
   { provide: CommentBronzeRepo, useClass: CommentRawMemoryRepo },
-  { provide: CommitBronzeRepo, useClass: CommitRawMemoryRepo },
+  { provide: CommitBronzeRepo, useClass: CommitBronzeRepo },
   { provide: UserBronzeRepo, useClass: UserMemoryRepo },
   { provide: RepoBronzeRepo, useClass: RepoRawMemoryRepo },
 ];

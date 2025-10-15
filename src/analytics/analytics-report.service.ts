@@ -98,6 +98,7 @@ export class AnalyticsReportService {
 
       switch (activity.activityType) {
         case 'commit':
+        case 'pr_commit':
           counts.commits += activityCount;
           break;
         case 'pr':
