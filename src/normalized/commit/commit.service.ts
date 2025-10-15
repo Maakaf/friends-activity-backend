@@ -27,11 +27,13 @@ export class CommitSilverService {
       const cur = mapCommit(b);
       if (!cur) continue;
 
-      const prev = byId.get(cur.commitId);
+      // Include target_node in the key to preserve different contexts
+      const contextKey = `${cur.commitId}-${b.target_node || 'direct'}`;
+      const prev = byId.get(contextKey);
       if (!prev) {
-        byId.set(cur.commitId, cur);
+        byId.set(contextKey, cur);
       } else {
-        byId.set(cur.commitId, mergeCommit(prev, cur));
+        byId.set(contextKey, mergeCommit(prev, cur));
       }
     }
 

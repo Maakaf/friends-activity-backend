@@ -53,9 +53,9 @@ export async function upsertBronzeUser(ds: DataSource, row: BronzeUserRow) {
   await ds.query(
     `
     INSERT INTO bronze.github_users
-      (user_node, provider, login, name, fetched_at, raw_payload)
+      (user_node, provider, login, name, fetched_at, raw_payload, processing_status)
     VALUES
-      ($1, 'github', $2, $3, now(), $4::jsonb)
+      ($1, 'github', $2, $3, now(), $4::jsonb, 'processing')
     ON CONFLICT (user_node) DO UPDATE
       SET login = EXCLUDED.login,
           name  = EXCLUDED.name,
@@ -63,6 +63,24 @@ export async function upsertBronzeUser(ds: DataSource, row: BronzeUserRow) {
           raw_payload = EXCLUDED.raw_payload
     `,
     [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload)]
+  );
+}
+
+/** Insert user with specific processing status (for new users) */
+export async function insertBronzeUserWithStatus(
+  ds: DataSource, 
+  row: BronzeUserRow, 
+  status: 'ready' | 'processing' | 'failed' = 'ready'
+) {
+  await ds.query(
+    `
+    INSERT INTO bronze.github_users
+      (user_node, provider, login, name, fetched_at, raw_payload, processing_status)
+    VALUES
+      ($1, 'github', $2, $3, now(), $4::jsonb, $5)
+    ON CONFLICT (user_node) DO NOTHING
+    `,
+    [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload), status]
   );
 }
 

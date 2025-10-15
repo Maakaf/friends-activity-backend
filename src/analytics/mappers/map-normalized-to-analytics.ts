@@ -94,19 +94,7 @@ export function mapSilverToCurated(bundle: SilverBundle): {
   });
   commits.forEach(c  => addActivity(c.authorUserId, c.repoId, c.createdAt, 'commit'));
 
-  // Final deduplication step to prevent constraint violations
-  const uniqueActivities = new Map<string, UserActivityEntity>();
-  Array.from(activityMap.values()).forEach(activity => {
-    const key = `${activity.userId}-${activity.day?.toISOString().split('T')[0]}-${activity.repoId}-${activity.activityType}`;
-    const existing = uniqueActivities.get(key);
-    if (existing) {
-      existing.activityCount = (existing.activityCount || 0) + (activity.activityCount || 0);
-    } else {
-      uniqueActivities.set(key, { ...activity });
-    }
-  });
-  
-  const activities = Array.from(uniqueActivities.values());
+  const activities = Array.from(activityMap.values());
 
   return { profiles, activities, repos: repoEntities };
 }

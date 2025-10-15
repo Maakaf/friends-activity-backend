@@ -25,11 +25,21 @@ export class CommitBronzeRepo {
     }
 
     const sql = `
-      SELECT event_ulid, event_type, provider_event_id,
-             actor_user_node, repo_node, target_node, created_at, raw_payload
-        FROM bronze.github_events
+      SELECT e.event_ulid, e.event_type, e.provider_event_id,
+             e.actor_user_node, e.repo_node, e.target_node, e.created_at, e.raw_payload
+        FROM bronze.github_events e
        WHERE ${where.join(' AND ')}
-       ORDER BY created_at ASC, event_ulid ASC`;
+         AND (
+           e.target_node IS NULL  -- Direct commits
+           OR EXISTS (            -- PR commits where PR is merged
+             SELECT 1 FROM bronze.github_events pr
+             WHERE pr.event_type = 'pull_request'
+               AND pr.provider_event_id = e.target_node
+               AND (pr.raw_payload->>'merged_at' IS NOT NULL
+                    OR pr.raw_payload->'pull_request'->>'merged_at' IS NOT NULL)
+           )
+         )
+       ORDER BY e.created_at ASC, e.event_ulid ASC`;
 
     const rows = await this.ds.query(sql, args);
     return rows as BronzeRow[];
