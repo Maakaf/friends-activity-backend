@@ -797,6 +797,68 @@ export class GithubService {
   // =======================
 
   /**
+   * Process ONLY the specified new users without including existing DB users
+   */
+  async ingestNewUsersOnly(
+    usersArray: string[],
+    sinceIso?: string,
+    untilIso?: string,
+  ) {
+    const inputUsers = new Set(usersArray.map((s) => s.trim()).filter(Boolean));
+    
+    if (!inputUsers.size) throw new Error('users list is required');
+
+    const until = untilIso ?? this.isoNow();
+    const since = sinceIso ?? this.isoDaysAgo(180); // 6 months for new users
+
+    this.logger.log(`🆕 Processing ONLY new users: ${Array.from(inputUsers).join(', ')}`);
+    
+    // Create time windows for input users only (all get 6 months as new users)
+    const userTimeWindows = new Map<string, string>();
+    for (const user of inputUsers) {
+      userTimeWindows.set(user, since);
+      this.logger.log(`📅 User ${user}: fetching last 180 days (new user)`);
+    }
+
+    await this.upsertUserProfilesToBronze([...inputUsers]);
+    const repoUsers = await this.buildRepoUsersMap(userTimeWindows);
+
+    // Fetch all repo metadata in parallel
+    const repoList = Array.from(repoUsers.values());
+    const repoMetaMap = await this.fetchMultipleReposMeta(
+      repoList.map(({owner, repo}) => ({owner, repo}))
+    );
+
+    let ingestedRepos = 0;
+    const totalRepos = Array.from(repoUsers.values()).length;
+    for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
+      this.logger.log(`🔄 Processing repo ${ingestedRepos + 1}/${totalRepos}: ${owner}/${repo}`);
+      const meta = repoMetaMap.get(this.repoKey(owner, repo));
+      if (!meta) {
+        this.logger.warn(`❌ No metadata found for ${owner}/${repo}, skipping`);
+        continue;
+      }
+
+      const numberToId = await this.buildNumberToIdMap(meta.owner, meta.name, since);
+      await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since);
+      await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
+      await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
+      await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, until);
+      ingestedRepos++;
+      this.logger.log(`✅ Completed repo ${ingestedRepos}/${totalRepos}: ${owner}/${repo}`);
+    }
+    
+    return { 
+      mode: 'new-users-only', 
+      users: [...inputUsers], 
+      excludedUsers: [], // No excluded users in this mode
+      repos: ingestedRepos, 
+      since, 
+      until
+    };
+  }
+
+  /**
    *  - discover per-user repos since `sinceIso`
    *  - merge into repo -> set(users) map
    *  - ingest each repo ONCE, using only the users who actually contributed there
