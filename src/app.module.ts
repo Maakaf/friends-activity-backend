@@ -11,6 +11,7 @@ import { NormalizedModule } from './normalized/normalized.module.js';
 import { AnalyticsModule } from './analytics/analytics.module.js';
 import { PipelineModule } from './pipeline/pipeline.module.js';
 import { ApiKeyGuard } from './auth/api-key.guard.js';
+import { SchedulerModule } from './scheduler/scheduler.module.js';
 
 function pgConfig() {
   if (process.env.DATABASE_URL) {
@@ -36,6 +37,7 @@ function pgConfig() {
     NormalizedModule,
     AnalyticsModule,
     PipelineModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [

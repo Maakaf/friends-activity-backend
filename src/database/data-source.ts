@@ -2,6 +2,7 @@
 import 'reflect-metadata';
 import 'dotenv/config';
 
+import { UserSyncStatus } from '../scheduler/sync-status.entity.js';
 import { DataSource } from 'typeorm';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -22,6 +23,8 @@ const entitiesArr: string[] = [
   path.join(__dirname, '..', 'raw', '**', '*.entity.{ts,js}'),
   // Curated entities
   path.join(__dirname, '..', 'analytics', '**', '*.entity.{ts,js}'),
+  // User sync status entity
+  path.join(__dirname, '..', 'scheduler', 'sync-status.entity.js'),
 ];
 
 const dataSource = new DataSource({
@@ -30,7 +33,10 @@ const dataSource = new DataSource({
   ssl: { rejectUnauthorized: false },
 
 
-  entities: entitiesArr,
+  entities: [
+    ...entitiesArr,
+    UserSyncStatus,
+  ],
 
   migrations: [migrationsGlob],
   migrationsTableName: 'typeorm_migrations',

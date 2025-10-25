@@ -36,6 +36,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-fastify": "^11.1.6",
+    "@nestjs/schedule": "^6.0.1",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/typeorm": "^11.0.0",
     "@octokit/plugin-paginate-rest": "^13.1.1",
@@ -72,7 +73,7 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.16.0",
+    "tsx": "^4.20.6",
     "typeorm-ts-node-esm": "^0.3.20",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.20.0"
