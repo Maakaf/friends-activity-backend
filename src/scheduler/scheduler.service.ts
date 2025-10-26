@@ -6,19 +6,21 @@ import { SyncStatusRepo } from './sync-status.repo.js';
 @Injectable()
 export class SchedulerService {
   private readonly logger = new Logger(SchedulerService.name);
-  private readonly BATCH_SIZE = 10; // Process 10 users at a time
-  private readonly DELAY_BETWEEN_BATCHES_MS = 60000; // 1 minute delay between batches
+  private readonly BATCH_SIZE = 10;
+  private readonly DELAY_BETWEEN_BATCHES_MS = 60000;
 
   constructor(
     private readonly pipelineService: PipelineService,
     private readonly syncStatusRepo: SyncStatusRepo,
-  ) {}
+  ) {
+    this.logger.log('SchedulerService initialized');
+  }
 
   // Run every day at 2 AM
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleDailySync() {
     this.logger.log('Starting daily user sync...');
-
+    
     try {
       const usersToSync = await this.syncStatusRepo.getUsersToSync(24);
       this.logger.log(`Found ${usersToSync.length} users to sync`);
@@ -70,7 +72,7 @@ export class SchedulerService {
       await this.syncStatusRepo.markInProgress(username);
 
       // Call your existing pipeline
-      await (this.pipelineService as any).processUser(username);
+      await this.pipelineService.processUser(username);
 
       await this.syncStatusRepo.markCompleted(username);
       this.logger.log(`Successfully synced user: ${username}`);

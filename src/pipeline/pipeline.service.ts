@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { GithubService } from '../raw/raw.service.js';
 import { SilverOrchestratorService } from '../normalized/orchestrator.js';
 import { AnalyticsService } from '../analytics/analytics.service.js';
@@ -80,6 +80,26 @@ export class PipelineService {
       pendingProcessing: pendingProcessingUsers,
       nonExistentUsers: nonExistentUsers
     };
+  }
+
+  /**
+   * Process a single user (used by scheduler).
+   */
+  async processUser(username: string): Promise<void> {
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
+    const now = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+    // Ingest user data
+    await this.github.ingestEachUserInTheirRepos([username], twoDaysAgo, now);
+
+    // Build normalized bundle
+    await this.silver.buildBundle({
+      sinceIso: twoDaysAgo,
+      untilIso: now,
+    });
+
+    // Refresh analytics
+    await this.analytics.refreshAll();
   }
 
   /**
