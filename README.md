@@ -138,7 +138,7 @@ Swagger UI is available at http://localhost:3000/docs
 - `npm run dev`: Start development server
 - `npm run build`: Build for production
 - `npm start`: Start production server
-- `npm test`: Run tests (not implemented yet)
+- `npm test`: Run tests
 
 ## Contributing
 
@@ -151,12 +151,22 @@ We welcome contributions from the community! Please see our [CONTRIBUTING.md](CO
 ### Development Setup
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
+2. Open a new [issue](https://github.com/Maakaf/friends-activity-backend/issues) - make sure to provide a good subject and description to let others understand the content of that issue.  
+3. Create a local branch: `git checkout -b issue-<issue number taken from #2>/short-descriptive-name`
 3. Make your changes
 4. Add tests if applicable
 5. Commit your changes: `git commit -m 'Add some feature'`
-6. Push to the branch: `git push origin feature/your-feature`
+6. Push to the branch: `git push origin <your branch name>`
 7. Submit a pull request
+
+> ### Note:
+> Before merging a PR to main, all CI checks should pass (github actions).
+>
+> To make sure CI will run on your branch, please follow the naming convention:
+>
+> each branch name should look like **issue-<issue number\>/short-descriptive-name**. 
+>
+> for example: **issue-48/github-service-basic-utests**
 
 ## License
 
