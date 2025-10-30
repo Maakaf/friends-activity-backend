@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddProcessingStatusToUsers1736334000000 implements MigrationInterface {
+export class AddProcessingStatusToUsers1755617000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       ALTER TABLE bronze.github_users 
