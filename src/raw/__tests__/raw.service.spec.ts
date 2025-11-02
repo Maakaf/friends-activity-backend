@@ -59,4 +59,7 @@ describe('GithubService', () => {
 
         await expect(service.ingestEachUserInTheirRepos([], '')).rejects.toThrow('users list is required');
     });
+    it('Should just fail as a dummy test', () => {
+        expect(true).toBe(false);
+    });
 });
