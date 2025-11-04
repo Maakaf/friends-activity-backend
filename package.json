@@ -75,7 +75,8 @@
     "tsx": "^4.16.0",
     "typeorm-ts-node-esm": "^0.3.20",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.20.0",
+    "uuid":"^13.0.0"
   },
   "jest": {
     "extensionsToTreatAsEsm": [
