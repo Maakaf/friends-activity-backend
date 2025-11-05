@@ -4,6 +4,9 @@ import { DataSource } from 'typeorm';
 import { GithubService } from '../../raw/raw.service.js';
 import { RawMemoryStore } from '../../raw/raw-memory.store.js';
 import { v4 as uuid4 } from 'uuid';
+import { GITHUB_CLIENT } from '../../raw/github-client.token.js';
+import type { GithubClient } from '../../raw/github-client-interface.js';
+import { jest } from '@jest/globals';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -18,6 +21,26 @@ describe('GithubService', () => {
             moduleMocker.getMetadata(DataSource) as MockMetadata<any, any>
         );
 
+        const mockGithubClient: GithubClient = {
+            // Users
+            getUserByUsername: jest.fn(),
+            // Repos
+            getRepo: jest.fn(),
+            listRepoCommits: jest.fn(),
+            // Issues & PRs
+            listIssuesAndPullsForRepo: jest.fn(),
+            getIssue: jest.fn(),
+            getPull: jest.fn(),
+            // Comments
+            listIssueCommentsForRepo: jest.fn(),
+            listReviewCommentsForRepo: jest.fn(),
+            // PR commits
+            listCommitsForPull: jest.fn(),
+            // Search
+            searchIssuesAndPulls: jest.fn(),
+            searchCommits: jest.fn(),
+        } as unknown as GithubClient;
+
         nestTestmodule = await Test.createTestingModule({
             providers: [
                 GithubService,
@@ -30,6 +53,10 @@ describe('GithubService', () => {
                     useValue: moduleMocker.generateFromMetadata(
                         moduleMocker.getMetadata(RawMemoryStore) as MockMetadata<any, any>
                     ),
+                },
+                {
+                    provide: GITHUB_CLIENT,
+                    useValue: mockGithubClient,
                 },
             ],
         }).compile();
@@ -45,12 +72,12 @@ describe('GithubService', () => {
         }
     });
 
-    it('Should throw if GITHUB_TOKEN is missing', async () => {
+    it('Should create service even if GITHUB_TOKEN is missing (client injected)', async () => {
         delete process.env.GITHUB_TOKEN;
         expect(process.env.GITHUB_TOKEN).toBeUndefined();
 
-        // This should throw during service creation
-        await expect(createService()).rejects.toThrow('GITHUB_TOKEN environment variable is required');
+        await expect(createService()).resolves.toBeUndefined();
+        expect(service).toBeDefined();
     });
 
     it('Should throw for empty users array', async () => {
