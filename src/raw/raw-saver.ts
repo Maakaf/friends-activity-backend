@@ -1,6 +1,8 @@
 
 import { DataSource } from 'typeorm';
 
+export type RawPayload = Record<string, unknown>;
+
 export interface BronzeRow {
   event_ulid: string;
   provider: 'github';
@@ -12,7 +14,7 @@ export interface BronzeRow {
   created_at?: string | null; // ISO string
   received_at?: string | null; // you can ignore; DB defaults now()
   is_private?: boolean | null;
-  raw_payload: any;
+  raw_payload: RawPayload;
 }
 
 export async function insertBronze(ds: DataSource, row: BronzeRow) {
@@ -45,7 +47,7 @@ export interface BronzeUserRow {
   user_node: string;       // GitHub numeric id, as text
   login: string;
   name?: string | null;
-  raw_payload: any;
+  raw_payload: RawPayload;
 }
 
 /** Upsert latest user payload into bronze.github_users */
@@ -91,7 +93,7 @@ export interface BronzeRepoRow {
   owner_login?: string | null;
   name?: string | null;
   is_private?: boolean | null;
-  raw_payload: any;
+  raw_payload: RawPayload;
 }
 
 /** Upsert latest repo payload into bronze.github_repos */
