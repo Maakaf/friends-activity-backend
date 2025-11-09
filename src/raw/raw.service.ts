@@ -3,13 +3,24 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Octokit } from '@octokit/rest';
 import { paginateRest } from '@octokit/plugin-paginate-rest';
+import { RequestError } from '@octokit/request-error';
+import type { RestEndpointMethodTypes } from '@octokit/rest';
 import { insertBronze, BronzeRow,  upsertBronzeUser, upsertBronzeRepo } from './raw-saver.js';
+import type { RawPayload } from './raw-saver.js';
 import { RawMemoryStore, BronzeEventsRow, BronzeUsersRow, BronzeReposRow } from './raw-memory.store.js';
 
 const MyOctokit = Octokit.plugin(paginateRest);
   
 const ISSUE_NUM_RE = /\/issues\/(\d+)$/;
 const PR_NUM_RE    = /\/pulls\/(\d+)$/;
+
+type RepoResponse = RestEndpointMethodTypes['repos']['get']['response']['data'];
+type UserResponse = RestEndpointMethodTypes['users']['getByUsername']['response']['data'];
+type IssueListItem = RestEndpointMethodTypes['issues']['listForRepo']['response']['data'][number];
+type IssueListParams = RestEndpointMethodTypes['issues']['listForRepo']['parameters'];
+type GoldUserProfileRow = { login: string };
+type BronzeUserNodeRow = { login: string; user_node: string | null };
+type BronzeUserNodeOnlyRow = { user_node: string | null };
 
 @Injectable()
 export class GithubService {
@@ -25,6 +36,20 @@ export class GithubService {
     @Inject(RawMemoryStore) private readonly mem: RawMemoryStore,
   ) {}
 
+  private isRequestError(error: unknown): error is RequestError {
+    return error instanceof RequestError;
+  }
+
+  private getErrorStatus(error: unknown): number | undefined {
+    return this.isRequestError(error) ? error.status : undefined;
+  }
+
+  private getErrorMessage(error: unknown): string {
+    if (this.isRequestError(error)) return error.message;
+    if (error instanceof Error) return error.message;
+    return String(error);
+  }
+
   private async sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -35,22 +60,24 @@ export class GithubService {
     maxRetries = 5,
     baseDelay = 2000
   ): Promise<T> {
-    let lastError: any;
+    let lastError: unknown;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await fn();
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
-        const isRateLimit = error?.status === 403 && error?.message?.includes('rate limit');
-        const isServerError = error?.status >= 500; // 502, 504, etc.
+        const status = this.getErrorStatus(error);
+        const message = this.getErrorMessage(error);
+        const isRateLimit = status === 403 && message.includes('rate limit');
+        const isServerError = typeof status === 'number' && status >= 500; // 502, 504, etc.
         
         if (attempt === maxRetries) {
           if (isServerError) {
-            this.logger.warn(`⚠️ ${operation} failed with server error after ${maxRetries} attempts, skipping: ${error?.status}`);
-            return [] as any; // Return empty array for pagination failures
+            this.logger.warn(`⚠️ ${operation} failed with server error after ${maxRetries} attempts, skipping: ${status ?? 'unknown'}`);
+            return [] as T; // Return empty array for pagination failures
           }
-          this.logger.warn(`❌ ${operation} failed after ${maxRetries} attempts: ${error?.message}`);
+          this.logger.warn(`❌ ${operation} failed after ${maxRetries} attempts: ${message}`);
           throw error;
         }
         
@@ -65,7 +92,7 @@ export class GithubService {
       }
     }
     
-    throw lastError;
+    throw (lastError instanceof Error ? lastError : new Error(this.getErrorMessage(lastError)));
   }
 
   // --------- Helpers ----------
@@ -117,13 +144,15 @@ export class GithubService {
   private async fetchRepoMeta(owner: string, repo: string) {
     this.logger.log(`Fetching repo metadata: ${owner}/${repo}`);
     const { data } = await this.octokit.repos.get({ owner, repo });
+    const repoData: RepoResponse = data;
     this.logger.log(`✅ Repo metadata fetched: ${owner}/${repo}`);
     
-    const repo_node = String((data as any).id);
-    const full_name = (data as any).full_name ?? `${owner}/${repo}`;
-    const owner_login = (data as any).owner?.login ?? owner;
-    const name = (data as any).name ?? repo;
-    const is_private = Boolean((data as any).private);
+    const repo_node = String(repoData.id);
+    const full_name = repoData.full_name ?? `${owner}/${repo}`;
+    const owner_login = repoData.owner?.login ?? owner;
+    const name = repoData.name ?? repo;
+    const is_private = repoData.private === true;
+    const rawPayload = repoData as RawPayload;
     
     try {
       // DB write
@@ -133,7 +162,7 @@ export class GithubService {
         owner_login,
         name,
         is_private,
-        raw_payload: data,
+        raw_payload: rawPayload,
       });
       
       // Memory write
@@ -145,7 +174,7 @@ export class GithubService {
         name,
         is_private,
         fetched_at: null,
-        raw_payload: data,
+        raw_payload: rawPayload,
       };
       this.mem.upsertRepo(memRepo);
     } catch (error) {
@@ -155,7 +184,7 @@ export class GithubService {
     return {
       owner,
       name: repo,
-      id: Number((data as any).id),
+      id: Number(repoData.id),
       private: is_private,
     };
   }
@@ -204,14 +233,14 @@ export class GithubService {
     const result = await this.ds.query(
       'SELECT login FROM gold.user_profile WHERE login = ANY($1)',
       [userLogins]
-    );
+    ) as GoldUserProfileRow[];
     
-    return new Set(result.map((row: any) => row.login));
+    return new Set(result.map((row) => row.login));
   }
 
   private async getAllDbUsers(): Promise<string[]> {
-    const result = await this.ds.query('SELECT login FROM gold.user_profile');
-    return result.map((row: any) => row.login);
+    const result = await this.ds.query('SELECT login FROM gold.user_profile') as GoldUserProfileRow[];
+    return result.map((row) => row.login);
   }
 
   private findExcludedUsers(allDbUsers: string[], inputUsers: string[]): string[] {
@@ -227,9 +256,9 @@ export class GithubService {
     const userNodes = await this.ds.query(
       'SELECT login, user_node FROM bronze.github_users WHERE login = ANY($1)',
       [usersToRemove]
-    );
-    const userNodeMap = new Map(userNodes.map((row: any) => [row.login, row.user_node]));
-    const userNodeValues = Array.from(userNodeMap.values()).filter(Boolean);
+    ) as BronzeUserNodeRow[];
+    const userNodeMap = new Map(userNodes.map((row) => [row.login, row.user_node]));
+    const userNodeValues = Array.from(userNodeMap.values()).filter((node): node is string => typeof node === 'string');
 
     let eventsDeleted = 0;
     let activitiesDeleted = 0;
@@ -293,7 +322,7 @@ export class GithubService {
         const userNodeResult = await this.ds.query(
           'SELECT user_node FROM bronze.github_users WHERE login = $1',
           [user]
-        );
+        ) as BronzeUserNodeOnlyRow[];
         
         if (userNodeResult.length === 0) {
           this.logger.warn(`⚠️ User ${user} not found in bronze.github_users, skipping`);
@@ -301,6 +330,10 @@ export class GithubService {
         }
         
         const userNode = userNodeResult[0].user_node;
+        if (!userNode) {
+          this.logger.warn(`⚠️ User ${user} has no user_node in bronze.github_users, skipping`);
+          continue;
+        }
         
         // Delete events for this user
         await this.ds.query(
@@ -358,8 +391,8 @@ export class GithubService {
     if (!inputUsers.length) return;
 
     // Get all users currently in gold.user_profile
-    const allDbUsers = await this.ds.query('SELECT login FROM gold.user_profile');
-    const dbUserLogins = allDbUsers.map((row: any) => row.login);
+    const allDbUsers = await this.ds.query('SELECT login FROM gold.user_profile') as GoldUserProfileRow[];
+    const dbUserLogins = allDbUsers.map((row) => row.login);
     
     // Find users in DB but not in input list
     const usersToRemove = dbUserLogins.filter((login: string) => !inputUsers.includes(login));
@@ -379,16 +412,18 @@ export class GithubService {
       try {
         this.logger.log(`Fetching user: ${login}`);
         const { data } = await this.octokit.users.getByUsername({ username: login });
-        const user_node = String((data as any).id);
-        const userLogin = (data as any).login ?? login;
-        const name = (data as any).name ?? null;
+        const userData: UserResponse = data;
+        const user_node = String(userData.id);
+        const userLogin = userData.login ?? login;
+        const name = userData.name ?? null;
+        const rawPayload = userData as RawPayload;
         
         // DB write
         await upsertBronzeUser(this.ds, {
           user_node,
           login: userLogin,
           name,
-          raw_payload: data,
+          raw_payload: rawPayload,
         });
         
         // Memory write
@@ -398,7 +433,7 @@ export class GithubService {
           login: userLogin,
           name,
           fetched_at: null,
-          raw_payload: data,
+          raw_payload: rawPayload,
         };
         this.mem.upsertUser(memUser);
         this.logger.log(`✅ User profile saved: ${login}`);
@@ -415,12 +450,12 @@ export class GithubService {
     const map = new Map<string, string>();
     const items = await this.octokit.paginate(
       this.octokit.issues.listForRepo,
-      { owner, repo, state: 'all', per_page: 100, since: sinceIso },
-      (r) => r.data,
+      { owner, repo, state: 'all', per_page: 100, since: sinceIso } satisfies IssueListParams,
+      (r) => r.data as IssueListItem[],
     );
     for (const it of items) {
-      const num = (it as any).number;
-      const id  = (it as any).id;
+      const num = it.number;
+      const id  = it.id;
       if (num != null && id != null) map.set(String(num), String(id));
     }
     return map;
