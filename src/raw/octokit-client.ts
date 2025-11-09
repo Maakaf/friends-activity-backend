@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
+import type { RestEndpointMethodTypes } from '@octokit/rest';
+import type { RequestParameters } from '@octokit/types';
 import { paginateRest } from '@octokit/plugin-paginate-rest';
 import type {
     GithubClient,
@@ -14,6 +16,27 @@ import type {
     GithubSearchIssueOrPRDTO,
     GithubSearchCommitDTO,
 } from './github-client-interface.js';
+
+type RepoCommitItem = RestEndpointMethodTypes['repos']['listCommits']['response']['data'][number];
+type RepoCommitParams = RestEndpointMethodTypes['repos']['listCommits']['parameters'];
+
+type IssueOrPRItem = RestEndpointMethodTypes['issues']['listForRepo']['response']['data'][number];
+type IssueOrPRParams = RestEndpointMethodTypes['issues']['listForRepo']['parameters'];
+
+type IssueCommentItem = RestEndpointMethodTypes['issues']['listCommentsForRepo']['response']['data'][number];
+type IssueCommentParams = RestEndpointMethodTypes['issues']['listCommentsForRepo']['parameters'];
+
+type ReviewCommentItem = RestEndpointMethodTypes['pulls']['listReviewCommentsForRepo']['response']['data'][number];
+type ReviewCommentParams = RestEndpointMethodTypes['pulls']['listReviewCommentsForRepo']['parameters'];
+
+type PullCommitItem = RestEndpointMethodTypes['pulls']['listCommits']['response']['data'][number];
+type PullCommitParams = RestEndpointMethodTypes['pulls']['listCommits']['parameters'];
+
+type SearchIssueItem = RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][number];
+type SearchIssueParams = RestEndpointMethodTypes['search']['issuesAndPullRequests']['parameters'];
+
+type SearchCommitItem = RestEndpointMethodTypes['search']['commits']['response']['data']['items'][number];
+type SearchCommitParams = RestEndpointMethodTypes['search']['commits']['parameters'];
 
 const MyOctokit = Octokit.plugin(paginateRest);
 
@@ -31,8 +54,8 @@ export class OctokitClient implements GithubClient {
     async getUserByUsername(params: { username: string; }): Promise<GithubUserDTO> {
         const { data } = await this.octokit.users.getByUsername({ username: params.username });
         return {
-            id: String((data as any).id),
-            login: (data as any).login,
+            id: String(data.id),
+            login: data.login,
             raw: data,
         };
     }
@@ -41,25 +64,25 @@ export class OctokitClient implements GithubClient {
     async getRepo(params: { owner: string; repo: string; }): Promise<GithubRepoMetaDTO> {
         const { data } = await this.octokit.repos.get({ owner: params.owner, repo: params.repo });
         return {
-            id: Number((data as any).id),
-            fullName: (data as any).full_name,
-            ownerLogin: (data as any).owner?.login,
-            name: (data as any).name,
-            private: Boolean((data as any).private),
+            id: Number(data.id),
+            fullName: data.full_name,
+            ownerLogin: data.owner?.login ?? '',
+            name: data.name ?? params.repo,
+            private: Boolean(data.private),
             raw: data,
         };
     }
 
     async listRepoCommits(params: { owner: string; repo: string; sinceIso: string; untilIso?: string; authorLogin?: string; }): Promise<GithubCommitDTO[]> {
-        const listParams: any = { owner: params.owner, repo: params.repo, per_page: 100, since: params.sinceIso };
+        const listParams: RepoCommitParams = { owner: params.owner, repo: params.repo, per_page: 100, since: params.sinceIso };
         if (params.untilIso) listParams.until = params.untilIso;
         if (params.authorLogin) listParams.author = params.authorLogin;
         const items = await this.octokit.paginate(
             this.octokit.repos.listCommits,
             listParams,
-            (r) => r.data,
+            (r) => r.data as RepoCommitItem[],
         );
-        return items.map((c: any): GithubCommitDTO => ({
+        return items.map((c): GithubCommitDTO => ({
             sha: String(c.sha),
             authorLogin: c.author?.login ?? null,
             authorId: c.author?.id != null ? String(c.author.id) : null,
@@ -70,14 +93,14 @@ export class OctokitClient implements GithubClient {
 
     // Issues and PRs
     async listIssuesAndPullsForRepo(params: { owner: string; repo: string; sinceIso: string; creatorLogin?: string; }): Promise<GithubIssueOrPRDTO[]> {
-        const listParams: any = { owner: params.owner, repo: params.repo, state: 'all', per_page: 100, since: params.sinceIso };
+        const listParams: IssueOrPRParams = { owner: params.owner, repo: params.repo, state: 'all', per_page: 100, since: params.sinceIso };
         if (params.creatorLogin) listParams.creator = params.creatorLogin;
         const items = await this.octokit.paginate(
             this.octokit.issues.listForRepo,
             listParams,
-            (r) => r.data,
+            (r) => r.data as IssueOrPRItem[],
         );
-        return items.map((it: any): GithubIssueOrPRDTO => ({
+        return items.map((it): GithubIssueOrPRDTO => ({
             id: String(it.id),
             number: Number(it.number),
             isPR: it.pull_request != null,
@@ -92,23 +115,23 @@ export class OctokitClient implements GithubClient {
     async getIssue(params: { owner: string; repo: string; issueNumber: number; }): Promise<GithubIssueDTO> {
         const { owner, repo, issueNumber } = params;
         const { data } = await this.octokit.issues.get({ owner, repo, issue_number: issueNumber });
-        return { id: String((data as any).id), raw: data };
+        return { id: String(data.id), raw: data };
     }
 
     async getPull(params: { owner: string; repo: string; pullNumber: number; }): Promise<GithubPullRequestDTO> {
         const { owner, repo, pullNumber } = params;
         const { data } = await this.octokit.pulls.get({ owner, repo, pull_number: pullNumber });
-        return { id: String((data as any).id), raw: data };
+        return { id: String(data.id), raw: data };
     }
 
     // Comments
     async listIssueCommentsForRepo(params: { owner: string; repo: string; sinceIso: string; }): Promise<GithubIssueCommentDTO[]> {
         const items = await this.octokit.paginate(
             this.octokit.issues.listCommentsForRepo,
-            { owner: params.owner, repo: params.repo, per_page: 100, since: params.sinceIso },
-            (r) => r.data,
+            { owner: params.owner, repo: params.repo, per_page: 100, since: params.sinceIso } satisfies IssueCommentParams,
+            (r) => r.data as IssueCommentItem[],
         );
-        return items.map((c: any): GithubIssueCommentDTO => ({
+        return items.map((c): GithubIssueCommentDTO => ({
             id: String(c.id),
             userLogin: c.user?.login ?? null,
             userId: c.user?.id != null ? String(c.user.id) : null,
@@ -121,10 +144,10 @@ export class OctokitClient implements GithubClient {
     async listReviewCommentsForRepo(params: { owner: string; repo: string; sinceIso: string; }): Promise<GithubPRReviewCommentDTO[]> {
         const items = await this.octokit.paginate(
             this.octokit.pulls.listReviewCommentsForRepo,
-            { owner: params.owner, repo: params.repo, per_page: 100, since: params.sinceIso },
-            (r) => r.data,
+            { owner: params.owner, repo: params.repo, per_page: 100, since: params.sinceIso } satisfies ReviewCommentParams,
+            (r) => r.data as ReviewCommentItem[],
         );
-        return items.map((c: any): GithubPRReviewCommentDTO => ({
+        return items.map((c): GithubPRReviewCommentDTO => ({
             id: String(c.id),
             userLogin: c.user?.login ?? null,
             userId: c.user?.id != null ? String(c.user.id) : null,
@@ -138,10 +161,10 @@ export class OctokitClient implements GithubClient {
     async listCommitsForPull(params: { owner: string; repo: string; pullNumber: number; }): Promise<GithubCommitDTO[]> {
         const items = await this.octokit.paginate(
             this.octokit.pulls.listCommits,
-            { owner: params.owner, repo: params.repo, pull_number: params.pullNumber, per_page: 100 },
-            (r) => r.data,
+            { owner: params.owner, repo: params.repo, pull_number: params.pullNumber, per_page: 100 } satisfies PullCommitParams,
+            (r) => r.data as PullCommitItem[],
         );
-        return items.map((c: any): GithubCommitDTO => ({
+        return items.map((c): GithubCommitDTO => ({
             sha: String(c.sha),
             authorLogin: c.author?.login ?? null,
             authorId: c.author?.id != null ? String(c.author.id) : null,
@@ -154,9 +177,14 @@ export class OctokitClient implements GithubClient {
     async searchIssuesAndPulls(params: { q: string; }): Promise<GithubSearchIssueOrPRDTO[]> {
         const items = await this.octokit.paginate(
             this.octokit.search.issuesAndPullRequests,
-            { q: params.q, per_page: 100, advanced_search: 'true' as any },
+            {
+                q: params.q,
+                per_page: 100,
+                advanced_search: 'true',
+            } as RequestParameters & SearchIssueParams,
+            (r) => r.data.items as SearchIssueItem[],
         );
-        return (items as any[]).map((it: any): GithubSearchIssueOrPRDTO => ({
+        return items.map((it): GithubSearchIssueOrPRDTO => ({
             repositoryUrl: it.repository_url ?? null,
             raw: it,
         }));
@@ -168,15 +196,14 @@ export class OctokitClient implements GithubClient {
             {
                 q: params.q,
                 per_page: 100,
-                headers: { accept: 'application/vnd.github.cloak-preview+json' },
-            } as any,
+                request: { headers: { accept: 'application/vnd.github.cloak-preview+json' } },
+            } as RequestParameters & SearchCommitsParams,
+            (r) => r.data.items as SearchCommitItem[],
         );
-        return (items as any[]).map((it: any): GithubSearchCommitDTO => ({
+        return items.map((it): GithubSearchCommitDTO => ({
             repositoryFullName: it.repository?.full_name ?? null,
             htmlUrl: it.html_url ?? null,
             raw: it,
         }));
     }
 }
-
-
