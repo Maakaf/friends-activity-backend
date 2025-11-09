@@ -5,6 +5,17 @@ import { mapPR, mergePR } from '../mappers.js';
 import { GithubService } from '../../raw/raw.service.js';
 import { RawMemoryStore } from '../../raw/raw-memory.store.js';
 import type { PR } from '../types.js';
+import type { RawPayload } from '../../raw/raw-saver.js';
+
+type AugmentedPRPayload = RawPayload & {
+  _repo_owner?: string;
+  _repo_name?: string;
+  number?: number;
+};
+
+type CommitRow = {
+  provider_event_id: string;
+};
 
 @Injectable()
 export class PRSilverService {
@@ -41,7 +52,7 @@ export class PRSilverService {
       if (!cur) continue;
 
       // Extract repo info from augmented payload
-      const rp = b.raw_payload ?? {};
+      const rp = (b.raw_payload as AugmentedPRPayload | null) ?? {};
       if (rp._repo_owner && rp._repo_name && rp.number) {
         prToRepoInfo.set(cur.prId, {
           owner: rp._repo_owner,
@@ -68,8 +79,8 @@ export class PRSilverService {
         WHERE event_type = 'commit' AND target_node = $1
         ORDER BY created_at ASC`;
       
-      const commitRows = await this.ds.query(commitSql, [pr.prId]);
-      pr.commits = commitRows.map((row: any) => row.provider_event_id);
+      const commitRows = await this.ds.query(commitSql, [pr.prId]) as CommitRow[];
+      pr.commits = commitRows.map((row) => row.provider_event_id);
     }
 
     // if (validate) out.forEach((p) => PRSchema.parse(p));

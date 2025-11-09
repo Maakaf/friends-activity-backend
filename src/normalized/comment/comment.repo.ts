@@ -18,7 +18,7 @@ export class CommentBronzeRepo {
       `(event_type = 'issue_comment' OR event_type = 'pr_review_comment')`,
       `created_at >= $1`
     ];
-    const args: any[] = [sinceIso];
+    const args: unknown[] = [sinceIso];
 
     if (untilIso) { where.push(`created_at < $${args.length + 1}`); args.push(untilIso); }
     if (repoId)   { where.push(`repo_node = $${args.length + 1}`);   args.push(repoId); }
