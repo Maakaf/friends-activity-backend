@@ -175,32 +175,24 @@ export class OctokitClient implements GithubClient {
 
     // Search
     async searchIssuesAndPulls(params: { q: string; }): Promise<GithubSearchIssueOrPRDTO[]> {
-        const items = await this.octokit.paginate(
-            this.octokit.search.issuesAndPullRequests,
-            {
-                q: params.q,
-                per_page: 100,
-                advanced_search: 'true',
-            } as RequestParameters & SearchIssueParams,
-            (r) => r.data.items as SearchIssueItem[],
-        );
-        return items.map((it): GithubSearchIssueOrPRDTO => ({
+        const { data } = await this.octokit.search.issuesAndPullRequests({
+            q: params.q,
+            per_page: 100,
+            advanced_search: 'true',
+        } as SearchIssueParams & RequestParameters);
+        return (data.items as SearchIssueItem[]).map((it): GithubSearchIssueOrPRDTO => ({
             repositoryUrl: it.repository_url ?? null,
             raw: it,
         }));
     }
 
     async searchCommits(params: { q: string; }): Promise<GithubSearchCommitDTO[]> {
-        const items = await this.octokit.paginate(
-            this.octokit.search.commits,
-            {
-                q: params.q,
-                per_page: 100,
-                request: { headers: { accept: 'application/vnd.github.cloak-preview+json' } },
-            } as RequestParameters & SearchCommitsParams,
-            (r) => r.data.items as SearchCommitItem[],
-        );
-        return items.map((it): GithubSearchCommitDTO => ({
+        const { data } = await this.octokit.search.commits({
+            q: params.q,
+            per_page: 100,
+            request: { headers: { accept: 'application/vnd.github.cloak-preview+json' } },
+        } as SearchCommitParams & RequestParameters);
+        return (data.items as SearchCommitItem[]).map((it): GithubSearchCommitDTO => ({
             repositoryFullName: it.repository?.full_name ?? null,
             htmlUrl: it.html_url ?? null,
             raw: it,
