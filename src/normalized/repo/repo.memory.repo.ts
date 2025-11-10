@@ -33,7 +33,8 @@ export class RepoRawMemoryRepo {
         if (sinceIso && r.fetched_at && r.fetched_at < sinceIso) return false;
         if (untilIso && r.fetched_at && r.fetched_at >= untilIso) return false;
         if (repoIds?.length && !repoIds.includes(r.repo_node)) return false;
-        if (owners?.length && r.owner_login && !owners.includes(r.owner_login)) return false;
+        if (owners?.length && r.owner_login && !owners.includes(r.owner_login))
+          return false;
         if (names?.length && r.name && !names.includes(r.name)) return false;
         return true;
       })

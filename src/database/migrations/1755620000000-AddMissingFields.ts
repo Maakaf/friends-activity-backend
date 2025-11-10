@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddMissingFields1755620000000 implements MigrationInterface {
   name = 'AddMissingFields1755620000000';
@@ -11,7 +11,7 @@ export class AddMissingFields1755620000000 implements MigrationInterface {
         WHERE table_schema = 'gold' AND table_name = 'user_profile'
       )
     `);
-    
+
     if (userProfileExists[0].exists) {
       await queryRunner.query(`
         ALTER TABLE gold.user_profile 
@@ -30,7 +30,7 @@ export class AddMissingFields1755620000000 implements MigrationInterface {
         WHERE table_schema = 'gold' AND table_name = 'repository'
       )
     `);
-    
+
     if (repositoryExists[0].exists) {
       await queryRunner.query(`
         ALTER TABLE gold.repository 
@@ -48,7 +48,7 @@ export class AddMissingFields1755620000000 implements MigrationInterface {
         WHERE table_schema = 'gold' AND table_name = 'user_profile'
       )
     `);
-    
+
     if (userProfileExists[0].exists) {
       await queryRunner.query(`
         ALTER TABLE gold.user_profile 
@@ -67,7 +67,7 @@ export class AddMissingFields1755620000000 implements MigrationInterface {
         WHERE table_schema = 'gold' AND table_name = 'repository'
       )
     `);
-    
+
     if (repositoryExists[0].exists) {
       await queryRunner.query(`
         ALTER TABLE gold.repository 

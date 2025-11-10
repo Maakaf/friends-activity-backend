@@ -13,16 +13,22 @@ export class IssueBronzeRepo {
   async loadSince(params: {
     sinceIso: string;
     untilIso?: string;
-    repoId?: string;            // optional: filter to one repo
-    authorUserIds?: string[];   // optional: filter to specific authors
+    repoId?: string; // optional: filter to one repo
+    authorUserIds?: string[]; // optional: filter to specific authors
   }): Promise<BronzeRow[]> {
     const { sinceIso, untilIso, repoId, authorUserIds } = params;
 
     const where: string[] = [`event_type = 'issue'`, `created_at >= $1`];
     const args: unknown[] = [sinceIso];
 
-    if (untilIso) { where.push(`created_at < $${args.length + 1}`); args.push(untilIso); }
-    if (repoId)   { where.push(`repo_node = $${args.length + 1}`);   args.push(repoId); }
+    if (untilIso) {
+      where.push(`created_at < $${args.length + 1}`);
+      args.push(untilIso);
+    }
+    if (repoId) {
+      where.push(`repo_node = $${args.length + 1}`);
+      args.push(repoId);
+    }
     if (authorUserIds?.length) {
       // Postgres ANY(string[]) pattern
       where.push(`actor_user_node = ANY($${args.length + 1})`);

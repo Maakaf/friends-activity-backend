@@ -3,9 +3,9 @@ import { DataSource } from 'typeorm';
 import type { RawPayload } from '../../raw/raw-saver.js';
 
 export interface BronzeUsersRow {
-  user_node: string;            // PK in bronze.github_users
+  user_node: string; // PK in bronze.github_users
   login: string | null;
-  fetched_at: string | null;    // ISO
+  fetched_at: string | null; // ISO
   raw_payload: RawPayload | null;
 }
 
@@ -25,13 +25,21 @@ export class UserBronzeRepo {
     const where: string[] = ['1=1'];
     const args: unknown[] = [];
 
-    if (sinceIso) { where.push(`fetched_at >= $${args.length + 1}`); args.push(sinceIso); }
-    if (untilIso) { where.push(`fetched_at <  $${args.length + 1}`); args.push(untilIso); }
+    if (sinceIso) {
+      where.push(`fetched_at >= $${args.length + 1}`);
+      args.push(sinceIso);
+    }
+    if (untilIso) {
+      where.push(`fetched_at <  $${args.length + 1}`);
+      args.push(untilIso);
+    }
     if (userIds?.length) {
-      where.push(`user_node = ANY($${args.length + 1}::text[])`); args.push(userIds);
+      where.push(`user_node = ANY($${args.length + 1}::text[])`);
+      args.push(userIds);
     }
     if (logins?.length) {
-      where.push(`login = ANY($${args.length + 1}::text[])`); args.push(logins);
+      where.push(`login = ANY($${args.length + 1}::text[])`);
+      args.push(logins);
     }
 
     const lim = limit && limit > 0 ? `LIMIT ${Number(limit)}` : '';
@@ -43,6 +51,6 @@ export class UserBronzeRepo {
        ORDER BY fetched_at DESC
        ${lim}
     `;
-    return (await this.ds.query(sql, args)) as BronzeUsersRow[];
+    return await this.ds.query(sql, args);
   }
 }

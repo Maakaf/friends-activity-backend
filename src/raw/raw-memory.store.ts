@@ -70,7 +70,7 @@ export class RawMemoryStore {
   removeUserData(userNode: string) {
     // Remove user
     this.users.delete(userNode);
-    
+
     // Remove events by this user
     for (const [eventId, event] of this.events.entries()) {
       if (event.actor_user_node === userNode) {

@@ -9,8 +9,8 @@ import { CommitSilverService } from './commit/commit.service.js';
 
 export interface SilverBuildArgs {
   sinceIso?: string;
-  untilIso?: string;      //optional
-  limit?: number;        // optional
+  untilIso?: string; //optional
+  limit?: number; // optional
 }
 
 @Injectable()
@@ -20,13 +20,18 @@ export class SilverOrchestratorService {
     @Inject(ReposSilverService) private readonly reposSvc: ReposSilverService,
     @Inject(IssueSilverService) private readonly issuesSvc: IssueSilverService,
     @Inject(PRSilverService) private readonly prsSvc: PRSilverService,
-    @Inject(CommentSilverService) private readonly commentsSvc: CommentSilverService,
-    @Inject(CommitSilverService) private readonly commitsSvc: CommitSilverService,
+    @Inject(CommentSilverService)
+    private readonly commentsSvc: CommentSilverService,
+    @Inject(CommitSilverService)
+    private readonly commitsSvc: CommitSilverService,
   ) {}
 
   async buildBundle(args: SilverBuildArgs = {}): Promise<SilverBundle> {
-    const sinceIso = args.sinceIso ?? new Date(Date.now() - 180 * 86400e3)
-      .toISOString().replace(/\.\d{3}Z$/, 'Z');
+    const sinceIso =
+      args.sinceIso ??
+      new Date(Date.now() - 180 * 86400e3)
+        .toISOString()
+        .replace(/\.\d{3}Z$/, 'Z');
     const untilIso = args.untilIso;
 
     const [users, repos, issues, prs, comments, commits] = await Promise.all([

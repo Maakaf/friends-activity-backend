@@ -1,4 +1,3 @@
-
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { IssueBronzeRepo } from './issue.repo.js';
 import { mapIssue, mergeIssue } from '../mappers.js';
@@ -7,7 +6,9 @@ import type { Issue } from '../types.js';
 @Injectable()
 export class IssueSilverService {
   private readonly log = new Logger(IssueSilverService.name);
-  constructor(@Inject(IssueBronzeRepo) private readonly repo: IssueBronzeRepo) {}
+  constructor(
+    @Inject(IssueBronzeRepo) private readonly repo: IssueBronzeRepo,
+  ) {}
 
   //----------------------- ISSUE --------------------\\
   /**
@@ -21,7 +22,7 @@ export class IssueSilverService {
     untilIso?: string;
     repoId?: string;
     authorUserIds?: string[];
-    validate?: boolean;  // optional zod toggle
+    validate?: boolean; // optional zod toggle
   }): Promise<Issue[]> {
     const { validate = false, ...load } = params;
     const bronzeRows = await this.repo.loadSince(load);
@@ -41,14 +42,15 @@ export class IssueSilverService {
     }
 
     const out = [...byId.values()];
-/*
+    /*
     if (validate) {
       // optional: plug in zod here if you add IssueSchema later
       // out.forEach((i) => IssueSchema.parse(i));
     }
 */
-    this.log.debug(`silver.issues: ${out.length} (from ${bronzeRows.length} bronze rows)`);
+    this.log.debug(
+      `silver.issues: ${out.length} (from ${bronzeRows.length} bronze rows)`,
+    );
     return out;
   }
 }
-

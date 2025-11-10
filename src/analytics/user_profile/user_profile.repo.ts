@@ -7,12 +7,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class UserProfileRepo {
   constructor(
     @InjectRepository(UserProfileEntity)
-    private readonly repository: Repository<UserProfileEntity>
+    private readonly repository: Repository<UserProfileEntity>,
   ) {}
 
   /** Insert or update many user profiles in a single query */
   async upsertMany(rows: UserProfileEntity[]) {
-    return this.repository.createQueryBuilder()
+    return this.repository
+      .createQueryBuilder()
       .insert()
       .into(UserProfileEntity)
       .values(rows)
@@ -30,9 +31,9 @@ export class UserProfileRepo {
           'site_admin',
           'gh_created_at',
           'gh_updated_at',
-          'fetched_at'
+          'fetched_at',
         ],
-        ['user_id']           // conflict target (PRIMARY KEY)
+        ['user_id'], // conflict target (PRIMARY KEY)
       )
       .execute();
   }

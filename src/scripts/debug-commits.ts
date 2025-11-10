@@ -4,7 +4,10 @@ import dataSource from '../database/data-source.js';
 
 type CountRow = { count: string };
 type CommitByUserRow = { login: string; commit_count: string };
-type RecentCommitRow = CommitByUserRow & { earliest: string | null; latest: string | null };
+type RecentCommitRow = CommitByUserRow & {
+  earliest: string | null;
+  latest: string | null;
+};
 
 async function debugCommits() {
   try {
@@ -13,8 +16,8 @@ async function debugCommits() {
 
     // Check total commits in bronze
     const totalCommits = await dataSource.query(
-      "SELECT COUNT(*) as count FROM bronze.github_events WHERE event_type = 'commit'"
-    ) as CountRow[];
+      "SELECT COUNT(*) as count FROM bronze.github_events WHERE event_type = 'commit'",
+    );
     console.log(`📊 Total commits in bronze: ${totalCommits[0]?.count ?? '0'}`);
 
     // Check commits by user
@@ -27,8 +30,8 @@ async function debugCommits() {
       WHERE e.event_type = 'commit'
       GROUP BY u.login
       ORDER BY commit_count DESC
-    `) as CommitByUserRow[];
-    
+    `);
+
     console.log('📊 Commits by user:');
     commitsByUser.forEach((row) => {
       console.log(`  ${row.login}: ${row.commit_count} commits`);
@@ -47,11 +50,13 @@ async function debugCommits() {
         AND e.created_at >= NOW() - INTERVAL '7 days'
       GROUP BY u.login
       ORDER BY commit_count DESC
-    `) as RecentCommitRow[];
-    
+    `);
+
     console.log('📊 Recent commits (last 7 days):');
     recentCommits.forEach((row) => {
-      console.log(`  ${row.login}: ${row.commit_count} commits (${row.earliest} to ${row.latest})`);
+      console.log(
+        `  ${row.login}: ${row.commit_count} commits (${row.earliest} to ${row.latest})`,
+      );
     });
 
     await dataSource.destroy();

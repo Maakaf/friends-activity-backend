@@ -35,8 +35,8 @@ async function debugPRCommits() {
       WHERE r.full_name = 'Maakaf/friends-activity-backend'
       GROUP BY u.login
       ORDER BY pr_count DESC
-    `) as RepoAnalysisRow[];
-    
+    `);
+
     console.log('📊 PR vs Commit Analysis for friends-activity-backend:');
     repoAnalysis.forEach((row) => {
       console.log(`  ${row.login}:`);
@@ -58,8 +58,8 @@ async function debugPRCommits() {
         AND repo_node IN (SELECT repo_node FROM bronze.github_repos WHERE full_name = 'Maakaf/friends-activity-backend')
       GROUP BY provider_event_id
       HAVING COUNT(*) > 1
-    `) as DuplicateCommitRow[];
-    
+    `);
+
     console.log('🔍 Duplicate commit SHAs:');
     if (duplicateCommits.length === 0) {
       console.log('  No duplicates found');

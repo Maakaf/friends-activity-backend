@@ -1,4 +1,3 @@
-
 import { DataSource } from 'typeorm';
 
 export type RawPayload = Record<string, unknown>;
@@ -44,7 +43,7 @@ export async function insertBronze(ds: DataSource, row: BronzeRow) {
 
 /* -------- Bronze users -------- */
 export interface BronzeUserRow {
-  user_node: string;       // GitHub numeric id, as text
+  user_node: string; // GitHub numeric id, as text
   login: string;
   name?: string | null;
   raw_payload: RawPayload;
@@ -66,15 +65,21 @@ export async function upsertBronzeUser(ds: DataSource, row: BronzeUserRow) {
           raw_payload = EXCLUDED.raw_payload,
           last_synced_at = EXCLUDED.last_synced_at
     `,
-    [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload), row.last_synced_at ?? null]
+    [
+      row.user_node,
+      row.login,
+      row.name ?? null,
+      JSON.stringify(row.raw_payload),
+      row.last_synced_at ?? null,
+    ],
   );
 }
 
 /** Insert user with specific processing status (for new users) */
 export async function insertBronzeUserWithStatus(
-  ds: DataSource, 
-  row: BronzeUserRow, 
-  status: 'ready' | 'processing' | 'failed' = 'ready'
+  ds: DataSource,
+  row: BronzeUserRow,
+  status: 'ready' | 'processing' | 'failed' = 'ready',
 ) {
   await ds.query(
     `
@@ -84,14 +89,21 @@ export async function insertBronzeUserWithStatus(
       ($1, 'github', $2, $3, now(), $4::jsonb, $5, $6)
     ON CONFLICT (user_node) DO NOTHING
     `,
-    [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload), status, row.last_synced_at ?? null]
+    [
+      row.user_node,
+      row.login,
+      row.name ?? null,
+      JSON.stringify(row.raw_payload),
+      status,
+      row.last_synced_at ?? null,
+    ],
   );
 }
 
 /* -------- Bronze repos -------- */
 export interface BronzeRepoRow {
-  repo_node: string;       // GitHub numeric id, as text
-  full_name: string;       // owner/name
+  repo_node: string; // GitHub numeric id, as text
+  full_name: string; // owner/name
   owner_login?: string | null;
   name?: string | null;
   is_private?: boolean | null;
@@ -121,6 +133,6 @@ export async function upsertBronzeRepo(ds: DataSource, row: BronzeRepoRow) {
       row.name ?? null,
       row.is_private ?? null,
       JSON.stringify(row.raw_payload),
-    ]
+    ],
   );
 }

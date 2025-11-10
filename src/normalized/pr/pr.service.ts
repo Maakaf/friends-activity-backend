@@ -45,7 +45,10 @@ export class PRSilverService {
     const bronzeRows = await this.repo.loadSince(load);
 
     const byId = new Map<string, PR>();
-    const prToRepoInfo = new Map<string, { owner: string; repo: string; number: number }>();
+    const prToRepoInfo = new Map<
+      string,
+      { owner: string; repo: string; number: number }
+    >();
 
     for (const b of bronzeRows) {
       const cur = mapPR(b);
@@ -78,14 +81,16 @@ export class PRSilverService {
         FROM bronze.github_events
         WHERE event_type = 'commit' AND target_node = $1
         ORDER BY created_at ASC`;
-      
-      const commitRows = await this.ds.query(commitSql, [pr.prId]) as CommitRow[];
+
+      const commitRows = await this.ds.query(commitSql, [pr.prId]);
       pr.commits = commitRows.map((row) => row.provider_event_id);
     }
 
     // if (validate) out.forEach((p) => PRSchema.parse(p));
 
-    this.log.debug(`silver.prs: ${out.length} (from ${bronzeRows.length} bronze rows)`);
+    this.log.debug(
+      `silver.prs: ${out.length} (from ${bronzeRows.length} bronze rows)`,
+    );
     return out;
   }
 }

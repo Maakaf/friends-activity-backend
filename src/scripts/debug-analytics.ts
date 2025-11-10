@@ -33,11 +33,14 @@ async function debugAnalytics() {
       WHERE r.full_name = 'Maakaf/friends-activity-backend'
       GROUP BY user_id, activity_type
       ORDER BY total_count DESC
-    `) as GoldActivityRow[];
-    
+    `);
+
     console.log('Gold Activity:');
     for (const row of goldActivity) {
-      const [user] = await dataSource.query('SELECT login FROM bronze.github_users WHERE user_node = $1', [row.user_id]) as LoginRow[];
+      const [user] = await dataSource.query(
+        'SELECT login FROM bronze.github_users WHERE user_node = $1',
+        [row.user_id],
+      );
       const login = user?.login ?? row.user_id;
       console.log(`  ${login}: ${row.total_count} ${row.activity_type}`);
     }
@@ -56,11 +59,13 @@ async function debugAnalytics() {
         AND e.event_type = 'commit'
       GROUP BY u.login
       ORDER BY total_events DESC
-    `) as TimeAnalysisRow[];
-    
+    `);
+
     console.log('Time Range for Commits:');
     timeAnalysis.forEach((row) => {
-      console.log(`  ${row.login}: ${row.total_events} commits (${row.earliest_activity} to ${row.latest_activity})`);
+      console.log(
+        `  ${row.login}: ${row.total_events} commits (${row.earliest_activity} to ${row.latest_activity})`,
+      );
     });
 
     await dataSource.destroy();

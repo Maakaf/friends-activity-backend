@@ -24,16 +24,21 @@ async function debugDeduplication() {
         AND r.full_name = 'Maakaf/friends-activity-backend'
         AND ua.activity_type = 'commit'
       ORDER BY ua.day DESC
-    `) as GoldActivityRow[];
-    
-    console.log('📊 Gold Activity for Lidor57 (commits in friends-activity-backend):');
+    `);
+
+    console.log(
+      '📊 Gold Activity for Lidor57 (commits in friends-activity-backend):',
+    );
     if (goldActivity.length === 0) {
       console.log('  No commit activities found in gold layer');
     } else {
       goldActivity.forEach((row) => {
         console.log(`  ${row.day}: ${row.activity_count} commits`);
       });
-      const goldTotal = goldActivity.reduce((sum, row) => sum + (row.activity_count ?? 0), 0);
+      const goldTotal = goldActivity.reduce(
+        (sum, row) => sum + (row.activity_count ?? 0),
+        0,
+      );
       console.log(`  Total: ${goldTotal} commits`);
     }
 
@@ -50,8 +55,8 @@ async function debugDeduplication() {
         AND e.event_type = 'commit'
       GROUP BY DATE(e.created_at)
       ORDER BY day DESC
-    `) as BronzeCommitRow[];
-    
+    `);
+
     console.log('\n📊 Bronze Commits for Lidor57 by day:');
     if (bronzeCommits.length === 0) {
       console.log('  No commits found in bronze layer');
@@ -59,7 +64,10 @@ async function debugDeduplication() {
       bronzeCommits.forEach((row) => {
         console.log(`  ${row.day}: ${row.commit_count} commits`);
       });
-      const bronzeTotal = bronzeCommits.reduce((sum, row) => sum + Number(row.commit_count), 0);
+      const bronzeTotal = bronzeCommits.reduce(
+        (sum, row) => sum + Number(row.commit_count),
+        0,
+      );
       console.log(`  Total: ${bronzeTotal} commits`);
     }
 

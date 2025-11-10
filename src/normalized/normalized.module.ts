@@ -47,8 +47,6 @@ const BronzeRepoBindings: Provider[] = [
     ReposSilverService,
     SilverOrchestratorService,
   ],
-  exports: [
-    SilverOrchestratorService,
-  ],
+  exports: [SilverOrchestratorService],
 })
 export class NormalizedModule {}
