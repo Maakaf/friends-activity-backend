@@ -1,0 +1,70 @@
+name: Daily Stats Refresh
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 1 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  refresh-stats:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Get ready users
+        id: get-users
+        run: |
+          echo "Fetching ready users..."
+          RESPONSE=$(curl -s -H "X-API-Key: ${{ secrets.API_KEY }}" \
+            ${{ secrets.API_URL }}/pipeline/listUsers)
+          
+          # Extract only users from the 'ready' status group
+          USERS=$(echo $RESPONSE | jq -r '.ready.users | @json')
+          USER_COUNT=$(echo $RESPONSE | jq -r '.ready.users | length')
+          
+          echo "users=$USERS" >> $GITHUB_OUTPUT
+          echo "Found $USER_COUNT ready users: $USERS"
+
+      - name: Check if there are users to process
+        id: check-users
+        run: |
+          USER_COUNT=$(echo '${{ steps.get-users.outputs.users }}' | jq '. | length')
+          if [ "$USER_COUNT" -eq 0 ]; then
+            echo "No ready users found. Skipping stats refresh."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "Processing $USER_COUNT users"
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run pipeline stats
+        if: steps.check-users.outputs.skip == 'false'
+        run: |
+          echo "Triggering pipeline stats for ready users..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: ${{ secrets.API_KEY }}" \
+            -d "{\"users\": ${{ steps.get-users.outputs.users }}}" \
+            ${{ secrets.API_URL }}/pipeline/stats)
+          
+          HTTP_STATUS=$(echo "$RESPONSE" | grep HTTP_STATUS | cut -d: -f2)
+          BODY=$(echo "$RESPONSE" | sed '/HTTP_STATUS/d')
+          
+          echo "Response status: $HTTP_STATUS"
+          echo "Response body: $BODY"
+          
+          if [ "$HTTP_STATUS" -ne 200 ] && [ "$HTTP_STATUS" -ne 201 ]; then
+            echo "Error: Pipeline stats request failed with status $HTTP_STATUS"
+            exit 1
+          fi
+          
+          echo "Pipeline stats triggered successfully!"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.check-users.outputs.skip }}" == "true" ]; then
+            echo "✅ No users needed processing"
+          else
+            echo "✅ Stats refresh completed for ready users"
+          fi
