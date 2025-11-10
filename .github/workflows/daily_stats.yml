@@ -15,8 +15,9 @@ jobs:
         id: get-users
         run: |
           echo "Fetching ready users..."
-          RESPONSE=$(curl -s -H "X-API-Key: ${{ secrets.API_KEY }}" \
-            ${{ secrets.API_URL }}/pipeline/listUsers)
+          RESPONSE=$(curl -s -H "accept: */*" \
+            -H "X-API-Key: ${{ secrets.API_KEY }}" \
+            "${{ vars.API_URL }}/pipeline/listUsers")
           
           # Extract only users from the 'ready' status group
           USERS=$(echo $RESPONSE | jq -r '.ready.users | @json')
@@ -42,10 +43,11 @@ jobs:
         run: |
           echo "Triggering pipeline stats for ready users..."
           RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
-            -H "Content-Type: application/json" \
+            -H "accept: */*" \
             -H "X-API-Key: ${{ secrets.API_KEY }}" \
+            -H "Content-Type: application/json" \
             -d "{\"users\": ${{ steps.get-users.outputs.users }}}" \
-            ${{ secrets.API_URL }}/pipeline/stats)
+            "${{ vars.API_URL }}/pipeline/stats")
           
           HTTP_STATUS=$(echo "$RESPONSE" | grep HTTP_STATUS | cut -d: -f2)
           BODY=$(echo "$RESPONSE" | sed '/HTTP_STATUS/d')
