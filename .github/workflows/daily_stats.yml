@@ -20,11 +20,12 @@ jobs:
             "https://friends-activity-backend-production.up.railway.app/pipeline/listUsers")
           
           # Extract only users from the 'ready' status group
-          USERS=$(echo $RESPONSE | jq -r '.ready.users | @json')
+          USERS=$(echo $RESPONSE | jq -c '.ready.users')
           USER_COUNT=$(echo $RESPONSE | jq -r '.ready.users | length')
           
           echo "users=$USERS" >> $GITHUB_OUTPUT
-          echo "Found $USER_COUNT ready users: $USERS"
+          echo "Found $USER_COUNT ready users"
+          echo "Users JSON: $USERS"
 
       - name: Check if there are users to process
         id: check-users
@@ -42,11 +43,14 @@ jobs:
         if: steps.check-users.outputs.skip == 'false'
         run: |
           echo "Triggering pipeline stats for ready users..."
+          PAYLOAD=$(jq -n --argjson users '${{ steps.get-users.outputs.users }}' '{users: $users}')
+          echo "Payload: $PAYLOAD"
+          
           RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
             -H "accept: */*" \
             -H "X-API-Key: ${{ secrets.API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d "{\"users\": ${{ steps.get-users.outputs.users }}}" \
+            -d "$PAYLOAD" \
             "https://friends-activity-backend-production.up.railway.app/pipeline/stats")
           
           HTTP_STATUS=$(echo "$RESPONSE" | grep HTTP_STATUS | cut -d: -f2)
