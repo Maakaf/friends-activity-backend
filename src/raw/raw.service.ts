@@ -5,6 +5,7 @@ import { Octokit } from '@octokit/rest';
 import { paginateRest } from '@octokit/plugin-paginate-rest';
 import { RequestError } from '@octokit/request-error';
 import type { RestEndpointMethodTypes } from '@octokit/rest';
+import type { RequestParameters } from '@octokit/types';
 import { insertBronze, BronzeRow,  upsertBronzeUser, upsertBronzeRepo } from './raw-saver.js';
 import type { RawPayload } from './raw-saver.js';
 import { RawMemoryStore, BronzeEventsRow, BronzeUsersRow, BronzeReposRow } from './raw-memory.store.js';
@@ -18,6 +19,24 @@ type RepoResponse = RestEndpointMethodTypes['repos']['get']['response']['data'];
 type UserResponse = RestEndpointMethodTypes['users']['getByUsername']['response']['data'];
 type IssueListItem = RestEndpointMethodTypes['issues']['listForRepo']['response']['data'][number];
 type IssueListParams = RestEndpointMethodTypes['issues']['listForRepo']['parameters'];
+type IssueDetailResponse = RestEndpointMethodTypes['issues']['get']['response']['data'];
+type PullDetailResponse = RestEndpointMethodTypes['pulls']['get']['response']['data'];
+
+type IssueCommentItem = RestEndpointMethodTypes['issues']['listCommentsForRepo']['response']['data'][number];
+type IssueCommentParams = RestEndpointMethodTypes['issues']['listCommentsForRepo']['parameters'];
+type ReviewCommentItem = RestEndpointMethodTypes['pulls']['listReviewCommentsForRepo']['response']['data'][number];
+type ReviewCommentParams = RestEndpointMethodTypes['pulls']['listReviewCommentsForRepo']['parameters'];
+
+type PullCommitItem = RestEndpointMethodTypes['pulls']['listCommits']['response']['data'][number];
+type PullCommitParams = RestEndpointMethodTypes['pulls']['listCommits']['parameters'];
+type RepoCommitItem = RestEndpointMethodTypes['repos']['listCommits']['response']['data'][number];
+type RepoCommitParams = RestEndpointMethodTypes['repos']['listCommits']['parameters'];
+
+type SearchIssueItem = RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][number];
+type SearchIssueParams = RestEndpointMethodTypes['search']['issuesAndPullRequests']['parameters'];
+type SearchCommitItem = RestEndpointMethodTypes['search']['commits']['response']['data']['items'][number];
+type SearchCommitParams = RestEndpointMethodTypes['search']['commits']['parameters'];
+
 type GoldUserProfileRow = { login: string };
 type BronzeUserNodeRow = { login: string; user_node: string | null };
 type BronzeUserNodeOnlyRow = { user_node: string | null };
@@ -522,7 +541,7 @@ export class GithubService {
   }
 
   private async resolveIssueParentId(
-    owner: string, repo: string, comment: any, numberToId: Map<string, string>
+    owner: string, repo: string, comment: IssueCommentItem, numberToId: Map<string, string>
   ) {
     const issueUrl = comment.issue_url ?? '';
     const m = issueUrl.match(ISSUE_NUM_RE);
@@ -533,7 +552,8 @@ export class GithubService {
 
     try {
       const { data } = await this.octokit.issues.get({ owner, repo, issue_number: Number(num) });
-      const id = String((data as any).id);
+      const issue: IssueDetailResponse = data;
+      const id = String(issue.id);
       numberToId.set(num, id);
       return id;
     } catch (error) {
@@ -543,7 +563,7 @@ export class GithubService {
   }
 
   private async resolvePRParentId(
-    owner: string, repo: string, comment: any, numberToId: Map<string, string>
+    owner: string, repo: string, comment: ReviewCommentItem, numberToId: Map<string, string>
   ) {
     const prUrl = comment.pull_request_url ?? '';
     const m = prUrl.match(PR_NUM_RE);
@@ -554,7 +574,8 @@ export class GithubService {
 
     try {
       const { data } = await this.octokit.pulls.get({ owner, repo, pull_number: Number(num) });
-      const id = String((data as any).id);
+      const pr: PullDetailResponse = data;
+      const id = String(pr.id);
       numberToId.set(num, id);
       return id;
     } catch (error) {
@@ -575,27 +596,27 @@ export class GithubService {
     const commits = await this.retryWithBackoff(
       () => this.octokit.paginate(
         this.octokit.pulls.listCommits,
-        { owner, repo, pull_number: prNumber, per_page: 100 },
-        r => r.data,
+        { owner, repo, pull_number: prNumber, per_page: 100 } satisfies PullCommitParams,
+        (r) => r.data as PullCommitItem[],
       ),
       `PR commits for ${owner}/${repo}#${prNumber}`
     );
 
     for (const c of commits) {
-      const authorLogin = (c as any).author?.login;
+      const authorLogin = c.author?.login ?? null;
       if (users.size && (!authorLogin || !users.has(authorLogin))) continue;
       
       const row: BronzeRow = {
-        event_ulid: `commit:${(c as any).sha}`,
+        event_ulid: `commit:${String(c.sha)}`,
         provider: 'github',
         event_type: 'commit',
-        provider_event_id: String((c as any).sha),
-        actor_user_node: (c as any).author?.id ? String((c as any).author.id) : null,
+        provider_event_id: String(c.sha),
+        actor_user_node: c.author?.id != null ? String(c.author.id) : null,
         repo_node: repoId != null ? String(repoId) : null,
         target_node: prId,
-        created_at: (c as any).commit?.committer?.date ?? null,
+        created_at: c.commit?.committer?.date ?? null,
         is_private: isPrivate ?? null,
-        raw_payload: c,
+        raw_payload: c as RawPayload,
       };
       await this.writeEventBoth(row);
     }
@@ -617,13 +638,14 @@ export class GithubService {
     const issues = await this.retryWithBackoff(
       () => this.octokit.paginate(
         this.octokit.search.issuesAndPullRequests,
-        { q: qIssues, per_page: 100, advanced_search: 'true'}
+        { q: qIssues, per_page: 100, advanced_search: 'true' } as SearchIssueParams & RequestParameters,
+        (r) => (r.data as unknown as { items: SearchIssueItem[] }).items,
       ),
       `Issues/PRs search for ${login}`
     );
     this.logger.log(`✅ Found ${issues.length} issues/PRs for ${login}`);
 
-    for (const it of issues as any[]) {
+    for (const it of issues) {
       const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
       if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
     }
@@ -641,8 +663,9 @@ export class GithubService {
         {
           q: qCommits,
           per_page: 100,
-          headers: { accept: 'application/vnd.github.cloak-preview+json' },
-        } as any
+          request: { headers: { accept: 'application/vnd.github.cloak-preview+json' } },
+        } as SearchCommitParams & RequestParameters,
+        (r) => (r.data as unknown as { items: SearchCommitItem[] }).items,
       ),
       `Commits search for ${login}`,
       5,
@@ -650,8 +673,8 @@ export class GithubService {
     );
     this.logger.log(`✅ Found ${commits.length} commits for ${login}`);
 
-    for (const c of commits as any[]) {
-      const full = c.repository?.full_name as string | undefined;
+    for (const c of commits) {
+      const full = c.repository?.full_name ?? undefined;
       if (full && full.includes('/')) {
         const [owner, repo] = full.split('/');
         found.set(this.repoKey(owner, repo), { owner, repo });
@@ -705,43 +728,50 @@ export class GithubService {
 
     for (const login of logins) {
       try {
+        const listParams: IssueListParams = {
+          owner,
+          repo,
+          state: 'all',
+          per_page: 100,
+          since: sinceIso,
+        };
+        if (login) listParams.creator = login;
+
         const pages = await this.retryWithBackoff(
           () => this.octokit.paginate(
             this.octokit.issues.listForRepo,
-            { owner, repo, state: 'all', per_page: 100, since: sinceIso, ...(login ? { creator: login } : {}) } as any,
-            (r) => r.data,
+            listParams,
+            (r) => r.data as IssueListItem[],
           ),
           `Issues/PRs for ${owner}/${repo} ${login ? `(creator: ${login})` : ''}`
         );
 
         for (const it of pages) {
-          const isPR = (it as any).pull_request != null;
+          const isPR = it.pull_request != null;
           const event_type = isPR ? 'pull_request' : 'issue';
 
-          // For PRs, augment payload with repo info for commit fetching
-          const payload = isPR ? {
-            ...it,
-            _repo_owner: owner,
-            _repo_name: repo,
-          } : it;
+          const basePayload = it as unknown as RawPayload;
+          const payload = isPR
+            ? { ...basePayload, _repo_owner: owner, _repo_name: repo } as RawPayload
+            : basePayload;
 
           const row: BronzeRow = {
-            event_ulid: `${event_type}:${(it as any).id}`,
+            event_ulid: `${event_type}:${String(it.id)}`,
             provider: 'github',
             event_type,
-            provider_event_id: String((it as any).id),
-            actor_user_node: (it as any).user?.id ? String((it as any).user.id) : null,
+            provider_event_id: String(it.id),
+            actor_user_node: it.user?.id != null ? String(it.user.id) : null,
             repo_node: repoId != null ? String(repoId) : null,
-            target_node: String((it as any).id), // parent for itself
-            created_at: (it as any).created_at ?? null,
+            target_node: String(it.id), // parent for itself
+            created_at: it.created_at ?? null,
             is_private: isPrivate ?? null,
             raw_payload: payload,
           };
           rows.push(row);
           
           if (isPR) {
-            const prNumber = (it as any).number;
-            const prId = String((it as any).id);
+            const prNumber = it.number;
+            const prId = String(it.id);
             await this.ingestCommitsForPR(owner, repo, repoId, isPrivate, prNumber, prId, users);
           }
         }
@@ -764,34 +794,34 @@ export class GithubService {
       const comments = await this.retryWithBackoff(
         () => this.octokit.paginate(
           this.octokit.issues.listCommentsForRepo,
-          { owner, repo, per_page: 100, since: sinceIso },
-          (r) => r.data,
+          { owner, repo, per_page: 100, since: sinceIso } satisfies IssueCommentParams,
+          (r) => r.data as IssueCommentItem[],
         ),
         `Issue comments for ${owner}/${repo}`
       );
 
       for (const c of comments) {
-        const login = (c as any).user?.login;
+        const login = c.user?.login ?? null;
         if (users.size && login && !users.has(login)) continue;
 
         try {
           const parentId = await this.resolveIssueParentId(owner, repo, c, numberToId);
 
           const row: BronzeRow = {
-            event_ulid: `issue_comment:${(c as any).id}`,
+            event_ulid: `issue_comment:${String(c.id)}`,
             provider: 'github',
             event_type: 'issue_comment',
-            provider_event_id: String((c as any).id),
-            actor_user_node: (c as any).user?.id ? String((c as any).user.id) : null,
+            provider_event_id: String(c.id),
+            actor_user_node: c.user?.id != null ? String(c.user.id) : null,
             repo_node: repoId != null ? String(repoId) : null,
             target_node: parentId, // <-- Parent Issue/PR ID
-            created_at: (c as any).created_at ?? null,
+            created_at: c.created_at ?? null,
             is_private: isPrivate ?? null,
-            raw_payload: c,
+            raw_payload: c as RawPayload,
           };
           await this.writeEventBoth(row);
         } catch (error) {
-          this.logger.warn(`❌ Failed to ingest issue comment ${(c as any).id} for ${owner}/${repo}: ${error}`);
+          this.logger.warn(`❌ Failed to ingest issue comment ${c.id} for ${owner}/${repo}: ${error}`);
         }
       }
     } catch (error) {
@@ -808,29 +838,29 @@ export class GithubService {
       const comments = await this.retryWithBackoff(
         () => this.octokit.paginate(
           this.octokit.pulls.listReviewCommentsForRepo,
-          { owner, repo, per_page: 100, since: sinceIso },
-          (r) => r.data,
+          { owner, repo, per_page: 100, since: sinceIso } satisfies ReviewCommentParams,
+          (r) => r.data as ReviewCommentItem[],
         ),
         `PR review comments for ${owner}/${repo}`
       );
 
       for (const c of comments) {
-        const login = (c as any).user?.login;
+        const login = c.user?.login ?? null;
         if (users.size && login && !users.has(login)) continue;
 
         const parentId = await this.resolvePRParentId(owner, repo, c, numberToId);
 
         const row: BronzeRow = {
-          event_ulid: `pr_review_comment:${(c as any).id}`,
+          event_ulid: `pr_review_comment:${String(c.id)}`,
           provider: 'github',
           event_type: 'pr_review_comment',
-          provider_event_id: String((c as any).id),
-          actor_user_node: (c as any).user?.id ? String((c as any).user.id) : null,
+          provider_event_id: String(c.id),
+          actor_user_node: c.user?.id != null ? String(c.user.id) : null,
           repo_node: repoId != null ? String(repoId) : null,
           target_node: parentId, // <-- Parent PR ID
-          created_at: (c as any).created_at ?? null,
+          created_at: c.created_at ?? null,
           is_private: isPrivate ?? null,
-          raw_payload: c,
+          raw_payload: c as RawPayload,
         };
         await this.writeEventBoth(row);
       }
@@ -848,7 +878,7 @@ export class GithubService {
 
     for (const login of who) {
       try {
-        const params: any = { owner, repo, per_page: 100, since: sinceIso };
+        const params: RepoCommitParams = { owner, repo, per_page: 100, since: sinceIso };
         if (untilIso) params.until = untilIso;
         if (login) params.author = login;
 
@@ -856,7 +886,7 @@ export class GithubService {
           () => this.octokit.paginate(
             this.octokit.repos.listCommits,
             params,
-            (r) => r.data,
+            (r) => r.data as RepoCommitItem[],
           ),
           `Commits for ${owner}/${repo} ${login ? `(author: ${login})` : ''}`,
           5,
@@ -864,20 +894,20 @@ export class GithubService {
         );
 
         for (const c of commits) {
-          const authorLogin = (c as any).author?.login;
+          const authorLogin = c.author?.login ?? null;
           if (users.size && (!authorLogin || !users.has(authorLogin))) continue;
 
           const row: BronzeRow = {
-            event_ulid: `commit:${(c as any).sha}`, // optionally include repo id: `commit:${repoId}:${sha}`
+            event_ulid: `commit:${String(c.sha)}`, // optionally include repo id: `commit:${repoId}:${sha}`
             provider: 'github',
             event_type: 'commit',
-            provider_event_id: String((c as any).sha),
-            actor_user_node: (c as any).author?.id ? String((c as any).author.id) : null,
+            provider_event_id: String(c.sha),
+            actor_user_node: c.author?.id != null ? String(c.author.id) : null,
             repo_node: repoId != null ? String(repoId) : null,
             target_node: null, // no push linkage here (can be added via Events pipeline later)
-            created_at: (c as any).commit?.committer?.date ?? null,
+            created_at: c.commit?.committer?.date ?? null,
             is_private: isPrivate ?? null,
-            raw_payload: c,
+            raw_payload: c as RawPayload,
           };
           await this.writeEventBoth(row);
         }

@@ -2,14 +2,27 @@ import 'reflect-metadata';
 import 'dotenv/config';
 import dataSource from '../database/data-source.js';
 
+type GoldActivityRow = {
+  user_id: string;
+  activity_type: string;
+  total_count: string;
+};
+
+type LoginRow = { login: string };
+
+type TimeAnalysisRow = {
+  login: string;
+  earliest_activity: string | null;
+  latest_activity: string | null;
+  total_events: string;
+};
+
 async function debugAnalytics() {
   try {
     await dataSource.initialize();
     console.log('🔗 Database connected');
 
-    // Check gold layer data directly
     console.log('📊 Gold Layer Data:');
-    
     const goldActivity = await dataSource.query(`
       SELECT 
         user_id,
@@ -20,17 +33,16 @@ async function debugAnalytics() {
       WHERE r.full_name = 'Maakaf/friends-activity-backend'
       GROUP BY user_id, activity_type
       ORDER BY total_count DESC
-    `);
+    `) as GoldActivityRow[];
     
     console.log('Gold Activity:');
     for (const row of goldActivity) {
-      const user = await dataSource.query('SELECT login FROM bronze.github_users WHERE user_node = $1', [row.user_id]);
-      console.log(`  ${user[0]?.login || row.user_id}: ${row.total_count} ${row.activity_type}`);
+      const [user] = await dataSource.query('SELECT login FROM bronze.github_users WHERE user_node = $1', [row.user_id]) as LoginRow[];
+      const login = user?.login ?? row.user_id;
+      console.log(`  ${login}: ${row.total_count} ${row.activity_type}`);
     }
 
-    // Check time filtering
     console.log('\n📊 Time Range Analysis:');
-    
     const timeAnalysis = await dataSource.query(`
       SELECT 
         u.login,
@@ -44,10 +56,10 @@ async function debugAnalytics() {
         AND e.event_type = 'commit'
       GROUP BY u.login
       ORDER BY total_events DESC
-    `);
+    `) as TimeAnalysisRow[];
     
     console.log('Time Range for Commits:');
-    timeAnalysis.forEach((row: any) => {
+    timeAnalysis.forEach((row) => {
       console.log(`  ${row.login}: ${row.total_events} commits (${row.earliest_activity} to ${row.latest_activity})`);
     });
 
