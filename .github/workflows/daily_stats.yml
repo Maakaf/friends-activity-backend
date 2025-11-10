@@ -17,7 +17,7 @@ jobs:
           echo "Fetching ready users..."
           RESPONSE=$(curl -s -H "accept: */*" \
             -H "X-API-Key: ${{ secrets.API_KEY }}" \
-            "${{ vars.API_URL }}/pipeline/listUsers")
+            "https://friends-activity-backend-production.up.railway.app/pipeline/listUsers")
           
           # Extract only users from the 'ready' status group
           USERS=$(echo $RESPONSE | jq -r '.ready.users | @json')
@@ -47,7 +47,7 @@ jobs:
             -H "X-API-Key: ${{ secrets.API_KEY }}" \
             -H "Content-Type: application/json" \
             -d "{\"users\": ${{ steps.get-users.outputs.users }}}" \
-            "${{ vars.API_URL }}/pipeline/stats")
+            "https://friends-activity-backend-production.up.railway.app/pipeline/stats")
           
           HTTP_STATUS=$(echo "$RESPONSE" | grep HTTP_STATUS | cut -d: -f2)
           BODY=$(echo "$RESPONSE" | sed '/HTTP_STATUS/d')
