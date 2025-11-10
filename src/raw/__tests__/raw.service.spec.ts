@@ -15,7 +15,7 @@ describe('GithubService', () => {
 
     const createService = async () => {
         const mockDataSourceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(DataSource) as MockMetadata<any, any>
+            moduleMocker.getMetadata(DataSource) as MockMetadata<DataSource, DataSource>
         );
 
         nestTestmodule = await Test.createTestingModule({
@@ -28,7 +28,7 @@ describe('GithubService', () => {
                 {
                     provide: RawMemoryStore,
                     useValue: moduleMocker.generateFromMetadata(
-                        moduleMocker.getMetadata(RawMemoryStore) as MockMetadata<any, any>
+                        moduleMocker.getMetadata(RawMemoryStore) as MockMetadata<RawMemoryStore, RawMemoryStore>
                     ),
                 },
             ],

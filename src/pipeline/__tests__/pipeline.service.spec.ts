@@ -18,20 +18,19 @@ describe('PipelineService', () => {
 
     const createService = async () => {
         const mockDataSourceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(DataSource) as MockMetadata<any, any>
+            moduleMocker.getMetadata(DataSource) as MockMetadata<DataSource, DataSource>
         );
-        moduleMocker.getMetadata(DataSource) as MockMetadata<any, any>;
         const mockGithubServiceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(GithubService) as MockMetadata<any, any>
+            moduleMocker.getMetadata(GithubService) as MockMetadata<GithubService, GithubService>
         );
         const mockSilverOrchestratorServiceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(SilverOrchestratorService) as MockMetadata<any, any>
+            moduleMocker.getMetadata(SilverOrchestratorService) as MockMetadata<SilverOrchestratorService, SilverOrchestratorService>
         );
         const mockAnalyticsServiceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(AnalyticsService) as MockMetadata<any, any>
+            moduleMocker.getMetadata(AnalyticsService) as MockMetadata<AnalyticsService, AnalyticsService>
         );
         const mockAnalyticsReportServiceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(AnalyticsReportService) as MockMetadata<any, any>
+            moduleMocker.getMetadata(AnalyticsReportService) as MockMetadata<AnalyticsReportService, AnalyticsReportService>
         );
 
 

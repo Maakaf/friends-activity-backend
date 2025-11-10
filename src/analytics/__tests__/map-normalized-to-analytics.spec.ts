@@ -120,8 +120,8 @@ describe('mapSilverToCurated', () => {
   });
 
   it('handles empty or missing arrays gracefully', () => {
-    const bundle: any = {}; // no users, repos, or activities
-    const { profiles, repos, activities } = mapSilverToCurated(bundle);
+    const bundle = {} as Partial<SilverBundle>;
+    const { profiles, repos, activities } = mapSilverToCurated(bundle as SilverBundle);
     expect(profiles).toHaveLength(0);
     expect(repos).toHaveLength(0);
     expect(activities).toHaveLength(0);
