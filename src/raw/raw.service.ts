@@ -372,6 +372,66 @@ export class GithubService {
     await this.removeSpecificUsers(usersToRemove);
   }
 
+  private async getUserSyncDates(users: string[]): Promise<Map<string, string>> {
+    const userSyncDates = new Map<string, string>();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    
+    // Get user sync info from bronze.github_users
+    const result = await this.ds.query(
+      'SELECT login, user_node, last_synced_at FROM bronze.github_users WHERE login = ANY($1)',
+      [users]
+    );
+    
+    for (const row of result) {
+      const login = row.login;
+      
+      if (row.last_synced_at) {
+        // Use last_synced_at - 1 day
+        const lastSync = new Date(row.last_synced_at);
+        const oneDayBefore = new Date(lastSync.getTime() - oneDayMs);
+        userSyncDates.set(login, oneDayBefore.toISOString().replace(/\.\d{3}Z$/, 'Z'));
+        this.logger.log(`📅 User ${login}: syncing from last_synced_at - 1 day (${oneDayBefore.toISOString()})`);
+      } else {
+        // Get latest activity date from bronze.github_events
+        const latestActivity = await this.ds.query(
+          'SELECT MAX(created_at) as latest FROM bronze.github_events WHERE actor_user_node = $1',
+          [row.user_node]
+        );
+        
+        if (latestActivity[0]?.latest) {
+          // Apply 1-day overlap to latest activity too
+          const fromTs = new Date(new Date(latestActivity[0].latest).getTime() - oneDayMs)
+            .toISOString().replace(/\.\d{3}Z$/, 'Z');
+          userSyncDates.set(login, fromTs);
+          this.logger.log(`📅 User ${login}: syncing from latest activity - 1 day overlap (${fromTs})`);
+        } else {
+          // Fallback to 2 days ago if no activity found
+          const twoDaysAgo = this.isoHoursAgo(48);
+          userSyncDates.set(login, twoDaysAgo);
+          this.logger.log(`📅 User ${login}: no activity found, using 2 days ago (${twoDaysAgo})`);
+        }
+      }
+    }
+    
+    return userSyncDates;
+  }
+
+  private async updateUserSyncTimestamp(users: string[], ts?: string) {
+    const stamp = ts ?? this.isoNow();
+    for (const login of users) {
+      try {
+        // Use GREATEST to prevent out-of-order updates from concurrent runs
+        await this.ds.query(
+          'UPDATE bronze.github_users SET last_synced_at = GREATEST(COALESCE(last_synced_at, \'-infinity\'), $1::timestamptz) WHERE login = $2',
+          [stamp, login]
+        );
+        this.logger.log(`✅ Updated last_synced_at for user ${login}`);
+      } catch (error) {
+        this.logger.warn(`❌ Failed to update last_synced_at for user ${login}: ${error}`);
+      }
+    }
+  }
+
   private async upsertUserProfilesToBronze(logins: string[]) {
     const unique = Array.from(new Set(logins.map(s => s.trim()).filter(Boolean)));
     this.logger.log(`Fetching user profiles: ${unique.join(', ')}`);
@@ -797,6 +857,77 @@ export class GithubService {
   // =======================
 
   /**
+   * Process ONLY the specified new users without including existing DB users
+   */
+  async ingestNewUsersOnly(
+    usersArray: string[],
+    sinceIso?: string,
+    untilIso?: string,
+  ) {
+    const inputUsers = new Set(usersArray.map((s) => s.trim()).filter(Boolean));
+    
+    if (!inputUsers.size) throw new Error('users list is required');
+
+    const until = untilIso ?? this.isoNow();
+    const since = sinceIso ?? this.isoDaysAgo(180); // 6 months for new users
+
+    this.logger.log(`🆕 Processing ONLY new users: ${Array.from(inputUsers).join(', ')}`);
+    
+    // Create time windows for input users only (all get 6 months as new users)
+    const userTimeWindows = new Map<string, string>();
+    for (const user of inputUsers) {
+      userTimeWindows.set(user, since);
+      this.logger.log(`📅 User ${user}: fetching last 180 days (new user)`);
+    }
+
+    await this.upsertUserProfilesToBronze([...inputUsers]);
+    const repoUsers = await this.buildRepoUsersMap(userTimeWindows);
+
+    // Fetch all repo metadata in parallel
+    const repoList = Array.from(repoUsers.values());
+    const repoMetaMap = await this.fetchMultipleReposMeta(
+      repoList.map(({owner, repo}) => ({owner, repo}))
+    );
+
+    // Track users we actually processed successfully
+    const touchedUsers = new Set<string>();
+    
+    let ingestedRepos = 0;
+    const totalRepos = Array.from(repoUsers.values()).length;
+    for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
+      this.logger.log(`🔄 Processing repo ${ingestedRepos + 1}/${totalRepos}: ${owner}/${repo}`);
+      const meta = repoMetaMap.get(this.repoKey(owner, repo));
+      if (!meta) {
+        this.logger.warn(`❌ No metadata found for ${owner}/${repo}, skipping`);
+        continue;
+      }
+
+      // Mark users as touched when we begin processing their repo
+      for (const user of usersForRepo) touchedUsers.add(user);
+
+      const numberToId = await this.buildNumberToIdMap(meta.owner, meta.name, since);
+      await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since);
+      await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
+      await this.ingestPRReviewComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, numberToId);
+      await this.ingestCommitsForUsers(meta.owner, meta.name, meta.id, meta.private, usersForRepo, since, until);
+      ingestedRepos++;
+      this.logger.log(`✅ Completed repo ${ingestedRepos}/${totalRepos}: ${owner}/${repo}`);
+    }
+    
+    // Update last_synced_at only for users we actually touched
+    await this.updateUserSyncTimestamp([...touchedUsers], until);
+    
+    return { 
+      mode: 'new-users-only', 
+      users: [...inputUsers], 
+      excludedUsers: [], // No excluded users in this mode
+      repos: ingestedRepos, 
+      since, 
+      until
+    };
+  }
+
+  /**
    *  - discover per-user repos since `sinceIso`
    *  - merge into repo -> set(users) map
    *  - ingest each repo ONCE, using only the users who actually contributed there
@@ -826,21 +957,23 @@ export class GithubService {
     // Check which users exist in gold.user_profile (all users)
     const existingUsers = await this.checkUsersInGoldProfile([...allUsersToProcess]);
     
+    // Upsert user profiles first, then get sync dates
+    await this.upsertUserProfilesToBronze([...allUsersToProcess]);
+    const userSyncDates = await this.getUserSyncDates([...allUsersToProcess]);
+    
     // Create user-specific time windows for ALL users
     const userTimeWindows = new Map<string, string>();
     for (const user of allUsersToProcess) {
       if (existingUsers.has(user)) {
-        // Existing user: last 48 hours
-        userTimeWindows.set(user, sinceIso ?? this.isoHoursAgo(48));
-        this.logger.log(`📅 User ${user}: fetching last 2 days (existing user)`);
+        // Existing user: use sync date logic (last_synced_at - 1 day or latest activity)
+        const syncDate = userSyncDates.get(user) || this.isoHoursAgo(48);
+        userTimeWindows.set(user, syncDate);
       } else {
         // New user: last 6 months
         userTimeWindows.set(user, sinceIso ?? this.isoDaysAgo(180));
         this.logger.log(`📅 User ${user}: fetching last 180 days (new user)`);
       }
     }
-
-    await this.upsertUserProfilesToBronze([...allUsersToProcess]);
     const repoUsers = await this.buildRepoUsersMap(userTimeWindows);
 
     // Fetch all repo metadata in parallel
@@ -849,6 +982,9 @@ export class GithubService {
       repoList.map(({owner, repo}) => ({owner, repo}))
     );
 
+    // Track users we actually processed successfully
+    const touchedUsers = new Set<string>();
+    
     let ingestedRepos = 0;
     const totalRepos = Array.from(repoUsers.values()).length;
     for (const { owner, repo, users: usersForRepo } of repoUsers.values()) {
@@ -865,6 +1001,9 @@ export class GithubService {
       ));
       const repoSinceIso = new Date(repoSince).toISOString().replace(/\.\d{3}Z$/, 'Z');
 
+      // Mark users as touched when we begin processing their repo
+      for (const user of usersForRepo) touchedUsers.add(user);
+
       const numberToId = await this.buildNumberToIdMap(meta.owner, meta.name, repoSinceIso);
       await this.ingestIssuesAndPRsByCreator(meta.owner, meta.name, meta.id, meta.private, usersForRepo, repoSinceIso);
       await this.ingestIssueComments(meta.owner, meta.name, meta.id, meta.private, usersForRepo, repoSinceIso, numberToId);
@@ -873,6 +1012,9 @@ export class GithubService {
       ingestedRepos++;
       this.logger.log(`✅ Completed repo ${ingestedRepos}/${totalRepos}: ${owner}/${repo}`);
     }
+
+    // Update last_synced_at only for users we actually touched
+    await this.updateUserSyncTimestamp([...touchedUsers], until);
 
     // For backward compatibility, use the earliest time window as 'since'
     const earliestSince = Math.min(...Array.from(userTimeWindows.values()).map(iso => new Date(iso).getTime()));
