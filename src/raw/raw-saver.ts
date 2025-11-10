@@ -48,6 +48,7 @@ export interface BronzeUserRow {
   login: string;
   name?: string | null;
   raw_payload: RawPayload;
+  last_synced_at?: string | null; // ISO string
 }
 
 /** Upsert latest user payload into bronze.github_users */
@@ -55,16 +56,17 @@ export async function upsertBronzeUser(ds: DataSource, row: BronzeUserRow) {
   await ds.query(
     `
     INSERT INTO bronze.github_users
-      (user_node, provider, login, name, fetched_at, raw_payload, processing_status)
+      (user_node, provider, login, name, fetched_at, raw_payload, processing_status, last_synced_at)
     VALUES
-      ($1, 'github', $2, $3, now(), $4::jsonb, 'processing')
+      ($1, 'github', $2, $3, now(), $4::jsonb, 'processing', $5)
     ON CONFLICT (user_node) DO UPDATE
       SET login = EXCLUDED.login,
           name  = EXCLUDED.name,
           fetched_at = now(),
-          raw_payload = EXCLUDED.raw_payload
+          raw_payload = EXCLUDED.raw_payload,
+          last_synced_at = EXCLUDED.last_synced_at
     `,
-    [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload)]
+    [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload), row.last_synced_at ?? null]
   );
 }
 
@@ -77,12 +79,12 @@ export async function insertBronzeUserWithStatus(
   await ds.query(
     `
     INSERT INTO bronze.github_users
-      (user_node, provider, login, name, fetched_at, raw_payload, processing_status)
+      (user_node, provider, login, name, fetched_at, raw_payload, processing_status, last_synced_at)
     VALUES
-      ($1, 'github', $2, $3, now(), $4::jsonb, $5)
+      ($1, 'github', $2, $3, now(), $4::jsonb, $5, $6)
     ON CONFLICT (user_node) DO NOTHING
     `,
-    [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload), status]
+    [row.user_node, row.login, row.name ?? null, JSON.stringify(row.raw_payload), status, row.last_synced_at ?? null]
   );
 }
 

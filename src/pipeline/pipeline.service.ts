@@ -250,7 +250,7 @@ export class PipelineService {
         // Run GitHub pipeline with 6-month data collection for new users
         const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
         const now = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
-        await this.github.ingestEachUserInTheirRepos([user], sixMonthsAgo, now);
+        await this.github.ingestNewUsersOnly([user], sixMonthsAgo, now);
         await this.analytics.refreshAll();
 
         // Set user status to ready in github_users
