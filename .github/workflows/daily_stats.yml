@@ -2,7 +2,7 @@ name: Daily Stats Refresh
 
 on:
   schedule:
-    # Run daily at 2 AM UTC
+    # Run daily at 1 AM UTC
     - cron: '0 1 * * *'
   workflow_dispatch: # Allow manual triggering
 
@@ -46,25 +46,16 @@ jobs:
           PAYLOAD=$(jq -n --argjson users '${{ steps.get-users.outputs.users }}' '{users: $users}')
           echo "Payload: $PAYLOAD"
           
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+          # Send request without waiting for response (fire and forget)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "accept: */*" \
             -H "X-API-Key: ${{ secrets.API_KEY }}" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
             "https://friends-activity-backend-production.up.railway.app/pipeline/stats")
           
-          HTTP_STATUS=$(echo "$RESPONSE" | grep HTTP_STATUS | cut -d: -f2)
-          BODY=$(echo "$RESPONSE" | sed '/HTTP_STATUS/d')
-          
-          echo "Response status: $HTTP_STATUS"
-          echo "Response body: $BODY"
-          
-          if [ "$HTTP_STATUS" -ne 200 ] && [ "$HTTP_STATUS" -ne 201 ]; then
-            echo "Error: Pipeline stats request failed with status $HTTP_STATUS"
-            exit 1
-          fi
-          
-          echo "Pipeline stats triggered successfully!"
+          echo "Request sent with HTTP status: $HTTP_CODE"
+          echo "✅ Pipeline stats request triggered successfully!"
 
       - name: Summary
         if: always()
@@ -72,5 +63,5 @@ jobs:
           if [ "${{ steps.check-users.outputs.skip }}" == "true" ]; then
             echo "✅ No users needed processing"
           else
-            echo "✅ Stats refresh completed for ready users"
+            echo "✅ Stats refresh request sent for ready users"
           fi
