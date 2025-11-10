@@ -6,6 +6,27 @@ import { AnalyticsReportService } from '../analytics/analytics-report.service.js
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 
+type ProcessingStatus = 'ready' | 'processing' | 'failed';
+type QueueStatus = 'pending' | 'processing';
+
+interface ProcessingQueueRow {
+  user_login: string;
+  status: QueueStatus;
+}
+
+interface GithubUserStatusRow {
+  login: string;
+  processing_status: ProcessingStatus;
+}
+
+interface LoginRow {
+  login: string;
+}
+
+interface UserNodeRow {
+  user_node: string | null;
+}
+
 @Injectable()
 export class PipelineService {
   constructor(
@@ -30,9 +51,13 @@ export class PipelineService {
     const queueResult = await this.dataSource.query(
       'SELECT user_login, status FROM bronze.processing_queue WHERE user_login = ANY($1)',
       [users]
-    );
-    const pendingUsers = queueResult.filter((r: any) => r.status === 'pending').map((r: any) => r.user_login);
-    const processingUsers = queueResult.filter((r: any) => r.status === 'processing').map((r: any) => r.user_login);
+    ) as ProcessingQueueRow[];
+    const pendingUsers = queueResult
+      .filter((r) => r.status === 'pending')
+      .map((r) => r.user_login);
+    const processingUsers = queueResult
+      .filter((r) => r.status === 'processing')
+      .map((r) => r.user_login);
 
     // Find users that don't exist in either table
     const allExistingUsers = [...readyUsers, ...failedUsers, ...pendingUsers, ...processingUsers];
@@ -160,12 +185,12 @@ export class PipelineService {
     // Get users from github_users table
     const githubUsers = await this.dataSource.query(
       'SELECT login, processing_status FROM bronze.github_users ORDER BY login'
-    );
+    ) as GithubUserStatusRow[];
 
     // Get users from processing_queue table
     const queueUsers = await this.dataSource.query(
       'SELECT user_login, status FROM bronze.processing_queue ORDER BY user_login'
-    );
+    ) as ProcessingQueueRow[];
 
     const ready: string[] = [];
     const processing: string[] = [];
@@ -188,7 +213,7 @@ export class PipelineService {
     }
 
     // Get all users already in github_users to avoid duplicates
-    const githubUserLogins = new Set(githubUsers.map((r: any) => r.login));
+    const githubUserLogins = new Set(githubUsers.map((r) => r.login));
 
     // Process processing_queue results (only if not already in github_users)
     for (const row of queueUsers) {
@@ -286,16 +311,16 @@ export class PipelineService {
   }
 
   // Status management utilities
-  private async getUsersByStatus(users: string[], allowedStatuses: string[]) {
+  private async getUsersByStatus(users: string[], allowedStatuses: ProcessingStatus[]) {
     const placeholders = allowedStatuses.map((_, i) => `$${i + 2}`).join(', ');
     const result = await this.dataSource.query(
       `SELECT login FROM bronze.github_users WHERE login = ANY($1) AND processing_status IN (${placeholders})`,
       [users, ...allowedStatuses]
-    );
-    return result.map((row: any) => row.login);
+    ) as LoginRow[];
+    return result.map((row) => row.login);
   }
 
-  private async setUserStatus(login: string, status: 'ready' | 'processing' | 'failed') {
+  private async setUserStatus(login: string, status: ProcessingStatus) {
     await this.dataSource.query(
       'UPDATE bronze.github_users SET processing_status = $1 WHERE login = $2',
       [status, login]
@@ -312,13 +337,16 @@ export class PipelineService {
         const userNodeResult = await this.dataSource.query(
           'SELECT user_node FROM bronze.github_users WHERE login = $1',
           [user]
-        );
+        ) as UserNodeRow[];
 
         if (userNodeResult.length === 0) {
           continue; // User not found, skip
         }
 
         const userNode = userNodeResult[0].user_node;
+        if (!userNode) {
+          continue;
+        }
 
         // Delete from all layers
         await this.dataSource.query('DELETE FROM bronze.github_events WHERE actor_user_node = $1', [userNode]);
