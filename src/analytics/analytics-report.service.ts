@@ -5,6 +5,28 @@ import { UserProfileEntity } from './user_profile/user_profile.entity.js';
 import { UserActivityEntity } from './user_activity/user_activity.entity.js';
 import { RepositoryEntity } from './repository/repository.entity.js';
 
+interface RepoActivityCounts {
+  commits: number;
+  pullRequests: number;
+  issues: number;
+  prComments: number;
+  issueComments: number;
+}
+
+interface UserRepoSummary extends RepoActivityCounts {
+  repoName: string | null;
+  description: string | null;
+  url: string | null;
+}
+
+interface UserSummaryTotals {
+  totalCommits: number;
+  totalPRs: number;
+  totalIssues: number;
+  totalPRComments: number;
+  totalIssueComments: number;
+}
+
 @Injectable()
 export class AnalyticsReportService {
   constructor(
@@ -40,7 +62,12 @@ export class AnalyticsReportService {
       .getMany();
 
     console.log(`Found ${activities.length} activities in last 180 days for repos with fork_count >= 3`);
-    console.log('Activities by type:', activities.reduce((acc, a) => { acc[a.activityType] = (acc[a.activityType] || 0) + (a.activityCount || 0); return acc; }, {} as any));
+    const activitiesByType = activities.reduce<Record<string, number>>((acc, a) => {
+      const current = acc[a.activityType] ?? 0;
+      acc[a.activityType] = current + (a.activityCount ?? 0);
+      return acc;
+    }, {});
+    console.log('Activities by type:', activitiesByType);
 
     // Build response
     const result = {
@@ -77,14 +104,17 @@ export class AnalyticsReportService {
     };
   }
 
-  private getUserRepos(userId: string, repos: RepositoryEntity[], activities: UserActivityEntity[]) {
+  private getUserRepos(userId: string, repos: RepositoryEntity[], activities: UserActivityEntity[]): UserRepoSummary[] {
     const userActivities = activities.filter(a => a.userId === userId);
-    const repoActivities = new Map();
+    const repoActivities = new Map<string, RepoActivityCounts>();
 
     // Group activities by repo
     userActivities.forEach(activity => {
-      if (!repoActivities.has(activity.repoId)) {
-        repoActivities.set(activity.repoId, {
+      const repoId = activity.repoId;
+      if (!repoId) return;
+
+      if (!repoActivities.has(repoId)) {
+        repoActivities.set(repoId, {
           commits: 0,
           pullRequests: 0,
           issues: 0,
@@ -93,7 +123,7 @@ export class AnalyticsReportService {
         });
       }
 
-      const counts = repoActivities.get(activity.repoId);
+      const counts = repoActivities.get(repoId)!;
       const activityCount = activity.activityCount || 0;
 
       switch (activity.activityType) {
@@ -131,13 +161,13 @@ export class AnalyticsReportService {
           issues: counts.issues,
           prComments: counts.prComments,
           issueComments: counts.issueComments
-        };
+        } satisfies UserRepoSummary;
       })
-      .filter(Boolean);
+      .filter((repo): repo is UserRepoSummary => repo !== null);
   }
 
-  private calculateUserSummary(repos: any[]) {
-    return repos.reduce((sum, repo) => ({
+  private calculateUserSummary(repos: UserRepoSummary[]): UserSummaryTotals {
+    return repos.reduce<UserSummaryTotals>((sum, repo) => ({
       totalCommits: sum.totalCommits + repo.commits,
       totalPRs: sum.totalPRs + repo.pullRequests,
       totalIssues: sum.totalIssues + repo.issues,
