@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import type { RawPayload } from '../../raw/raw-saver.js';
 
 export interface BronzeReposRow {
   repo_node: string;            // PK in bronze.github_repos
@@ -8,7 +9,7 @@ export interface BronzeReposRow {
   name: string | null;
   is_private: boolean | null;
   fetched_at: string | null;    // ISO
-  raw_payload: any;
+  raw_payload: RawPayload | null;
 }
 
 @Injectable()
@@ -26,7 +27,7 @@ export class RepoBronzeRepo {
     const { sinceIso, untilIso, repoIds, owners, names, limit } = params;
 
     const where: string[] = ['1=1'];
-    const args: any[] = [];
+    const args: unknown[] = [];
 
     if (sinceIso) { where.push(`fetched_at >= $${args.length + 1}`); args.push(sinceIso); }
     if (untilIso) { where.push(`fetched_at <  $${args.length + 1}`); args.push(untilIso); }

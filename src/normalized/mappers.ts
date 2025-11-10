@@ -2,6 +2,87 @@ import {
   Issue, PR, Comment, Commit,
   Repository, User, IssueState, ParentType, RepoId, UserId, ISO8601, Visibility
 } from './types.js';
+import type { RawPayload } from '../raw/raw-saver.js';
+
+type GithubUserPayload = RawPayload & {
+  id?: number | string | null;
+  login?: string | null;
+  name?: string | null;
+  avatar_url?: string | null;
+  html_url?: string | null;
+  email?: string | null;
+  company?: string | null;
+  location?: string | null;
+  bio?: string | null;
+  blog?: string | null;
+  twitter_username?: string | null;
+  public_repos?: number | null;
+  followers?: number | null;
+  following?: number | null;
+  site_admin?: boolean | null;
+  type?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
+type GithubIssuePayload = RawPayload & {
+  id?: number | string | null;
+  state?: string | null;
+  created_at?: string | null;
+  user?: GithubUserPayload | null;
+  assignee?: GithubUserPayload | null;
+  closed_at?: string | null;
+  updated_at?: string | null;
+  title?: string | null;
+  body?: string | null;
+};
+
+type GithubPullRequestPayload = GithubIssuePayload & {
+  pull_request?: { merged_at?: string | null } | null;
+  merged_at?: string | null;
+  number?: number | null;
+};
+
+type GithubCommentPayload = RawPayload & {
+  id?: number | string | null;
+  user?: GithubUserPayload | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  body?: string | null;
+};
+
+type GithubCommitPayload = RawPayload & {
+  sha?: string | null;
+  author?: GithubUserPayload | null;
+  commit?: {
+    committer?: { date?: string | null } | null;
+    message?: string | null;
+  } | null;
+};
+
+type GithubRepoPayload = RawPayload & {
+  id?: number | string | null;
+  owner?: GithubUserPayload | null;
+  name?: string | null;
+  description?: string | null;
+  html_url?: string | null;
+  visibility?: string | null;
+  private?: boolean | null;
+  default_branch?: string | null;
+  forks_count?: number | null;
+  parent?: { id?: number | string | null } | null;
+  pushed_at?: string | null;
+  updated_at?: string | null;
+  created_at?: string | null;
+};
+
+type GithubActorPayload = RawPayload & {
+  user?: GithubUserPayload | null;
+  author?: GithubUserPayload | null;
+  comment?: { user?: GithubUserPayload | null } | null;
+  assignees?: (GithubUserPayload | null | undefined)[] | null;
+  requested_reviewers?: (GithubUserPayload | null | undefined)[] | null;
+};
 
 export interface BronzeRow {
   event_ulid: string;
@@ -14,7 +95,7 @@ export interface BronzeRow {
   created_at: string | null;      // ISO
   received_at: string | null;     // ISO
   is_private: boolean | null;
-  raw_payload: any;               // GitHub REST payload
+  raw_payload: RawPayload | null;               // GitHub REST payload
 }
 
 /* ---------- Issues ---------- */
@@ -22,7 +103,7 @@ export interface BronzeRow {
 export function mapIssue(b: BronzeRow): Issue | null {
   if (b.event_type !== 'issue') return null;
 
-  const rp = b.raw_payload ?? {};
+  const rp = (b.raw_payload as GithubIssuePayload | null) ?? {};
   const id = b.provider_event_id ?? rp.id;
   if (id == null) return null;
 
@@ -64,7 +145,7 @@ export function mergeIssue(prev: Issue, next: Issue): Issue {
 export function mapPR(b: BronzeRow): PR | null {
   if (b.event_type !== 'pull_request') return null;
 
-  const rp = b.raw_payload ?? {};
+  const rp = (b.raw_payload as GithubPullRequestPayload | null) ?? {};
   const id = b.provider_event_id ?? rp.id;
   if (id == null) return null;
 
@@ -135,7 +216,7 @@ export function mergePR(prev: PR, next: PR): PR {
 export function mapComment(b: BronzeRow): Comment | null {
   if (b.event_type !== 'issue_comment' && b.event_type !== 'pr_review_comment') return null;
 
-  const rp = b.raw_payload ?? {};
+  const rp = (b.raw_payload as GithubCommentPayload | null) ?? {};
   const id = b.provider_event_id ?? rp.id;
   if (id == null) return null;
 
@@ -173,7 +254,7 @@ export function mergeComment(prev: Comment, next: Comment): Comment {
 export function mapCommit(b: BronzeRow): Commit | null {
   if (b.event_type !== 'commit') return null;
 
-  const rp = b.raw_payload ?? {};
+  const rp = (b.raw_payload as GithubCommitPayload | null) ?? {};
   const id = b.provider_event_id ?? rp.sha;
   if (!id) return null;
 
@@ -220,7 +301,7 @@ export function mergeCommit(prev: Commit, next: Commit): Commit {
 
 
 /** Map a GitHub user-ish JSON to Silver User. */
-export function mapUserFromPayload(u: any): User | null {
+export function mapUserFromPayload(u: GithubUserPayload | null | undefined): User | null {
   if (!u || u.id == null) return null;
   return {
     userId: String(u.id),
@@ -249,9 +330,9 @@ export function mapUserFromBronzeRow(row: {
   user_node: string;
   login: string | null;
   fetched_at: string | null;
-  raw_payload: any;
+  raw_payload: RawPayload | null;
 }): User | null {
-  const fromPayload = mapUserFromPayload(row.raw_payload);
+  const fromPayload = mapUserFromPayload(row.raw_payload as GithubUserPayload | null);
   if (fromPayload) {
     return {
       ...fromPayload,
@@ -282,15 +363,15 @@ export function mapUserFromBronzeRow(row: {
  * Given a bronze row payload and an actor id, try to find a matching
  * user object for that actor in common locations; otherwise return { id }.
  */
-export function pickUserObjectForActor(raw_payload: any, actorId: string): any {
-  const idEq = (u: any) => u && String(u.id) === actorId;
+export function pickUserObjectForActor(raw_payload: GithubActorPayload | null | undefined, actorId: string): GithubUserPayload {
+  const idEq = (u: GithubUserPayload | null | undefined) => u && u.id != null && String(u.id) === actorId;
 
-  const candidates: any[] = [];
+  const candidates: GithubUserPayload[] = [];
   if (raw_payload?.user) candidates.push(raw_payload.user);
   if (raw_payload?.author) candidates.push(raw_payload.author);
   if (raw_payload?.comment?.user) candidates.push(raw_payload.comment.user);
-  if (Array.isArray(raw_payload?.assignees)) candidates.push(...raw_payload.assignees);
-  if (Array.isArray(raw_payload?.requested_reviewers)) candidates.push(...raw_payload.requested_reviewers);
+  if (Array.isArray(raw_payload?.assignees)) candidates.push(...raw_payload.assignees.filter(Boolean) as GithubUserPayload[]);
+  if (Array.isArray(raw_payload?.requested_reviewers)) candidates.push(...raw_payload.requested_reviewers.filter(Boolean) as GithubUserPayload[]);
 
   const found = candidates.find(idEq);
   if (found) return found;
@@ -330,7 +411,7 @@ export function mergeUser(prev: User, next: User): User {
 
 
 /** Map a GitHub repo JSON payload to Silver Repository shape */
-export function mapRepositoryFromPayload(r: any): Repository | null {
+export function mapRepositoryFromPayload(r: GithubRepoPayload | null | undefined): Repository | null {
   if (!r || r.id == null) return null;
 
   const repoId: RepoId = String(r.id);
@@ -368,9 +449,9 @@ export function mapRepoFromBronzeRow(row: {
   name: string | null;
   is_private: boolean | null;
   fetched_at: string | null;
-  raw_payload: any;
+  raw_payload: RawPayload | null;
 }): Repository | null {
-  const fromPayload = mapRepositoryFromPayload(row.raw_payload);
+  const fromPayload = mapRepositoryFromPayload(row.raw_payload as GithubRepoPayload | null);
   if (fromPayload) {
     return {
       ...fromPayload,

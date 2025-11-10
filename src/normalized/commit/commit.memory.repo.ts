@@ -2,6 +2,12 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { BronzeRow } from '../mappers.js';
 import { RawMemoryStore } from '../../raw/raw-memory.store.js';
+import type { RawPayload } from '../../raw/raw-saver.js';
+
+type PullRequestPayload = RawPayload & {
+  merged_at?: string | null;
+  pull_request?: { merged_at?: string | null } | null;
+};
 
 @Injectable()
 export class CommitRawMemoryRepo {
@@ -37,9 +43,9 @@ export class CommitRawMemoryRepo {
         
         if (!linkedPR?.raw_payload) return false;
         
-        const rp = linkedPR.raw_payload;
-        const mergedAt = rp.merged_at || rp.pull_request?.merged_at;
-        return !!mergedAt;
+        const rp = linkedPR.raw_payload as PullRequestPayload | null;
+        const mergedAt = rp?.merged_at ?? rp?.pull_request?.merged_at ?? null;
+        return mergedAt != null;
       })
       .map(e => ({
         event_ulid: e.event_ulid,
