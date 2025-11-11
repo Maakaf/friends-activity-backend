@@ -1,7 +1,6 @@
 import { mapSilverToCurated } from '../mappers/map-normalized-to-analytics.js';
 import { SilverBundle } from '../../normalized/types.js';
 
-
 describe('mapSilverToCurated', () => {
   it('maps users, repos, and activities correctly', () => {
     const bundle: SilverBundle = {
@@ -42,7 +41,7 @@ describe('mapSilverToCurated', () => {
           issueId: '',
           state: 'open',
           closedAt: null,
-          updatedAt: null
+          updatedAt: null,
         },
       ],
       prs: [
@@ -53,7 +52,7 @@ describe('mapSilverToCurated', () => {
           prId: 'prId1',
           mergedAt: '2024-02-05T00:00:00Z',
           closedAt: '2024-02-05T00:00:00Z',
-          updatedAt: '2024-02-05T00:00:00Z'
+          updatedAt: '2024-02-05T00:00:00Z',
         },
       ],
       comments: [
@@ -63,7 +62,7 @@ describe('mapSilverToCurated', () => {
           createdAt: '2024-01-06T00:00:00Z',
           parentType: 'PR',
           commentId: 'commentId1',
-          parentId: 'pId1'
+          parentId: 'pId1',
         },
         {
           authorUserId: 'u1',
@@ -71,7 +70,7 @@ describe('mapSilverToCurated', () => {
           createdAt: '2024-06-06T00:00:00Z',
           parentType: 'Issue',
           commentId: 'commentId2',
-          parentId: 'pId1'
+          parentId: 'pId1',
         },
       ],
       commits: [
@@ -79,7 +78,7 @@ describe('mapSilverToCurated', () => {
           authorUserId: 'u1',
           repoId: 'r1',
           createdAt: '2024-01-07T00:00:00Z',
-          commitId: 'commitId1'
+          commitId: 'commitId1',
         },
       ],
     };
@@ -105,13 +104,19 @@ describe('mapSilverToCurated', () => {
     // 1 issue + 1 PR + 2 comment + 1 commit = 4 records
     expect(activities).toHaveLength(
       bundle.issues.length +
-      bundle.prs.length +
-      bundle.comments.length +
-      bundle.commits.length
+        bundle.prs.length +
+        bundle.comments.length +
+        bundle.commits.length,
     );
-    const types = activities.map(a => a.activityType).sort();
-    expect(types).toEqual(['commit', 'issue', 'issue_comment', 'pr', 'pr_comment']);
-    activities.forEach(a => {
+    const types = activities.map((a) => a.activityType).sort();
+    expect(types).toEqual([
+      'commit',
+      'issue',
+      'issue_comment',
+      'pr',
+      'pr_comment',
+    ]);
+    activities.forEach((a) => {
       expect(a.userId).toBe('u1');
       expect(a.repoId).toBe('r1');
       expect(a.day).toBeInstanceOf(Date);
@@ -121,7 +126,9 @@ describe('mapSilverToCurated', () => {
 
   it('handles empty or missing arrays gracefully', () => {
     const bundle = {} as Partial<SilverBundle>;
-    const { profiles, repos, activities } = mapSilverToCurated(bundle as SilverBundle);
+    const { profiles, repos, activities } = mapSilverToCurated(
+      bundle as SilverBundle,
+    );
     expect(profiles).toHaveLength(0);
     expect(repos).toHaveLength(0);
     expect(activities).toHaveLength(0);
