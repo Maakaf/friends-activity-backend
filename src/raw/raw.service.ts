@@ -246,7 +246,7 @@ export class GithubService {
       this.mem.upsertRepo(memRepo);
     } catch (error) {
       this.logger.warn(
-        `❌ Failed to save repo metadata: ${owner}/${repo} - ${error}`,
+        `❌ Failed to save repo metadata: ${owner}/${repo} - ${this.getErrorMessage(error)}`,
       );
     }
 
@@ -282,7 +282,7 @@ export class GithubService {
           return { key: this.repoKey(owner, repo), meta };
         } catch (error) {
           this.logger.warn(
-            `❌ Failed to fetch repo metadata for ${owner}/${repo}: ${error}`,
+            `❌ Failed to fetch repo metadata for ${owner}/${repo}: ${this.getErrorMessage(error)}`,
           );
           return { key: this.repoKey(owner, repo), meta: null };
         }
@@ -461,7 +461,9 @@ export class GithubService {
 
         this.logger.log(`✅ Successfully removed user ${user}`);
       } catch (error) {
-        this.logger.warn(`❌ Failed to remove user ${user}: ${error}`);
+        this.logger.warn(
+          `❌ Failed to remove user ${user}: ${this.getErrorMessage(error)}`,
+        );
         failedUsers.push(user);
       }
     }
@@ -572,7 +574,7 @@ export class GithubService {
         this.logger.log(`✅ Updated last_synced_at for user ${login}`);
       } catch (error) {
         this.logger.warn(
-          `❌ Failed to update last_synced_at for user ${login}: ${error}`,
+          `❌ Failed to update last_synced_at for user ${login}: ${this.getErrorMessage(error)}`,
         );
       }
     }
@@ -615,7 +617,9 @@ export class GithubService {
         this.mem.upsertUser(memUser);
         this.logger.log(`✅ User profile saved: ${login}`);
       } catch (error) {
-        this.logger.warn(`❌ Failed to fetch user: ${login} - ${error}`);
+        this.logger.warn(
+          `❌ Failed to fetch user: ${login} - ${this.getErrorMessage(error)}`,
+        );
       }
     }
   }
@@ -671,7 +675,7 @@ export class GithubService {
       return id;
     } catch (error) {
       this.logger.warn(
-        `❌ Failed to resolve issue parent ID for ${owner}/${repo}#${num}: ${error}`,
+        `❌ Failed to resolve issue parent ID for ${owner}/${repo}#${num}: ${this.getErrorMessage(error)}`,
       );
       return null;
     }
@@ -702,7 +706,7 @@ export class GithubService {
       return id;
     } catch (error) {
       this.logger.warn(
-        `❌ Failed to resolve PR parent ID for ${owner}/${repo}#${num}: ${error}`,
+        `❌ Failed to resolve PR parent ID for ${owner}/${repo}#${num}: ${this.getErrorMessage(error)}`,
       );
       return null;
     }
@@ -785,7 +789,9 @@ export class GithubService {
         if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
       }
     } catch (error) {
-      this.logger.warn(`❌ Failed to search issues/PRs for ${login}: ${error}`);
+      this.logger.warn(
+        `❌ Failed to search issues/PRs for ${login}: ${this.getErrorMessage(error)}`,
+      );
     }
 
     // B) Commits authored by the user
@@ -825,7 +831,9 @@ export class GithubService {
         }
       }
     } catch (error) {
-      this.logger.warn(`❌ Failed to search commits for ${login}: ${error}`);
+      this.logger.warn(
+        `❌ Failed to search commits for ${login}: ${this.getErrorMessage(error)}`,
+      );
     }
 
     const repos = Array.from(found.values());
@@ -946,7 +954,7 @@ export class GithubService {
         }
       } catch (error) {
         this.logger.warn(
-          `❌ Failed to fetch issues/PRs for ${owner}/${repo} ${login ? `(creator: ${login})` : ''}: ${error}`,
+          `❌ Failed to fetch issues/PRs for ${owner}/${repo} ${login ? `(creator: ${login})` : ''}: ${this.getErrorMessage(error)}`,
         );
       }
     }
@@ -1009,13 +1017,13 @@ export class GithubService {
           await this.writeEventBoth(row);
         } catch (error) {
           this.logger.warn(
-            `❌ Failed to ingest issue comment ${c.id} for ${owner}/${repo}: ${error}`,
+            `❌ Failed to ingest issue comment ${c.id} for ${owner}/${repo}: ${this.getErrorMessage(error)}`,
           );
         }
       }
     } catch (error) {
       this.logger.warn(
-        `❌ Failed to fetch issue comments for ${owner}/${repo}: ${error}`,
+        `❌ Failed to fetch issue comments for ${owner}/${repo}: ${this.getErrorMessage(error)}`,
       );
     }
   }
@@ -1073,7 +1081,7 @@ export class GithubService {
       }
     } catch (error) {
       this.logger.warn(
-        `❌ Failed to fetch PR review comments for ${owner}/${repo}: ${error}`,
+        `❌ Failed to fetch PR review comments for ${owner}/${repo}: ${this.getErrorMessage(error)}`,
       );
     }
   }
@@ -1133,7 +1141,7 @@ export class GithubService {
         }
       } catch (error) {
         this.logger.warn(
-          `❌ Failed to fetch commits for ${owner}/${repo} ${login ? `(author: ${login})` : ''}: ${error}`,
+          `❌ Failed to fetch commits for ${owner}/${repo} ${login ? `(author: ${login})` : ''}: ${this.getErrorMessage(error)}`,
         );
       }
     }
