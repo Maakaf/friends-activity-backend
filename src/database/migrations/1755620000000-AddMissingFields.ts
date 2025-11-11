@@ -1,18 +1,20 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+type ExistsRow = { exists: boolean };
+
 export class AddMissingFields1755620000000 implements MigrationInterface {
   name = 'AddMissingFields1755620000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Check if gold.user_profile table exists before altering
-    const userProfileExists = await queryRunner.query(`
+    const userProfileExists = (await queryRunner.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'gold' AND table_name = 'user_profile'
       )
-    `);
+    `)) as ExistsRow[];
 
-    if (userProfileExists[0].exists) {
+    if (userProfileExists[0]?.exists) {
       await queryRunner.query(`
         ALTER TABLE gold.user_profile 
         ADD COLUMN IF NOT EXISTS blog TEXT,
@@ -24,14 +26,14 @@ export class AddMissingFields1755620000000 implements MigrationInterface {
     }
 
     // Check if gold.repository table exists before altering
-    const repositoryExists = await queryRunner.query(`
+    const repositoryExists = (await queryRunner.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'gold' AND table_name = 'repository'
       )
-    `);
+    `)) as ExistsRow[];
 
-    if (repositoryExists[0].exists) {
+    if (repositoryExists[0]?.exists) {
       await queryRunner.query(`
         ALTER TABLE gold.repository 
         ADD COLUMN IF NOT EXISTS description TEXT,
@@ -42,14 +44,14 @@ export class AddMissingFields1755620000000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Check if gold.user_profile table exists before altering
-    const userProfileExists = await queryRunner.query(`
+    const userProfileExists = (await queryRunner.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'gold' AND table_name = 'user_profile'
       )
-    `);
+    `)) as ExistsRow[];
 
-    if (userProfileExists[0].exists) {
+    if (userProfileExists[0]?.exists) {
       await queryRunner.query(`
         ALTER TABLE gold.user_profile 
         DROP COLUMN IF EXISTS blog,
@@ -61,14 +63,14 @@ export class AddMissingFields1755620000000 implements MigrationInterface {
     }
 
     // Check if gold.repository table exists before altering
-    const repositoryExists = await queryRunner.query(`
+    const repositoryExists = (await queryRunner.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'gold' AND table_name = 'repository'
       )
-    `);
+    `)) as ExistsRow[];
 
-    if (repositoryExists[0].exists) {
+    if (repositoryExists[0]?.exists) {
       await queryRunner.query(`
         ALTER TABLE gold.repository 
         DROP COLUMN IF EXISTS description,
