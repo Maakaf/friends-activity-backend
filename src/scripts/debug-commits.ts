@@ -14,14 +14,12 @@ async function debugCommits() {
     await dataSource.initialize();
     console.log('🔗 Database connected');
 
-    // Check total commits in bronze
-    const totalCommits = await dataSource.query(
+    const totalCommits = await queryRows<CountRow>(
       "SELECT COUNT(*) as count FROM bronze.github_events WHERE event_type = 'commit'",
     );
     console.log(`📊 Total commits in bronze: ${totalCommits[0]?.count ?? '0'}`);
 
-    // Check commits by user
-    const commitsByUser = await dataSource.query(`
+    const commitsByUser = await queryRows<CommitByUserRow>(`
       SELECT 
         u.login,
         COUNT(*) as commit_count
@@ -37,8 +35,7 @@ async function debugCommits() {
       console.log(`  ${row.login}: ${row.commit_count} commits`);
     });
 
-    // Check recent commits (last 7 days)
-    const recentCommits = await dataSource.query(`
+    const recentCommits = await queryRows<RecentCommitRow>(`
       SELECT 
         u.login,
         COUNT(*) as commit_count,
@@ -67,4 +64,8 @@ async function debugCommits() {
   }
 }
 
-debugCommits();
+void debugCommits();
+
+function queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  return dataSource.query(sql, params);
+}

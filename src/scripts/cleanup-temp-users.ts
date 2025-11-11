@@ -25,7 +25,7 @@ async function cleanupTempUsers() {
     console.log('🔗 Database connected');
 
     // First, show which users will be deleted
-    const tempUsers = await dataSource.query(
+    const tempUsers: TempUserRow[] = await dataSource.query(
       "SELECT login FROM bronze.github_users WHERE user_node LIKE 'temp_%'",
     );
 
@@ -41,7 +41,7 @@ async function cleanupTempUsers() {
     }
 
     // Delete users with temp_ user_node values
-    const result = await dataSource.query(
+    const result: DeleteResult = await dataSource.query(
       "DELETE FROM bronze.github_users WHERE user_node LIKE 'temp_%'",
     );
 
@@ -56,4 +56,4 @@ async function cleanupTempUsers() {
   }
 }
 
-cleanupTempUsers();
+void cleanupTempUsers();

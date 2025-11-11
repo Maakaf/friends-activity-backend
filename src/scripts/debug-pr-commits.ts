@@ -22,7 +22,7 @@ async function debugPRCommits() {
     await dataSource.initialize();
     console.log('🔗 Database connected');
 
-    const repoAnalysis = await dataSource.query(`
+    const repoAnalysis = await queryRows<RepoAnalysisRow>(`
       SELECT 
         u.login,
         COUNT(CASE WHEN e.event_type = 'pull_request' THEN 1 END) as pr_count,
@@ -47,7 +47,7 @@ async function debugPRCommits() {
       console.log('');
     });
 
-    const duplicateCommits = await dataSource.query(`
+    const duplicateCommits = await queryRows<DuplicateCommitRow>(`
       SELECT 
         provider_event_id as sha,
         COUNT(*) as count,
@@ -79,4 +79,8 @@ async function debugPRCommits() {
   }
 }
 
-debugPRCommits();
+void debugPRCommits();
+
+function queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  return dataSource.query(sql, params);
+}

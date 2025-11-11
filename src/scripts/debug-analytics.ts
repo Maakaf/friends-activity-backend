@@ -23,7 +23,7 @@ async function debugAnalytics() {
     console.log('🔗 Database connected');
 
     console.log('📊 Gold Layer Data:');
-    const goldActivity = await dataSource.query(`
+    const goldActivity = await queryRows<GoldActivityRow>(`
       SELECT 
         user_id,
         activity_type,
@@ -37,7 +37,7 @@ async function debugAnalytics() {
 
     console.log('Gold Activity:');
     for (const row of goldActivity) {
-      const [user] = await dataSource.query(
+      const [user] = await queryRows<LoginRow>(
         'SELECT login FROM bronze.github_users WHERE user_node = $1',
         [row.user_id],
       );
@@ -46,7 +46,7 @@ async function debugAnalytics() {
     }
 
     console.log('\n📊 Time Range Analysis:');
-    const timeAnalysis = await dataSource.query(`
+    const timeAnalysis = await queryRows<TimeAnalysisRow>(`
       SELECT 
         u.login,
         MIN(e.created_at) as earliest_activity,
@@ -76,4 +76,8 @@ async function debugAnalytics() {
   }
 }
 
-debugAnalytics();
+void debugAnalytics();
+
+function queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  return dataSource.query(sql, params);
+}
