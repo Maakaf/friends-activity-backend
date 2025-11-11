@@ -17,38 +17,24 @@ import type {
   GithubSearchCommitDTO,
 } from './github-client-interface.js';
 
-type RepoCommitItem =
-  RestEndpointMethodTypes['repos']['listCommits']['response']['data'][number];
 type RepoCommitParams =
   RestEndpointMethodTypes['repos']['listCommits']['parameters'];
 
-type IssueOrPRItem =
-  RestEndpointMethodTypes['issues']['listForRepo']['response']['data'][number];
 type IssueOrPRParams =
   RestEndpointMethodTypes['issues']['listForRepo']['parameters'];
 
-type IssueCommentItem =
-  RestEndpointMethodTypes['issues']['listCommentsForRepo']['response']['data'][number];
 type IssueCommentParams =
   RestEndpointMethodTypes['issues']['listCommentsForRepo']['parameters'];
 
-type ReviewCommentItem =
-  RestEndpointMethodTypes['pulls']['listReviewCommentsForRepo']['response']['data'][number];
 type ReviewCommentParams =
   RestEndpointMethodTypes['pulls']['listReviewCommentsForRepo']['parameters'];
 
-type PullCommitItem =
-  RestEndpointMethodTypes['pulls']['listCommits']['response']['data'][number];
 type PullCommitParams =
   RestEndpointMethodTypes['pulls']['listCommits']['parameters'];
 
-type SearchIssueItem =
-  RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][number];
 type SearchIssueParams =
   RestEndpointMethodTypes['search']['issuesAndPullRequests']['parameters'];
 
-type SearchCommitItem =
-  RestEndpointMethodTypes['search']['commits']['response']['data']['items'][number];
 type SearchCommitParams =
   RestEndpointMethodTypes['search']['commits']['parameters'];
 

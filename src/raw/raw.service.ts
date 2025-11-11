@@ -28,8 +28,6 @@ const PR_NUM_RE = /\/pulls\/(\d+)$/;
 type RepoResponse = RestEndpointMethodTypes['repos']['get']['response']['data'];
 type UserResponse =
   RestEndpointMethodTypes['users']['getByUsername']['response']['data'];
-type IssueListItem =
-  RestEndpointMethodTypes['issues']['listForRepo']['response']['data'][number];
 type IssueListParams =
   RestEndpointMethodTypes['issues']['listForRepo']['parameters'];
 type IssueDetailResponse =
@@ -46,12 +44,8 @@ type ReviewCommentItem =
 type ReviewCommentParams =
   RestEndpointMethodTypes['pulls']['listReviewCommentsForRepo']['parameters'];
 
-type PullCommitItem =
-  RestEndpointMethodTypes['pulls']['listCommits']['response']['data'][number];
 type PullCommitParams =
   RestEndpointMethodTypes['pulls']['listCommits']['parameters'];
-type RepoCommitItem =
-  RestEndpointMethodTypes['repos']['listCommits']['response']['data'][number];
 type RepoCommitParams =
   RestEndpointMethodTypes['repos']['listCommits']['parameters'];
 
@@ -67,6 +61,13 @@ type SearchCommitParams =
 type GoldUserProfileRow = { login: string };
 type BronzeUserNodeRow = { login: string; user_node: string | null };
 type BronzeUserNodeOnlyRow = { user_node: string | null };
+type BronzeUserSyncRow = {
+  login: string;
+  user_node: string | null;
+  last_synced_at: string | null;
+};
+type LatestActivityRow = { latest: string | null };
+type UnknownRow = Record<string, unknown>;
 
 @Injectable()
 export class GithubService {
@@ -309,7 +310,7 @@ export class GithubService {
   ): Promise<Set<string>> {
     if (!userLogins.length) return new Set();
 
-    const result = await this.ds.query(
+    const result = await this.queryRows<GoldUserProfileRow>(
       'SELECT login FROM gold.user_profile WHERE login = ANY($1)',
       [userLogins],
     );
@@ -318,7 +319,9 @@ export class GithubService {
   }
 
   private async getAllDbUsers(): Promise<string[]> {
-    const result = await this.ds.query('SELECT login FROM gold.user_profile');
+    const result = await this.queryRows<GoldUserProfileRow>(
+      'SELECT login FROM gold.user_profile',
+    );
     return result.map((row) => row.login);
   }
 
@@ -338,7 +341,7 @@ export class GithubService {
     );
 
     // Get user_nodes from bronze.github_users for proper cleanup
-    const userNodes = await this.ds.query(
+    const userNodes = await this.queryRows<BronzeUserNodeRow>(
       'SELECT login, user_node FROM bronze.github_users WHERE login = ANY($1)',
       [usersToRemove],
     );
@@ -358,13 +361,13 @@ export class GithubService {
     ]);
 
     if (userNodeValues.length > 0) {
-      const activitiesResult = await this.ds.query(
+      const activitiesResult = await this.queryRows<UnknownRow>(
         'DELETE FROM gold.user_activity WHERE user_id = ANY($1) RETURNING *',
         [userNodeValues],
       );
       activitiesDeleted = activitiesResult.length;
 
-      const eventsResult = await this.ds.query(
+      const eventsResult = await this.queryRows<UnknownRow>(
         'DELETE FROM bronze.github_events WHERE actor_user_node = ANY($1) RETURNING *',
         [userNodeValues],
       );
@@ -407,7 +410,7 @@ export class GithubService {
     for (const user of existingUsersList) {
       try {
         // Get user_node for this specific user
-        const userNodeResult = await this.ds.query(
+        const userNodeResult = await this.queryRows<BronzeUserNodeOnlyRow>(
           'SELECT user_node FROM bronze.github_users WHERE login = $1',
           [user],
         );
@@ -481,7 +484,7 @@ export class GithubService {
     if (!inputUsers.length) return;
 
     // Get all users currently in gold.user_profile
-    const allDbUsers = await this.ds.query(
+    const allDbUsers = await this.queryRows<GoldUserProfileRow>(
       'SELECT login FROM gold.user_profile',
     );
     const dbUserLogins = allDbUsers.map((row) => row.login);
@@ -506,7 +509,7 @@ export class GithubService {
     const oneDayMs = 24 * 60 * 60 * 1000;
 
     // Get user sync info from bronze.github_users
-    const result = await this.ds.query(
+    const result = await this.queryRows<BronzeUserSyncRow>(
       'SELECT login, user_node, last_synced_at FROM bronze.github_users WHERE login = ANY($1)',
       [users],
     );
@@ -527,7 +530,7 @@ export class GithubService {
         );
       } else {
         // Get latest activity date from bronze.github_events
-        const latestActivity = await this.ds.query(
+        const latestActivity = await this.queryRows<LatestActivityRow>(
           'SELECT MAX(created_at) as latest FROM bronze.github_events WHERE actor_user_node = $1',
           [row.user_node],
         );
@@ -1410,5 +1413,9 @@ export class GithubService {
       until,
       userTimeWindows: Object.fromEntries(userTimeWindows),
     };
+  }
+
+  private queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+    return this.ds.query(sql, params);
   }
 }
