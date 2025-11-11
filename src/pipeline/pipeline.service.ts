@@ -48,7 +48,7 @@ export class PipelineService {
     const failedUsers = await this.getUsersByStatus(users, ['failed']);
 
     // Get users from processing_queue table
-    const queueResult = await this.dataSource.query(
+    const queueResult = await this.queryRows<ProcessingQueueRow>(
       'SELECT user_login, status FROM bronze.processing_queue WHERE user_login = ANY($1)',
       [users],
     );
@@ -95,7 +95,7 @@ export class PipelineService {
     );
 
     // 2. Silver layer: build normalized bundle
-    const silverBundle = await this.silver.buildBundle({
+    await this.silver.buildBundle({
       sinceIso: twoDaysAgo,
       untilIso: now,
     });
@@ -204,12 +204,12 @@ export class PipelineService {
     );
 
     // Get users from github_users table
-    const githubUsers = await this.dataSource.query(
+    const githubUsers = await this.queryRows<GithubUserStatusRow>(
       'SELECT login, processing_status FROM bronze.github_users ORDER BY login',
     );
 
     // Get users from processing_queue table
-    const queueUsers = await this.dataSource.query(
+    const queueUsers = await this.queryRows<ProcessingQueueRow>(
       'SELECT user_login, status FROM bronze.processing_queue ORDER BY user_login',
     );
 
@@ -342,7 +342,7 @@ export class PipelineService {
     allowedStatuses: ProcessingStatus[],
   ) {
     const placeholders = allowedStatuses.map((_, i) => `$${i + 2}`).join(', ');
-    const result = await this.dataSource.query(
+    const result = await this.queryRows<LoginRow>(
       `SELECT login FROM bronze.github_users WHERE login = ANY($1) AND processing_status IN (${placeholders})`,
       [users, ...allowedStatuses],
     );
@@ -363,7 +363,7 @@ export class PipelineService {
     for (const user of users) {
       try {
         // Get user_node for this specific user from bronze table
-        const userNodeResult = await this.dataSource.query(
+        const userNodeResult = await this.queryRows<UserNodeRow>(
           'SELECT user_node FROM bronze.github_users WHERE login = $1',
           [user],
         );
@@ -398,6 +398,7 @@ export class PipelineService {
         removedUsers.push(user);
       } catch (error) {
         failedUsers.push(user);
+        console.error(`Failed to remove user ${user}:`, error);
       }
     }
 
@@ -411,5 +412,9 @@ export class PipelineService {
       removedUsers,
       failedUsers,
     };
+  }
+
+  private queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+    return this.dataSource.query(sql, params);
   }
 }
