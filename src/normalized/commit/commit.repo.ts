@@ -47,7 +47,6 @@ export class CommitBronzeRepo {
          )
        ORDER BY e.created_at ASC, e.event_ulid ASC`;
 
-    const rows = await this.ds.query(sql, args);
-    return rows as BronzeRow[];
+    return await this.ds.query(sql, args);
   }
 }

@@ -24,7 +24,7 @@ export class IssueSilverService {
     authorUserIds?: string[];
     validate?: boolean; // optional zod toggle
   }): Promise<Issue[]> {
-    const { validate = false, ...load } = params;
+    const { validate: _validate = false, ...load } = params;
     const bronzeRows = await this.repo.loadSince(load);
 
     const byId = new Map<string, Issue>();
@@ -42,12 +42,9 @@ export class IssueSilverService {
     }
 
     const out = [...byId.values()];
-    /*
-    if (validate) {
-      // optional: plug in zod here if you add IssueSchema later
-      // out.forEach((i) => IssueSchema.parse(i));
+    if (_validate) {
+      this.log.debug('Issue validation flag is not yet implemented');
     }
-*/
     this.log.debug(
       `silver.issues: ${out.length} (from ${bronzeRows.length} bronze rows)`,
     );

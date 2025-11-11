@@ -41,7 +41,6 @@ export class PRBronzeRepo {
        WHERE ${where.join(' AND ')}
        ORDER BY created_at ASC, event_ulid ASC`;
 
-    const rows = await this.ds.query(sql, args);
-    return rows as BronzeRow[];
+    return await this.ds.query(sql, args);
   }
 }

@@ -7,12 +7,12 @@ import { RawMemoryStore } from '../../raw/raw-memory.store.js';
 export class PRRawMemoryRepo {
   constructor(@Inject(RawMemoryStore) private readonly mem: RawMemoryStore) {}
 
-  async loadSince(params: {
+  loadSince(params: {
     sinceIso: string;
     untilIso?: string;
     repoId?: string;
     authorUserIds?: string[];
-  }): Promise<BronzeRow[]> {
+  }): BronzeRow[] {
     const { sinceIso, untilIso, repoId, authorUserIds } = params;
 
     const allEvents = this.mem.getEvents();
@@ -30,7 +30,7 @@ export class PRRawMemoryRepo {
       .map((e) => ({
         event_ulid: e.event_ulid,
         provider: e.provider as 'github',
-        event_type: e.event_type,
+        event_type: e.event_type as BronzeRow['event_type'],
         provider_event_id: e.provider_event_id,
         actor_user_node: e.actor_user_node ?? null,
         repo_node: e.repo_node ?? null,

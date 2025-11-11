@@ -7,13 +7,13 @@ import { RawMemoryStore } from '../../raw/raw-memory.store.js';
 export class UserMemoryRepo {
   constructor(@Inject(RawMemoryStore) private readonly mem: RawMemoryStore) {}
 
-  async loadFromBronzeUsers(params: {
+  loadFromBronzeUsers(params: {
     sinceIso?: string;
     untilIso?: string;
     userIds?: string[];
     logins?: string[];
     limit?: number;
-  }): Promise<BronzeUsersRow[]> {
+  }): BronzeUsersRow[] {
     const { sinceIso, untilIso, userIds, logins, limit } = params;
 
     const allUsers = this.mem.getUsers();

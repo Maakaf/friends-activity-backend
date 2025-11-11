@@ -1,10 +1,6 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { UserBronzeRepo } from './user.repo.js';
-import {
-  mapUserFromBronzeRow,
-  pickUserObjectForActor,
-  mergeUser,
-} from '../mappers.js';
+import { mapUserFromBronzeRow } from '../mappers.js';
 import type { User } from '../types.js';
 
 @Injectable()

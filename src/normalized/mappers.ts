@@ -102,8 +102,7 @@ export interface BronzeRow {
     | 'pull_request'
     | 'issue_comment'
     | 'pr_review_comment'
-    | 'commit'
-    | string;
+    | 'commit';
   provider_event_id: string | null;
   actor_user_node: string | null; // user id as string
   repo_node: string | null; // repo id as string
