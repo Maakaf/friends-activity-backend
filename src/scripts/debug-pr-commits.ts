@@ -22,7 +22,7 @@ async function debugPRCommits() {
     await dataSource.initialize();
     console.log('🔗 Database connected');
 
-    const repoAnalysis = await dataSource.query(`
+    const repoAnalysis = await queryRows<RepoAnalysisRow>(`
       SELECT 
         u.login,
         COUNT(CASE WHEN e.event_type = 'pull_request' THEN 1 END) as pr_count,
@@ -35,8 +35,8 @@ async function debugPRCommits() {
       WHERE r.full_name = 'Maakaf/friends-activity-backend'
       GROUP BY u.login
       ORDER BY pr_count DESC
-    `) as RepoAnalysisRow[];
-    
+    `);
+
     console.log('📊 PR vs Commit Analysis for friends-activity-backend:');
     repoAnalysis.forEach((row) => {
       console.log(`  ${row.login}:`);
@@ -47,7 +47,7 @@ async function debugPRCommits() {
       console.log('');
     });
 
-    const duplicateCommits = await dataSource.query(`
+    const duplicateCommits = await queryRows<DuplicateCommitRow>(`
       SELECT 
         provider_event_id as sha,
         COUNT(*) as count,
@@ -58,8 +58,8 @@ async function debugPRCommits() {
         AND repo_node IN (SELECT repo_node FROM bronze.github_repos WHERE full_name = 'Maakaf/friends-activity-backend')
       GROUP BY provider_event_id
       HAVING COUNT(*) > 1
-    `) as DuplicateCommitRow[];
-    
+    `);
+
     console.log('🔍 Duplicate commit SHAs:');
     if (duplicateCommits.length === 0) {
       console.log('  No duplicates found');
@@ -79,4 +79,8 @@ async function debugPRCommits() {
   }
 }
 
-debugPRCommits();
+void debugPRCommits();
+
+function queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  return dataSource.query(sql, params);
+}

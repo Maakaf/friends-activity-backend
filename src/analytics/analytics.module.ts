@@ -17,10 +17,7 @@ import { RepositoryEntity } from './repository/repository.entity.js';
     ]),
     NormalizedModule,
   ],
-  providers: [
-    AnalyticsService,
-    AnalyticsReportService,
-  ],
+  providers: [AnalyticsService, AnalyticsReportService],
   exports: [AnalyticsService, AnalyticsReportService],
 })
 export class AnalyticsModule {}

@@ -1,110 +1,48 @@
 import { BadRequestException } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { MockMetadata, ModuleMocker } from 'jest-mock';
 import { DataSource } from 'typeorm';
-import { AnalyticsReportService } from '../../analytics/analytics-report.service';
-import { AnalyticsService } from '../../analytics/analytics.service';
-import { SilverOrchestratorService } from '../../normalized/orchestrator';
-import { GithubService } from '../../raw/raw.service';
-import { PipelineService } from '../pipeline.service';
+import { AnalyticsReportService } from '../../analytics/analytics-report.service.js';
+import { AnalyticsService } from '../../analytics/analytics.service.js';
+import { SilverOrchestratorService } from '../../normalized/orchestrator.js';
+import { GithubService } from '../../raw/raw.service.js';
+import { PipelineService } from '../pipeline.service.js';
 
-const moduleMocker = new ModuleMocker(global);
+const dataSourceStub = {
+  query: () => Promise.resolve([]),
+} as unknown as DataSource;
 
+const createService = () =>
+  new PipelineService(
+    {} as GithubService,
+    {} as SilverOrchestratorService,
+    {} as AnalyticsService,
+    {} as AnalyticsReportService,
+    dataSourceStub,
+  );
 
-describe('PipelineService', () => {
-    let service: PipelineService;
-    let mockDataSource: DataSource;
-    let nestTestmodule: TestingModule;
+describe('PipelineService guards', () => {
+  const sharedExpectations = async (
+    fn: (service: PipelineService) => Promise<unknown>,
+  ) => {
+    const service = createService();
+    await expect(fn(service)).rejects.toThrow(
+      'Body must be { "users": string[] } with at least one username.',
+    );
+    await expect(fn(service)).rejects.toBeInstanceOf(BadRequestException);
+  };
 
-    const createService = async () => {
-        const mockDataSourceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(DataSource) as MockMetadata<DataSource, DataSource>
-        );
-        const mockGithubServiceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(GithubService) as MockMetadata<GithubService, GithubService>
-        );
-        const mockSilverOrchestratorServiceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(SilverOrchestratorService) as MockMetadata<SilverOrchestratorService, SilverOrchestratorService>
-        );
-        const mockAnalyticsServiceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(AnalyticsService) as MockMetadata<AnalyticsService, AnalyticsService>
-        );
-        const mockAnalyticsReportServiceValue = moduleMocker.generateFromMetadata(
-            moduleMocker.getMetadata(AnalyticsReportService) as MockMetadata<AnalyticsReportService, AnalyticsReportService>
-        );
+  it('run()', async () => {
+    await sharedExpectations((s) => s.run([]));
+  });
 
+  it('generateReport()', async () => {
+    await sharedExpectations((s) => s.generateReport([]));
+  });
 
-        nestTestmodule = await Test.createTestingModule({
-            providers: [
-                PipelineService,
-                {
-                    provide: DataSource,
-                    useValue: mockDataSourceValue,
-                },
-                {
-                    provide: GithubService,
-                    useValue: mockGithubServiceValue,
-                },
-                {
-                    provide: SilverOrchestratorService,
-                    useValue: mockSilverOrchestratorServiceValue,
-                },
-                {
-                    provide: AnalyticsService,
-                    useValue: mockAnalyticsServiceValue,
-                },
-                {
-                    provide: AnalyticsReportService,
-                    useValue: mockAnalyticsReportServiceValue,
-                },
+  it('removeUsers()', async () => {
+    await sharedExpectations((s) => s.removeUsers([]));
+  });
 
-
-            ],
-        }).compile();
-
-        service = nestTestmodule.get<PipelineService>(PipelineService);
-        mockDataSource = nestTestmodule.get<DataSource>(DataSource);
-    };
-    afterEach(async () => {
-        if (nestTestmodule) {
-            await nestTestmodule.close();
-        }
-    });
-    describe('run', () => {
-        it('Should throw if users array is empty', async () => {
-            await createService();
-            await expect(service.run([]))
-                .rejects
-                .toThrow('Body must be { "users": string[] } with at least one username.');
-            await expect(service.run([])).rejects.toBeInstanceOf(BadRequestException);
-        });
-    });
-    describe('generateReport', () => {
-        it('Should throw if users array is empty', async () => {
-            await createService();
-            await expect(service.generateReport([]))
-                .rejects
-                .toThrow('Body must be { "users": string[] } with at least one username.');
-            await expect(service.generateReport([])).rejects.toBeInstanceOf(BadRequestException);
-        });
-    });
-    describe('removeUsers', () => {
-        it('Should throw if users array is empty', async () => {
-            await createService();
-            await expect(service.removeUsers([]))
-                .rejects
-                .toThrow('Body must be { "users": string[] } with at least one username.');
-            await expect(service.removeUsers([])).rejects.toBeInstanceOf(BadRequestException);
-        });
-    });
-    describe('addNewUsers', () => {
-        it('Should throw if users array is empty', async () => {
-            await createService();
-            await expect(service.addNewUsers([]))
-                .rejects
-                .toThrow('Body must be { "users": string[] } with at least one username.');
-            await expect(service.addNewUsers([])).rejects.toBeInstanceOf(BadRequestException);
-        });
-    });
-    describe('listUsers', () => { });
+  it('addNewUsers()', async () => {
+    await sharedExpectations((s) => s.addNewUsers([]));
+  });
 });

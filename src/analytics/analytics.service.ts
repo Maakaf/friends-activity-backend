@@ -12,10 +12,14 @@ export class AnalyticsService {
   private readonly logger = new Logger(AnalyticsService.name);
 
   constructor(
-    @Inject(SilverOrchestratorService) private readonly silver: SilverOrchestratorService,
-    @InjectRepository(UserProfileEntity) private readonly userProfileRepo: Repository<UserProfileEntity>,
-    @InjectRepository(UserActivityEntity) private readonly userActivityRepo: Repository<UserActivityEntity>,
-    @InjectRepository(RepositoryEntity) private readonly repositoryRepo: Repository<RepositoryEntity>,
+    @Inject(SilverOrchestratorService)
+    private readonly silver: SilverOrchestratorService,
+    @InjectRepository(UserProfileEntity)
+    private readonly userProfileRepo: Repository<UserProfileEntity>,
+    @InjectRepository(UserActivityEntity)
+    private readonly userActivityRepo: Repository<UserActivityEntity>,
+    @InjectRepository(RepositoryEntity)
+    private readonly repositoryRepo: Repository<RepositoryEntity>,
   ) {}
 
   /**
@@ -28,7 +32,9 @@ export class AnalyticsService {
 
     const { profiles, activities, repos } = mapSilverToCurated(bundle);
 
-    this.logger.log(`Processing ${profiles.length} profiles, ${activities.length} activities, ${repos.length} repos`);
+    this.logger.log(
+      `Processing ${profiles.length} profiles, ${activities.length} activities, ${repos.length} repos`,
+    );
 
     await Promise.all([
       this.upsertUserProfiles(profiles),
@@ -46,10 +52,13 @@ export class AnalyticsService {
 
   private async upsertUserActivities(activities: UserActivityEntity[]) {
     if (activities.length === 0) return;
-    
+
     // Process activities one by one to avoid batch duplicates
     for (const activity of activities) {
-      await this.userActivityRepo.upsert([activity], ['userId', 'day', 'repoId', 'activityType']);
+      await this.userActivityRepo.upsert(
+        [activity],
+        ['userId', 'day', 'repoId', 'activityType'],
+      );
     }
   }
 

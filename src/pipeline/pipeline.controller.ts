@@ -4,17 +4,18 @@ import { PipelineService } from './pipeline.service.js';
 import { IngestUsersDto } from '../raw/dto/ingest-users.dto.js';
 
 @ApiTags('pipeline')
-@ApiSecurity('X-API-Key')  // Add this
+@ApiSecurity('X-API-Key') // Add this
 @Controller('pipeline')
 export class PipelineController {
   constructor(private readonly pipeline: PipelineService) {
-      // TEMP sanity check
+    // TEMP sanity check
     console.log('PipelineController DI ok?', !!pipeline);
   }
-  
+
   @Post('stats')
   @ApiOperation({
-    summary: 'Run full Raw → Silver → Curated → Analytics pipeline for given users',
+    summary:
+      'Run full Raw → Silver → Curated → Analytics pipeline for given users',
   })
   @ApiBody({ type: IngestUsersDto })
   ingestUsersStrict(@Body() body: IngestUsersDto) {
@@ -23,7 +24,8 @@ export class PipelineController {
 
   @Post('analytics/report')
   @ApiOperation({
-    summary: 'Generate frontend analytics report from normalized data (last 180 days, fork_count >= 3)',
+    summary:
+      'Generate frontend analytics report from normalized data (last 180 days, fork_count >= 3)',
   })
   @ApiBody({ type: IngestUsersDto })
   getAnalyticsReport(@Body() body: IngestUsersDto) {

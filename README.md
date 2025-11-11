@@ -142,11 +142,12 @@ Swagger UI is available at http://localhost:3000/docs
 
 ## Contributing
 
-We welcome contributions from the community! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on:
+We welcome contributions from the community! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow (branching, tests, and type-safety rules).  
+Quick highlights:
 
-- **Documentation**: Improving README, API docs, or code comments
-- **Bug Fixes**: Reporting and fixing issues
-- **Feature Suggestions**: Proposing new features or improvements
+- TypeScript runs with `"strict": true` + `"noImplicitAny": true`.
+- ESLint treats `@typescript-eslint/no-explicit-any` as an error.
+- Common typing patterns live in [docs/type-safety.md](docs/type-safety.md); update that doc when you introduce new ones.
 
 ### Development Setup
 

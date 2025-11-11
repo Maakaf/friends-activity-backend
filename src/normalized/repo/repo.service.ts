@@ -24,7 +24,9 @@ export class ReposSilverService {
       if (r) repos.push(r);
     }
 
-    this.log.debug(`silver.repos: ${repos.length} (from ${rows.length} bronze rows)`);
+    this.log.debug(
+      `silver.repos: ${repos.length} (from ${rows.length} bronze rows)`,
+    );
     return repos;
   }
 }

@@ -22,7 +22,7 @@ export function mapSilverToCurated(bundle: SilverBundle): {
   } = bundle;
 
   /* ---------- gold.user_profile ---------- */
-  const profiles = (users ?? []).map(u => ({
+  const profiles = (users ?? []).map((u) => ({
     userId: u.userId,
     login: u.login,
     name: u.name ?? null,
@@ -45,7 +45,7 @@ export function mapSilverToCurated(bundle: SilverBundle): {
   }));
 
   /* ---------- curated.repository ---------- */
-  const repoEntities: RepositoryEntity[] = (repos ?? []).map(r => ({
+  const repoEntities: RepositoryEntity[] = (repos ?? []).map((r) => ({
     repoId: r.repoId,
     ownerUserId: r.ownerUserId ?? null,
     repoName: r.repoName ?? null,
@@ -57,21 +57,25 @@ export function mapSilverToCurated(bundle: SilverBundle): {
     lastActivity: r.lastActivity ? new Date(r.lastActivity) : null,
     ghCreatedAt: r.ghCreatedAt ? new Date(r.ghCreatedAt) : null,
     // fetchedAt: r.fetchedAt ? new Date(r.fetchedAt) : null,
-
   }));
 
   /* ---------- curated.user_activity ---------- */
   const activityMap = new Map<string, UserActivityEntity>();
 
-  const addActivity = (userId: string | null, repoId: string | null, dateIso: string | null, type: string) => {
+  const addActivity = (
+    userId: string | null,
+    repoId: string | null,
+    dateIso: string | null,
+    type: string,
+  ) => {
     if (!userId || !repoId || !dateIso) return;
-    
+
     const day = toDate(dateIso);
     if (!day) return;
-    
+
     const dayStr = day.toISOString().split('T')[0];
     const key = `${userId}-${dayStr}-${repoId}-${type}`;
-    
+
     const existing = activityMap.get(key);
     if (existing) {
       existing.activityCount = (existing.activityCount || 0) + 1;
@@ -86,13 +90,17 @@ export function mapSilverToCurated(bundle: SilverBundle): {
     }
   };
 
-  issues.forEach(i   => addActivity(i.authorUserId, i.repoId, i.createdAt, 'issue'));
-  prs.forEach(p      => addActivity(p.authorUserId, p.repoId, p.createdAt, 'pr'));
-  comments.forEach(c => {
+  issues.forEach((i) =>
+    addActivity(i.authorUserId, i.repoId, i.createdAt, 'issue'),
+  );
+  prs.forEach((p) => addActivity(p.authorUserId, p.repoId, p.createdAt, 'pr'));
+  comments.forEach((c) => {
     const commentType = c.parentType === 'PR' ? 'pr_comment' : 'issue_comment';
     addActivity(c.authorUserId, c.repoId, c.createdAt, commentType);
   });
-  commits.forEach(c  => addActivity(c.authorUserId, c.repoId, c.createdAt, 'commit'));
+  commits.forEach((c) =>
+    addActivity(c.authorUserId, c.repoId, c.createdAt, 'commit'),
+  );
 
   const activities = Array.from(activityMap.values());
 

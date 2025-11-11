@@ -7,18 +7,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class UserActivityRepo {
   constructor(
     @InjectRepository(UserActivityEntity)
-    private readonly repository: Repository<UserActivityEntity>
+    private readonly repository: Repository<UserActivityEntity>,
   ) {}
 
   /** Bulk insert or update activity counts */
   async upsertMany(rows: UserActivityEntity[]) {
-    return this.repository.createQueryBuilder()
+    return this.repository
+      .createQueryBuilder()
       .insert()
       .into(UserActivityEntity)
       .values(rows)
       .orUpdate(
-        ['activity_count'],                 // update only the count on conflict
-        ['user_id', 'day', 'repo_id', 'activity_type']
+        ['activity_count'], // update only the count on conflict
+        ['user_id', 'day', 'repo_id', 'activity_type'],
       )
       .execute();
   }

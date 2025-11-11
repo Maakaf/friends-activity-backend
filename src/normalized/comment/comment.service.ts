@@ -6,7 +6,9 @@ import type { Comment } from '../types.js';
 @Injectable()
 export class CommentSilverService {
   private readonly log = new Logger(CommentSilverService.name);
-  constructor(@Inject(CommentBronzeRepo) private readonly repo: CommentBronzeRepo) {}
+  constructor(
+    @Inject(CommentBronzeRepo) private readonly repo: CommentBronzeRepo,
+  ) {}
 
   async getCommentsSince(params: {
     sinceIso: string;
@@ -30,7 +32,9 @@ export class CommentSilverService {
     }
 
     const out = [...byId.values()];
-    this.log.debug(`silver.comments: ${out.length} (from ${bronzeRows.length} bronze rows)`);
+    this.log.debug(
+      `silver.comments: ${out.length} (from ${bronzeRows.length} bronze rows)`,
+    );
     return out;
   }
 }

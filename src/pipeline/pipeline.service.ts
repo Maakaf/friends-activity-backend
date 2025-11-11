@@ -35,7 +35,7 @@ export class PipelineService {
     private readonly analytics: AnalyticsService,
     private readonly analyticsReport: AnalyticsReportService,
     @InjectDataSource() private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   /**
    * Run the complete Raw -> Silver -> Curated -> Analytics pipeline.
@@ -48,10 +48,10 @@ export class PipelineService {
     const failedUsers = await this.getUsersByStatus(users, ['failed']);
 
     // Get users from processing_queue table
-    const queueResult = await this.dataSource.query(
+    const queueResult = await this.queryRows<ProcessingQueueRow>(
       'SELECT user_login, status FROM bronze.processing_queue WHERE user_login = ANY($1)',
-      [users]
-    ) as ProcessingQueueRow[];
+      [users],
+    );
     const pendingUsers = queueResult
       .filter((r) => r.status === 'pending')
       .map((r) => r.user_login);
@@ -60,8 +60,13 @@ export class PipelineService {
       .map((r) => r.user_login);
 
     // Find users that don't exist in either table
-    const allExistingUsers = [...readyUsers, ...failedUsers, ...pendingUsers, ...processingUsers];
-    const nonExistentUsers = users.filter(u => !allExistingUsers.includes(u));
+    const allExistingUsers = [
+      ...readyUsers,
+      ...failedUsers,
+      ...pendingUsers,
+      ...processingUsers,
+    ];
+    const nonExistentUsers = users.filter((u) => !allExistingUsers.includes(u));
 
     const skippedProcessingUsers = [...processingUsers, ...failedUsers];
     const pendingProcessingUsers = pendingUsers;
@@ -72,19 +77,25 @@ export class PipelineService {
         skippedProcessing: skippedProcessingUsers,
         pendingProcessing: pendingProcessingUsers,
         nonExistentUsers: nonExistentUsers,
-        processed: []
+        processed: [],
       };
     }
 
     // Calculate 2 days ago for stats endpoint
-    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .replace(/\.\d{3}Z$/, 'Z');
     const now = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 
     // 1. Bronze layer: ingest raw GitHub data (only ready users, 2 days data)
-    const ingestResult = await this.github.ingestEachUserInTheirRepos(readyUsers, twoDaysAgo, now);
+    const ingestResult = await this.github.ingestEachUserInTheirRepos(
+      readyUsers,
+      twoDaysAgo,
+      now,
+    );
 
     // 2. Silver layer: build normalized bundle
-    const silverBundle = await this.silver.buildBundle({
+    await this.silver.buildBundle({
       sinceIso: twoDaysAgo,
       untilIso: now,
     });
@@ -93,13 +104,16 @@ export class PipelineService {
     await this.analytics.refreshAll();
 
     // 4. Analytics report for the frontend
-    const report = await this.analyticsReport.generateFrontendReport(readyUsers, ingestResult.excludedUsers);
+    const report = await this.analyticsReport.generateFrontendReport(
+      readyUsers,
+      ingestResult.excludedUsers,
+    );
 
     return {
       ...report,
       skippedProcessing: skippedProcessingUsers,
       pendingProcessing: pendingProcessingUsers,
-      nonExistentUsers: nonExistentUsers
+      nonExistentUsers: nonExistentUsers,
     };
   }
 
@@ -120,14 +134,17 @@ export class PipelineService {
     this.throwOnEmptyUsersArr(users);
 
     // Filter users by status - only remove ready and failed users
-    const removableUsers = await this.getUsersByStatus(users, ['ready', 'failed']);
-    const skippedUsers = users.filter(u => !removableUsers.includes(u));
+    const removableUsers = await this.getUsersByStatus(users, [
+      'ready',
+      'failed',
+    ]);
+    const skippedUsers = users.filter((u) => !removableUsers.includes(u));
 
     if (removableUsers.length === 0) {
       return {
         message: 'No users available for removal',
         skippedProcessing: skippedUsers,
-        removed: []
+        removed: [],
       };
     }
 
@@ -136,7 +153,7 @@ export class PipelineService {
 
     return {
       ...result,
-      skippedProcessing: skippedUsers
+      skippedProcessing: skippedUsers,
     };
   }
 
@@ -147,14 +164,18 @@ export class PipelineService {
     this.throwOnEmptyUsersArr(users);
 
     // Check which users already exist (any status)
-    const existingUsers = await this.getUsersByStatus(users, ['ready', 'processing', 'failed']);
-    const newUsers = users.filter(u => !existingUsers.includes(u));
+    const existingUsers = await this.getUsersByStatus(users, [
+      'ready',
+      'processing',
+      'failed',
+    ]);
+    const newUsers = users.filter((u) => !existingUsers.includes(u));
 
     if (newUsers.length === 0) {
       return {
         message: 'All users already exist',
         existing_users: existingUsers,
-        processing_started: []
+        processing_started: [],
       };
     }
 
@@ -165,7 +186,7 @@ export class PipelineService {
       message: 'User processing completed',
       successfulUsers: processingResult.successful,
       failedUsers: processingResult.failed,
-      existingUsers: existingUsers
+      existingUsers: existingUsers,
     };
   }
 
@@ -179,18 +200,18 @@ export class PipelineService {
        WHERE user_login IN (
          SELECT login FROM bronze.github_users 
          WHERE processing_status IN ('ready', 'failed')
-       )`
+       )`,
     );
 
     // Get users from github_users table
-    const githubUsers = await this.dataSource.query(
-      'SELECT login, processing_status FROM bronze.github_users ORDER BY login'
-    ) as GithubUserStatusRow[];
+    const githubUsers = await this.queryRows<GithubUserStatusRow>(
+      'SELECT login, processing_status FROM bronze.github_users ORDER BY login',
+    );
 
     // Get users from processing_queue table
-    const queueUsers = await this.dataSource.query(
-      'SELECT user_login, status FROM bronze.processing_queue ORDER BY user_login'
-    ) as ProcessingQueueRow[];
+    const queueUsers = await this.queryRows<ProcessingQueueRow>(
+      'SELECT user_login, status FROM bronze.processing_queue ORDER BY user_login',
+    );
 
     const ready: string[] = [];
     const processing: string[] = [];
@@ -229,14 +250,15 @@ export class PipelineService {
       }
     }
 
-    const total = ready.length + processing.length + pending.length + failed.length;
+    const total =
+      ready.length + processing.length + pending.length + failed.length;
 
     return {
       total,
       ready: { count: ready.length, users: ready },
       processing: { count: processing.length, users: processing },
       pending: { count: pending.length, users: pending },
-      failed: { count: failed.length, users: failed }
+      failed: { count: failed.length, users: failed },
     };
   }
 
@@ -248,7 +270,9 @@ export class PipelineService {
     }
   }
 
-  private async processUsersAsync(users: string[]): Promise<{ successful: string[], failed: string[]; }> {
+  private async processUsersAsync(
+    users: string[],
+  ): Promise<{ successful: string[]; failed: string[] }> {
     const successful: string[] = [];
     const failed: string[] = [];
 
@@ -259,7 +283,7 @@ export class PipelineService {
     for (const user of users) {
       await this.dataSource.query(
         'INSERT INTO bronze.processing_queue (user_login, status) VALUES ($1, $2)',
-        [user, 'pending']
+        [user, 'pending'],
       );
     }
 
@@ -269,11 +293,13 @@ export class PipelineService {
         // Update queue status to 'processing'
         await this.dataSource.query(
           'UPDATE bronze.processing_queue SET status = $1 WHERE user_login = $2',
-          ['processing', user]
+          ['processing', user],
         );
 
         // Run GitHub pipeline with 6-month data collection for new users
-        const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
+        const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .replace(/\.\d{3}Z$/, 'Z');
         const now = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
         await this.github.ingestNewUsersOnly([user], sixMonthsAgo, now);
         await this.analytics.refreshAll();
@@ -284,7 +310,7 @@ export class PipelineService {
         // Remove from processing queue (completed)
         await this.dataSource.query(
           'DELETE FROM bronze.processing_queue WHERE user_login = $1',
-          [user]
+          [user],
         );
 
         successful.push(user);
@@ -299,7 +325,7 @@ export class PipelineService {
         // Remove from processing queue (failed)
         await this.dataSource.query(
           'DELETE FROM bronze.processing_queue WHERE user_login = $1',
-          [user]
+          [user],
         );
 
         failed.push(user);
@@ -311,19 +337,22 @@ export class PipelineService {
   }
 
   // Status management utilities
-  private async getUsersByStatus(users: string[], allowedStatuses: ProcessingStatus[]) {
+  private async getUsersByStatus(
+    users: string[],
+    allowedStatuses: ProcessingStatus[],
+  ) {
     const placeholders = allowedStatuses.map((_, i) => `$${i + 2}`).join(', ');
-    const result = await this.dataSource.query(
+    const result = await this.queryRows<LoginRow>(
       `SELECT login FROM bronze.github_users WHERE login = ANY($1) AND processing_status IN (${placeholders})`,
-      [users, ...allowedStatuses]
-    ) as LoginRow[];
+      [users, ...allowedStatuses],
+    );
     return result.map((row) => row.login);
   }
 
   private async setUserStatus(login: string, status: ProcessingStatus) {
     await this.dataSource.query(
       'UPDATE bronze.github_users SET processing_status = $1 WHERE login = $2',
-      [status, login]
+      [status, login],
     );
   }
 
@@ -334,10 +363,10 @@ export class PipelineService {
     for (const user of users) {
       try {
         // Get user_node for this specific user from bronze table
-        const userNodeResult = await this.dataSource.query(
+        const userNodeResult = await this.queryRows<UserNodeRow>(
           'SELECT user_node FROM bronze.github_users WHERE login = $1',
-          [user]
-        ) as UserNodeRow[];
+          [user],
+        );
 
         if (userNodeResult.length === 0) {
           continue; // User not found, skip
@@ -349,14 +378,27 @@ export class PipelineService {
         }
 
         // Delete from all layers
-        await this.dataSource.query('DELETE FROM bronze.github_events WHERE actor_user_node = $1', [userNode]);
-        await this.dataSource.query('DELETE FROM gold.user_activity WHERE user_id = $1', [userNode]);
-        await this.dataSource.query('DELETE FROM gold.user_profile WHERE login = $1', [user]);
-        await this.dataSource.query('DELETE FROM bronze.github_users WHERE login = $1', [user]);
+        await this.dataSource.query(
+          'DELETE FROM bronze.github_events WHERE actor_user_node = $1',
+          [userNode],
+        );
+        await this.dataSource.query(
+          'DELETE FROM gold.user_activity WHERE user_id = $1',
+          [userNode],
+        );
+        await this.dataSource.query(
+          'DELETE FROM gold.user_profile WHERE login = $1',
+          [user],
+        );
+        await this.dataSource.query(
+          'DELETE FROM bronze.github_users WHERE login = $1',
+          [user],
+        );
 
         removedUsers.push(user);
       } catch (error) {
         failedUsers.push(user);
+        console.error(`Failed to remove user ${user}:`, error);
       }
     }
 
@@ -365,10 +407,14 @@ export class PipelineService {
       summary: {
         requested: users.length,
         removed: removedUsers.length,
-        failed: failedUsers.length
+        failed: failedUsers.length,
       },
       removedUsers,
-      failedUsers
+      failedUsers,
     };
+  }
+
+  private queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+    return this.dataSource.query(sql, params);
   }
 }
