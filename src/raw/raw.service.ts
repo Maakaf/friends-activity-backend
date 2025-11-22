@@ -766,7 +766,13 @@ export class GithubService {
     this.logger.log(`Discovering repos for user: ${login}`);
 
     // A) Issues/PRs the user is involved in (author/comment/assignee/mentioned)
-    const qIssues = `involves:${login} created:>=${sinceIso}`;
+    const qIssuesParts = [
+      `involves:${login}`,
+      `created:>=${sinceIso}`,
+      'is:issue',
+      'is:pull-request',
+    ];
+    const qIssues = qIssuesParts.join(' ');
     try {
       this.logger.log(`Searching issues/PRs: ${qIssues}`);
       const issues = await this.retryWithBackoff(
@@ -776,7 +782,6 @@ export class GithubService {
             {
               q: qIssues,
               per_page: 100,
-              advanced_search: 'true',
             } as SearchIssueParams & RequestParameters,
             (r) => (r.data as unknown as { items: SearchIssueItem[] }).items,
           ),
@@ -788,7 +793,20 @@ export class GithubService {
         const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
         if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      /*Handling 422*/
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'status' in error &&
+        typeof (error as { status: unknown }).status === 'number' &&
+        (error as { status: number }).status === 422
+      ) {
+        this.logger.error(
+          '❌ Validation Failed (422) when searching issues/PRs for ${login}.',
+        );
+        return [];
+      }
       this.logger.warn(
         `❌ Failed to search issues/PRs for ${login}: ${this.getErrorMessage(error)}`,
       );
