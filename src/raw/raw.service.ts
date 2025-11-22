@@ -766,50 +766,24 @@ export class GithubService {
     this.logger.log(`Discovering repos for user: ${login}`);
 
     // A) Issues/PRs the user is involved in (author/comment/assignee/mentioned)
-    const qIssuesParts = [
-      `involves:${login}`,
-      `created:>=${sinceIso}`,
-      'is:issue',
-      'is:pull-request',
-    ];
-    const qIssues = qIssuesParts.join(' ');
+    const qIssues = `involves:${login} created:>=${sinceIso}`;
     try {
       this.logger.log(`Searching issues/PRs: ${qIssues}`);
       const issues = await this.retryWithBackoff(
-        () =>
-          this.octokit.paginate(
-            this.octokit.search.issuesAndPullRequests,
-            {
-              q: qIssues,
-              per_page: 100,
-            } as SearchIssueParams & RequestParameters,
-            (r) => (r.data as unknown as { items: SearchIssueItem[] }).items,
-          ),
-        `Issues/PRs search for ${login}`,
+        () => this.octokit.paginate(
+          this.octokit.search.issuesAndPullRequests,
+          { q: qIssues, per_page: 100, advanced_search: 'true'}
+        ),
+        `Issues/PRs search for ${login}`
       );
       this.logger.log(`✅ Found ${issues.length} issues/PRs for ${login}`);
 
-      for (const it of issues) {
+      for (const it of issues as any[]) {
         const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
         if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
       }
-    } catch (error: unknown) {
-      /*Handling 422*/
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'status' in error &&
-        typeof (error as { status: unknown }).status === 'number' &&
-        (error as { status: number }).status === 422
-      ) {
-        this.logger.error(
-          '❌ Validation Failed (422) when searching issues/PRs for ${login}.',
-        );
-        return [];
-      }
-      this.logger.warn(
-        `❌ Failed to search issues/PRs for ${login}: ${this.getErrorMessage(error)}`,
-      );
+    } catch (error) {
+      this.logger.warn(`❌ Failed to search issues/PRs for ${login}: ${this.getErrorMessage(error)}`);
     }
 
     // B) Commits authored by the user
@@ -817,41 +791,32 @@ export class GithubService {
     try {
       this.logger.log(`Searching commits: ${qCommits}`);
       const commits = await this.retryWithBackoff(
-        () =>
-          this.octokit.paginate(
-            this.octokit.search.commits,
-            {
-              q: qCommits,
-              per_page: 100,
-              request: {
-                headers: {
-                  accept: 'application/vnd.github.cloak-preview+json',
-                },
-              },
-            } as SearchCommitParams & RequestParameters,
-            (r) => (r.data as unknown as { items: SearchCommitItem[] }).items,
-          ),
+        () => this.octokit.paginate(
+          this.octokit.search.commits,
+          {
+            q: qCommits,
+            per_page: 100,
+            headers: { accept: 'application/vnd.github.cloak-preview+json' },
+          } as any
+        ),
         `Commits search for ${login}`,
         5,
-        5000, // longer delay for commit searches
+        5000 // longer delay for commit searches
       );
       this.logger.log(`✅ Found ${commits.length} commits for ${login}`);
 
-      for (const c of commits) {
-        const full = c.repository?.full_name ?? undefined;
+      for (const c of commits as any[]) {
+        const full = c.repository?.full_name as string | undefined;
         if (full && full.includes('/')) {
           const [owner, repo] = full.split('/');
           found.set(this.repoKey(owner, repo), { owner, repo });
         } else {
           const parsed = this.parseOwnerRepoFromHtmlUrl(c.html_url);
-          if (parsed)
-            found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
+          if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
         }
       }
     } catch (error) {
-      this.logger.warn(
-        `❌ Failed to search commits for ${login}: ${this.getErrorMessage(error)}`,
-      );
+      this.logger.warn(`❌ Failed to search commits for ${login}: ${this.getErrorMessage(error)}`);
     }
 
     const repos = Array.from(found.values());
