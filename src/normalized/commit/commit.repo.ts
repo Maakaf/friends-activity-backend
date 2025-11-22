@@ -15,10 +15,16 @@ export class CommitBronzeRepo {
     const { sinceIso, untilIso, repoId, authorUserIds } = params;
 
     const where: string[] = [`event_type = 'commit'`, `created_at >= $1`];
-    const args: any[] = [sinceIso];
+    const args: unknown[] = [sinceIso];
 
-    if (untilIso) { where.push(`created_at < $${args.length + 1}`); args.push(untilIso); }
-    if (repoId)   { where.push(`repo_node = $${args.length + 1}`);   args.push(repoId); }
+    if (untilIso) {
+      where.push(`created_at < $${args.length + 1}`);
+      args.push(untilIso);
+    }
+    if (repoId) {
+      where.push(`repo_node = $${args.length + 1}`);
+      args.push(repoId);
+    }
     if (authorUserIds?.length) {
       where.push(`actor_user_node = ANY($${args.length + 1}::text[])`);
       args.push(authorUserIds);
@@ -41,7 +47,6 @@ export class CommitBronzeRepo {
          )
        ORDER BY e.created_at ASC, e.event_ulid ASC`;
 
-    const rows = await this.ds.query(sql, args);
-    return rows as BronzeRow[];
+    return await this.ds.query(sql, args);
   }
 }

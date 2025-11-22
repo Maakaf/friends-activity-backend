@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
+import type { FastifyRequest } from 'fastify';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -8,7 +14,7 @@ export class ApiKeyGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<FastifyRequest>();
     const apiKey = this.extractApiKey(request);
     const validApiKey = process.env.API_KEY;
 
@@ -27,7 +33,22 @@ export class ApiKeyGuard implements CanActivate {
     return true;
   }
 
-  private extractApiKey(request: any): string | undefined {
-    return request.headers['x-api-key'] || request.headers['authorization']?.replace('Bearer ', '');
+  private extractApiKey(request: FastifyRequest): string | undefined {
+    const apiKeyHeader = request.headers['x-api-key'];
+    const apiKey = Array.isArray(apiKeyHeader) ? apiKeyHeader[0] : apiKeyHeader;
+    if (typeof apiKey === 'string' && apiKey.trim().length > 0) {
+      return apiKey.trim();
+    }
+
+    const authHeader = request.headers['authorization'] as
+      | string
+      | string[]
+      | undefined;
+    const authValue = Array.isArray(authHeader) ? authHeader[0] : authHeader;
+    if (typeof authValue === 'string' && authValue.startsWith('Bearer ')) {
+      return authValue.slice(7).trim();
+    }
+
+    return undefined;
   }
 }

@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddBronzeUsersAndRepos1755615000000 implements MigrationInterface {
   name = 'AddBronzeUsersAndRepos1755615000000';
@@ -14,7 +14,9 @@ export class AddBronzeUsersAndRepos1755615000000 implements MigrationInterface {
         raw_payload   JSONB NOT NULL
       )
     `);
-    await queryRunner.query(`CREATE INDEX IF NOT EXISTS ix_github_users_login ON bronze.github_users (login)`);
+    await queryRunner.query(
+      `CREATE INDEX IF NOT EXISTS ix_github_users_login ON bronze.github_users (login)`,
+    );
 
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS bronze.github_repos (
@@ -28,8 +30,12 @@ export class AddBronzeUsersAndRepos1755615000000 implements MigrationInterface {
         raw_payload   JSONB NOT NULL
       )
     `);
-    await queryRunner.query(`CREATE INDEX IF NOT EXISTS ix_github_repos_owner ON bronze.github_repos (owner_login)`);
-    await queryRunner.query(`CREATE INDEX IF NOT EXISTS ix_github_repos_name ON bronze.github_repos (name)`);
+    await queryRunner.query(
+      `CREATE INDEX IF NOT EXISTS ix_github_repos_owner ON bronze.github_repos (owner_login)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX IF NOT EXISTS ix_github_repos_name ON bronze.github_repos (name)`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

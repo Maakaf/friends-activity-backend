@@ -2,19 +2,24 @@ import 'reflect-metadata';
 import 'dotenv/config';
 import dataSource from '../database/data-source.js';
 
+type CountRow = { count: string };
+type CommitByUserRow = { login: string; commit_count: string };
+type RecentCommitRow = CommitByUserRow & {
+  earliest: string | null;
+  latest: string | null;
+};
+
 async function debugCommits() {
   try {
     await dataSource.initialize();
     console.log('🔗 Database connected');
 
-    // Check total commits in bronze
-    const totalCommits = await dataSource.query(
-      "SELECT COUNT(*) as count FROM bronze.github_events WHERE event_type = 'commit'"
+    const totalCommits = await queryRows<CountRow>(
+      "SELECT COUNT(*) as count FROM bronze.github_events WHERE event_type = 'commit'",
     );
-    console.log(`📊 Total commits in bronze: ${totalCommits[0].count}`);
+    console.log(`📊 Total commits in bronze: ${totalCommits[0]?.count ?? '0'}`);
 
-    // Check commits by user
-    const commitsByUser = await dataSource.query(`
+    const commitsByUser = await queryRows<CommitByUserRow>(`
       SELECT 
         u.login,
         COUNT(*) as commit_count
@@ -24,14 +29,13 @@ async function debugCommits() {
       GROUP BY u.login
       ORDER BY commit_count DESC
     `);
-    
+
     console.log('📊 Commits by user:');
-    commitsByUser.forEach((row: any) => {
+    commitsByUser.forEach((row) => {
       console.log(`  ${row.login}: ${row.commit_count} commits`);
     });
 
-    // Check recent commits (last 7 days)
-    const recentCommits = await dataSource.query(`
+    const recentCommits = await queryRows<RecentCommitRow>(`
       SELECT 
         u.login,
         COUNT(*) as commit_count,
@@ -44,10 +48,12 @@ async function debugCommits() {
       GROUP BY u.login
       ORDER BY commit_count DESC
     `);
-    
+
     console.log('📊 Recent commits (last 7 days):');
-    recentCommits.forEach((row: any) => {
-      console.log(`  ${row.login}: ${row.commit_count} commits (${row.earliest} to ${row.latest})`);
+    recentCommits.forEach((row) => {
+      console.log(
+        `  ${row.login}: ${row.commit_count} commits (${row.earliest} to ${row.latest})`,
+      );
     });
 
     await dataSource.destroy();
@@ -58,4 +64,8 @@ async function debugCommits() {
   }
 }
 
-debugCommits();
+void debugCommits();
+
+function queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  return dataSource.query(sql, params);
+}

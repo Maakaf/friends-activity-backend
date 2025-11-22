@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddGoldRepository1755616000000 implements MigrationInterface {
   name = 'AddGoldRepository1755616000000';
@@ -20,9 +20,15 @@ export class AddGoldRepository1755616000000 implements MigrationInterface {
       )
     `);
 
-    await queryRunner.query(`CREATE INDEX IF NOT EXISTS ix_repository_owner_id ON gold.repository (owner_id)`);
-    await queryRunner.query(`CREATE INDEX IF NOT EXISTS ix_repository_name ON gold.repository (repo_name)`);
-    await queryRunner.query(`CREATE INDEX IF NOT EXISTS ix_repository_last_activity ON gold.repository (last_activity DESC)`);
+    await queryRunner.query(
+      `CREATE INDEX IF NOT EXISTS ix_repository_owner_id ON gold.repository (owner_id)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX IF NOT EXISTS ix_repository_name ON gold.repository (repo_name)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX IF NOT EXISTS ix_repository_last_activity ON gold.repository (last_activity DESC)`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

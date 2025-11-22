@@ -2,13 +2,15 @@ import 'reflect-metadata';
 import 'dotenv/config';
 import dataSource from '../database/data-source.js';
 
+type GoldActivityRow = { day: string; activity_count: number | null };
+type BronzeCommitRow = { day: string; commit_count: string };
+
 async function debugDeduplication() {
   try {
     await dataSource.initialize();
     console.log('🔗 Database connected');
 
-    // Check gold.user_activity for Lidor57 in friends-activity-backend
-    const goldActivity = await dataSource.query(`
+    const goldActivity = await queryRows<GoldActivityRow>(`
       SELECT 
         ua.day,
         ua.activity_type,
@@ -22,19 +24,24 @@ async function debugDeduplication() {
         AND ua.activity_type = 'commit'
       ORDER BY ua.day DESC
     `);
-    
-    console.log('📊 Gold Activity for Lidor57 (commits in friends-activity-backend):');
+
+    console.log(
+      '📊 Gold Activity for Lidor57 (commits in friends-activity-backend):',
+    );
     if (goldActivity.length === 0) {
       console.log('  No commit activities found in gold layer');
     } else {
-      goldActivity.forEach((row: any) => {
-        console.log(`  ${row.day}: ${row.activity_count} commits`);
+      goldActivity.forEach((row) => {
+        console.log(`  ${row.day}: ${row.activity_count ?? 0} commits`);
       });
-      console.log(`  Total: ${goldActivity.reduce((sum: number, row: any) => sum + row.activity_count, 0)} commits`);
+      const goldTotal = goldActivity.reduce(
+        (sum, row) => sum + (row.activity_count ?? 0),
+        0,
+      );
+      console.log(`  Total: ${goldTotal} commits`);
     }
 
-    // Check bronze commits by day for comparison
-    const bronzeCommits = await dataSource.query(`
+    const bronzeCommits = await queryRows<BronzeCommitRow>(`
       SELECT 
         DATE(e.created_at) as day,
         COUNT(*) as commit_count
@@ -47,15 +54,19 @@ async function debugDeduplication() {
       GROUP BY DATE(e.created_at)
       ORDER BY day DESC
     `);
-    
+
     console.log('\n📊 Bronze Commits for Lidor57 by day:');
     if (bronzeCommits.length === 0) {
       console.log('  No commits found in bronze layer');
     } else {
-      bronzeCommits.forEach((row: any) => {
+      bronzeCommits.forEach((row) => {
         console.log(`  ${row.day}: ${row.commit_count} commits`);
       });
-      console.log(`  Total: ${bronzeCommits.reduce((sum: number, row: any) => sum + parseInt(row.commit_count), 0)} commits`);
+      const bronzeTotal = bronzeCommits.reduce(
+        (sum, row) => sum + Number(row.commit_count),
+        0,
+      );
+      console.log(`  Total: ${bronzeTotal} commits`);
     }
 
     await dataSource.destroy();
@@ -66,4 +77,8 @@ async function debugDeduplication() {
   }
 }
 
-debugDeduplication();
+void debugDeduplication();
+
+function queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  return dataSource.query(sql, params);
+}

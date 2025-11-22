@@ -16,7 +16,6 @@ const migrationsGlob = isProd
   ? path.join(__dirname, 'migrations', '*.js')
   : path.join(__dirname, 'migrations', '*.ts');
 
-
 const entitiesArr: string[] = [
   // Raw entities
   path.join(__dirname, '..', 'raw', '**', '*.entity.{ts,js}'),
@@ -29,13 +28,12 @@ const dataSource = new DataSource({
   url: DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 
-
   entities: entitiesArr,
 
   migrations: [migrationsGlob],
   migrationsTableName: 'typeorm_migrations',
   schema: 'public',
-  logging: false, 
+  logging: false,
 });
 
 export default dataSource;

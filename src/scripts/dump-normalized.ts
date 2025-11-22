@@ -23,8 +23,10 @@ function parseArgs(): Args {
   const kv = Object.fromEntries(
     process.argv.slice(2).map((a) => {
       const i = a.indexOf('=');
-      return i === -1 ? [a.replace(/^--/, ''), ''] : [a.slice(2, i), a.slice(i + 1)];
-    })
+      return i === -1
+        ? [a.replace(/^--/, ''), '']
+        : [a.slice(2, i), a.slice(i + 1)];
+    }),
   );
   const num = (s?: string) => (s ? Number(s) : undefined);
   return {
@@ -40,18 +42,21 @@ function parseArgs(): Args {
 async function main() {
   const args = parseArgs();
 
-  const sinceIso = args.sinceIso ?? new Date(Date.now() - 180 * 86400e3)
-    .toISOString().replace(/\.\d{3}Z$/, 'Z');
+  const sinceIso =
+    args.sinceIso ??
+    new Date(Date.now() - 180 * 86400e3)
+      .toISOString()
+      .replace(/\.\d{3}Z$/, 'Z');
   const untilIso = args.untilIso;
 
   const app = await NestFactory.createApplicationContext(AppModule);
   try {
-    const usersSvc    = app.get(UsersSilverService);
-    const reposSvc    = app.get(ReposSilverService);
-    const issuesSvc   = app.get(IssueSilverService);
-    const prsSvc      = app.get(PRSilverService);
+    const usersSvc = app.get(UsersSilverService);
+    const reposSvc = app.get(ReposSilverService);
+    const issuesSvc = app.get(IssueSilverService);
+    const prsSvc = app.get(PRSilverService);
     const commentsSvc = app.get(CommentSilverService);
-    const commitsSvc  = app.get(CommitSilverService);
+    const commitsSvc = app.get(CommitSilverService);
 
     const [users, repos, issues, prs, comments, commits] = await Promise.all([
       usersSvc.getUsersSince({ sinceIso, untilIso, limit: args.limit }),
@@ -73,7 +78,9 @@ async function main() {
   commits=${commits.length}`);
 
     if (args.out) {
-      const outPath = path.isAbsolute(args.out) ? args.out : path.join(process.cwd(), args.out);
+      const outPath = path.isAbsolute(args.out)
+        ? args.out
+        : path.join(process.cwd(), args.out);
       fs.mkdirSync(path.dirname(outPath), { recursive: true });
 
       if (args.module) {
@@ -84,7 +91,11 @@ export const silver = ${JSON.stringify(bundle, null, args.pretty ? 2 : 0)} as co
         fs.writeFileSync(outPath, moduleCode, 'utf8');
         console.log(`Saved Silver as TS module → ${outPath}`);
       } else {
-        fs.writeFileSync(outPath, JSON.stringify(bundle, null, args.pretty ? 2 : 0), 'utf8');
+        fs.writeFileSync(
+          outPath,
+          JSON.stringify(bundle, null, args.pretty ? 2 : 0),
+          'utf8',
+        );
         console.log(`Saved Silver JSON → ${outPath}`);
       }
     }
@@ -93,4 +104,7 @@ export const silver = ${JSON.stringify(bundle, null, args.pretty ? 2 : 0)} as co
   }
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

@@ -6,7 +6,9 @@ import type { Commit } from '../types.js';
 @Injectable()
 export class CommitSilverService {
   private readonly log = new Logger(CommitSilverService.name);
-  constructor(@Inject(CommitBronzeRepo) private readonly repo: CommitBronzeRepo) {}
+  constructor(
+    @Inject(CommitBronzeRepo) private readonly repo: CommitBronzeRepo,
+  ) {}
 
   /**
    * Build Silver Commits from Bronze.
@@ -38,7 +40,9 @@ export class CommitSilverService {
     }
 
     const out = [...byId.values()];
-    this.log.debug(`silver.commits: ${out.length} (from ${bronzeRows.length} bronze rows)`);
+    this.log.debug(
+      `silver.commits: ${out.length} (from ${bronzeRows.length} bronze rows)`,
+    );
     return out;
   }
 }

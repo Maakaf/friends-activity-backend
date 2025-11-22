@@ -1,5 +1,6 @@
 // src/raw/raw-memory.store.ts
 import { Injectable } from '@nestjs/common';
+import type { RawPayload } from './raw-saver.js';
 
 // Exact bronze table interfaces
 export interface BronzeEventsRow {
@@ -13,7 +14,7 @@ export interface BronzeEventsRow {
   created_at?: string | null;
   received_at?: string | null;
   is_private?: boolean | null;
-  raw_payload: any;
+  raw_payload: RawPayload;
 }
 
 export interface BronzeUsersRow {
@@ -22,7 +23,7 @@ export interface BronzeUsersRow {
   login: string;
   name?: string | null;
   fetched_at?: string | null;
-  raw_payload: any;
+  raw_payload: RawPayload;
 }
 
 export interface BronzeReposRow {
@@ -33,7 +34,7 @@ export interface BronzeReposRow {
   name?: string | null;
   is_private?: boolean | null;
   fetched_at?: string | null;
-  raw_payload: any;
+  raw_payload: RawPayload;
 }
 
 @Injectable()
@@ -69,7 +70,7 @@ export class RawMemoryStore {
   removeUserData(userNode: string) {
     // Remove user
     this.users.delete(userNode);
-    
+
     // Remove events by this user
     for (const [eventId, event] of this.events.entries()) {
       if (event.actor_user_node === userNode) {

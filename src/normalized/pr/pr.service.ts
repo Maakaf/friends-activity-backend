@@ -5,6 +5,23 @@ import { mapPR, mergePR } from '../mappers.js';
 import { GithubService } from '../../raw/raw.service.js';
 import { RawMemoryStore } from '../../raw/raw-memory.store.js';
 import type { PR } from '../types.js';
+import type { RawPayload } from '../../raw/raw-saver.js';
+
+type AugmentedPRPayload = RawPayload & {
+  _repo_owner?: string;
+  _repo_name?: string;
+  number?: number;
+};
+
+type CommitRow = {
+  provider_event_id: string;
+};
+
+const isCommitRow = (row: unknown): row is CommitRow =>
+  typeof row === 'object' &&
+  row !== null &&
+  typeof (row as { provider_event_id?: unknown }).provider_event_id ===
+    'string';
 
 @Injectable()
 export class PRSilverService {
@@ -30,18 +47,21 @@ export class PRSilverService {
     authorUserIds?: string[];
     validate?: boolean; // hook for zod later
   }): Promise<PR[]> {
-    const { validate = false, ...load } = params;
+    const { validate: shouldValidate = false, ...load } = params;
     const bronzeRows = await this.repo.loadSince(load);
 
     const byId = new Map<string, PR>();
-    const prToRepoInfo = new Map<string, { owner: string; repo: string; number: number }>();
+    const prToRepoInfo = new Map<
+      string,
+      { owner: string; repo: string; number: number }
+    >();
 
     for (const b of bronzeRows) {
       const cur = mapPR(b);
       if (!cur) continue;
 
       // Extract repo info from augmented payload
-      const rp = b.raw_payload ?? {};
+      const rp = (b.raw_payload as AugmentedPRPayload | null) ?? {};
       if (rp._repo_owner && rp._repo_name && rp.number) {
         prToRepoInfo.set(cur.prId, {
           owner: rp._repo_owner,
@@ -67,14 +87,27 @@ export class PRSilverService {
         FROM bronze.github_events
         WHERE event_type = 'commit' AND target_node = $1
         ORDER BY created_at ASC`;
-      
-      const commitRows = await this.ds.query(commitSql, [pr.prId]);
-      pr.commits = commitRows.map((row: any) => row.provider_event_id);
+
+      const commitRowsRaw: unknown = await this.ds.query(commitSql, [pr.prId]);
+      if (!Array.isArray(commitRowsRaw)) {
+        this.log.warn(
+          `Unexpected commit rows shape for PR ${pr.prId}, skipping commits attachment`,
+        );
+        continue;
+      }
+
+      pr.commits = commitRowsRaw
+        .filter(isCommitRow)
+        .map((row) => row.provider_event_id);
     }
 
-    // if (validate) out.forEach((p) => PRSchema.parse(p));
+    if (shouldValidate) {
+      this.log.debug('PR validation flag is not yet implemented');
+    }
 
-    this.log.debug(`silver.prs: ${out.length} (from ${bronzeRows.length} bronze rows)`);
+    this.log.debug(
+      `silver.prs: ${out.length} (from ${bronzeRows.length} bronze rows)`,
+    );
     return out;
   }
 }

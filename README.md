@@ -138,25 +138,36 @@ Swagger UI is available at http://localhost:3000/docs
 - `npm run dev`: Start development server
 - `npm run build`: Build for production
 - `npm start`: Start production server
-- `npm test`: Run tests (not implemented yet)
+- `npm test`: Run tests
 
 ## Contributing
 
-We welcome contributions from the community! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on:
+We welcome contributions from the community! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow (branching, tests, and type-safety rules).  
+Quick highlights:
 
-- **Documentation**: Improving README, API docs, or code comments
-- **Bug Fixes**: Reporting and fixing issues
-- **Feature Suggestions**: Proposing new features or improvements
+- TypeScript runs with `"strict": true` + `"noImplicitAny": true`.
+- ESLint treats `@typescript-eslint/no-explicit-any` as an error.
+- Common typing patterns live in [docs/type-safety.md](docs/type-safety.md); update that doc when you introduce new ones.
 
 ### Development Setup
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
+2. Open a new [issue](https://github.com/Maakaf/friends-activity-backend/issues) - make sure to provide a good subject and description to let others understand the content of that issue.  
+3. Create a local branch: `git checkout -b issue-<issue number taken from #2>/short-descriptive-name`
 3. Make your changes
 4. Add tests if applicable
 5. Commit your changes: `git commit -m 'Add some feature'`
-6. Push to the branch: `git push origin feature/your-feature`
+6. Push to the branch: `git push origin <your branch name>`
 7. Submit a pull request
+
+> ### Note:
+> Before merging a PR to main, all CI checks should pass (github actions).
+>
+> To make sure CI will run on your branch, please follow the naming convention:
+>
+> each branch name should look like **issue-<issue number\>/short-descriptive-name**. 
+>
+> for example: **issue-48/github-service-basic-utests**
 
 ## License
 

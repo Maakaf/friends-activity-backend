@@ -2,15 +2,28 @@ import 'reflect-metadata';
 import 'dotenv/config';
 import dataSource from '../database/data-source.js';
 
+type GoldActivityRow = {
+  user_id: string;
+  activity_type: string;
+  total_count: string;
+};
+
+type LoginRow = { login: string };
+
+type TimeAnalysisRow = {
+  login: string;
+  earliest_activity: string | null;
+  latest_activity: string | null;
+  total_events: string;
+};
+
 async function debugAnalytics() {
   try {
     await dataSource.initialize();
     console.log('🔗 Database connected');
 
-    // Check gold layer data directly
     console.log('📊 Gold Layer Data:');
-    
-    const goldActivity = await dataSource.query(`
+    const goldActivity = await queryRows<GoldActivityRow>(`
       SELECT 
         user_id,
         activity_type,
@@ -21,17 +34,19 @@ async function debugAnalytics() {
       GROUP BY user_id, activity_type
       ORDER BY total_count DESC
     `);
-    
+
     console.log('Gold Activity:');
     for (const row of goldActivity) {
-      const user = await dataSource.query('SELECT login FROM bronze.github_users WHERE user_node = $1', [row.user_id]);
-      console.log(`  ${user[0]?.login || row.user_id}: ${row.total_count} ${row.activity_type}`);
+      const [user] = await queryRows<LoginRow>(
+        'SELECT login FROM bronze.github_users WHERE user_node = $1',
+        [row.user_id],
+      );
+      const login = user?.login ?? row.user_id;
+      console.log(`  ${login}: ${row.total_count} ${row.activity_type}`);
     }
 
-    // Check time filtering
     console.log('\n📊 Time Range Analysis:');
-    
-    const timeAnalysis = await dataSource.query(`
+    const timeAnalysis = await queryRows<TimeAnalysisRow>(`
       SELECT 
         u.login,
         MIN(e.created_at) as earliest_activity,
@@ -45,10 +60,12 @@ async function debugAnalytics() {
       GROUP BY u.login
       ORDER BY total_events DESC
     `);
-    
+
     console.log('Time Range for Commits:');
-    timeAnalysis.forEach((row: any) => {
-      console.log(`  ${row.login}: ${row.total_events} commits (${row.earliest_activity} to ${row.latest_activity})`);
+    timeAnalysis.forEach((row) => {
+      console.log(
+        `  ${row.login}: ${row.total_events} commits (${row.earliest_activity} to ${row.latest_activity})`,
+      );
     });
 
     await dataSource.destroy();
@@ -59,4 +76,8 @@ async function debugAnalytics() {
   }
 }
 
-debugAnalytics();
+void debugAnalytics();
+
+function queryRows<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  return dataSource.query(sql, params);
+}

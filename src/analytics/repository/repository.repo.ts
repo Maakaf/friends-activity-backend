@@ -7,12 +7,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class RepositoryRepo {
   constructor(
     @InjectRepository(RepositoryEntity)
-    private readonly repository: Repository<RepositoryEntity>
+    private readonly repository: Repository<RepositoryEntity>,
   ) {}
 
   /** Insert or update many repository records */
   async upsertMany(rows: RepositoryEntity[]) {
-    return this.repository.createQueryBuilder()
+    return this.repository
+      .createQueryBuilder()
       .insert()
       .into(RepositoryEntity)
       .values(rows)
@@ -24,9 +25,9 @@ export class RepositoryRepo {
           'default_branch',
           'fork_count',
           'last_activity',
-          'gh_created_at'
+          'gh_created_at',
         ],
-        ['repo_id']
+        ['repo_id'],
       )
       .execute();
   }

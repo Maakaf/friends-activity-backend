@@ -7,13 +7,13 @@ import { RawMemoryStore } from '../../raw/raw-memory.store.js';
 export class UserMemoryRepo {
   constructor(@Inject(RawMemoryStore) private readonly mem: RawMemoryStore) {}
 
-  async loadFromBronzeUsers(params: {
+  loadFromBronzeUsers(params: {
     sinceIso?: string;
     untilIso?: string;
     userIds?: string[];
     logins?: string[];
     limit?: number;
-  }): Promise<BronzeUsersRow[]> {
+  }): BronzeUsersRow[] {
     const { sinceIso, untilIso, userIds, logins, limit } = params;
 
     const allUsers = this.mem.getUsers();
@@ -29,7 +29,8 @@ export class UserMemoryRepo {
         if (sinceIso && r.fetched_at && r.fetched_at < sinceIso) return false;
         if (untilIso && r.fetched_at && r.fetched_at >= untilIso) return false;
         if (userIds?.length && !userIds.includes(r.user_node)) return false;
-        if (logins?.length && r.login && !logins.includes(r.login)) return false;
+        if (logins?.length && r.login && !logins.includes(r.login))
+          return false;
         return true;
       })
       .sort((a, b) => (b.fetched_at || '').localeCompare(a.fetched_at || ''));
