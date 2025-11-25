@@ -15,7 +15,7 @@ export class PipelineController {
   @Post('stats')
   @ApiOperation({
     summary:
-      'Run full Raw → Silver → Curated → Analytics pipeline for given users',
+      'Run full Raw → Silver → Curated → Analytics pipeline for all users (showing data for requested users only)',
   })
   @ApiBody({ type: IngestUsersDto })
   ingestUsersStrict(@Body() body: IngestUsersDto) {
