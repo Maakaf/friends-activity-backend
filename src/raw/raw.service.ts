@@ -49,11 +49,12 @@ type PullCommitParams =
 type RepoCommitParams =
   RestEndpointMethodTypes['repos']['listCommits']['parameters'];
 
-// Minimal shape we need from /search/issues
-type SearchIssueItem = {
-  repository_url?: string | null;
-  html_url?: string | null;
-} & Record<string, unknown>;
+/**
+ * Items returned from GitHub's /search/issues endpoint.
+ * (Same shape as search.issuesAndPullRequests items.)
+ */
+type SearchIssueItem =
+  RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][number];
 
 type SearchCommitItem =
   RestEndpointMethodTypes['search']['commits']['response']['data']['items'][number];
@@ -775,17 +776,32 @@ export class GithubService {
     try {
       this.logger.log(`Searching issues/PRs: ${qIssues}`);
 
-      // NOTE: paginate's typings in this version of @octokit/plugin-paginate-rest
-      // don't support a route string, but the runtime call works.
-      // We cast to `any` here to satisfy TypeScript.
-      const issues = await this.retryWithBackoff<SearchIssueItem[]>(
-        () =>
-          (this.octokit.paginate as any)('GET /search/issues', {
-            q: qIssues,
-            per_page: 100,
-          } as RequestParameters) as Promise<SearchIssueItem[]>,
-        `Issues/PRs search for ${login}`,
-      );
+      const perPage = 100;
+      let page = 1;
+      const issues: SearchIssueItem[] = [];
+
+      while (true) {
+        const { data } = await this.octokit.request('GET /search/issues', {
+          q: qIssues,
+          per_page: perPage,
+          page,
+        } as RequestParameters & {
+          q: string;
+          per_page: number;
+          page: number;
+        });
+
+        const pageData = data as { items?: SearchIssueItem[] };
+        const pageItems = Array.isArray(pageData.items) ? pageData.items : [];
+        issues.push(...pageItems);
+
+        // Stop if last page or safety cap (GitHub search limit ≈ 1000 results)
+        if (pageItems.length < perPage || page >= 10) {
+          break;
+        }
+
+        page += 1;
+      }
 
       this.logger.log(`✅ Found ${issues.length} issues/PRs for ${login}`);
 
@@ -793,7 +809,9 @@ export class GithubService {
         const parsed = this.parseOwnerRepoFromRepoUrl(
           it.repository_url ?? null,
         );
-        if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
+        if (parsed) {
+          found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
+        }
       }
     } catch (error) {
       this.logger.warn(
@@ -805,25 +823,33 @@ export class GithubService {
     const qCommits = `author:${login} committer-date:>=${sinceIso}`;
     try {
       this.logger.log(`Searching commits: ${qCommits}`);
-      const commits = await this.retryWithBackoff(
-        () =>
-          this.octokit.paginate(
-            this.octokit.search.commits,
-            {
-              q: qCommits,
-              per_page: 100,
-              request: {
-                headers: {
-                  accept: 'application/vnd.github.cloak-preview+json',
-                },
-              },
-            } as SearchCommitParams & RequestParameters,
-            (r) => (r.data as unknown as { items: SearchCommitItem[] }).items,
-          ),
-        `Commits search for ${login}`,
-        5,
-        5000, // longer delay for commit searches
-      );
+
+      const perPage = 100;
+      let page = 1;
+      const commits: SearchCommitItem[] = [];
+
+      while (true) {
+        const { data } = await this.octokit.search.commits({
+          q: qCommits,
+          per_page: perPage,
+          page,
+          request: {
+            headers: {
+              accept: 'application/vnd.github.cloak-preview+json',
+            },
+          },
+        } as SearchCommitParams & RequestParameters);
+
+        const pageItems = Array.isArray(data.items) ? data.items : [];
+        commits.push(...pageItems);
+
+        if (pageItems.length < perPage || page >= 10) {
+          break;
+        }
+
+        page += 1;
+      }
+
       this.logger.log(`✅ Found ${commits.length} commits for ${login}`);
 
       for (const c of commits) {
@@ -833,8 +859,9 @@ export class GithubService {
           found.set(this.repoKey(owner, repo), { owner, repo });
         } else {
           const parsed = this.parseOwnerRepoFromHtmlUrl(c.html_url);
-          if (parsed)
+          if (parsed) {
             found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
+          }
         }
       }
     } catch (error) {
@@ -924,7 +951,7 @@ export class GithubService {
           const isPR = it.pull_request != null;
           const event_type = isPR ? 'pull_request' : 'issue';
 
-          const basePayload = it as unknown as RawPayload;
+          const basePayload = it as RawPayload;
           const payload = isPR
             ? ({
                 ...basePayload,
