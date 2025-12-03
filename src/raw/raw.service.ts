@@ -49,10 +49,12 @@ type PullCommitParams =
 type RepoCommitParams =
   RestEndpointMethodTypes['repos']['listCommits']['parameters'];
 
-type SearchIssueItem =
-  RestEndpointMethodTypes['search']['issuesAndPullRequests']['response']['data']['items'][number];
-type SearchIssueParams =
-  RestEndpointMethodTypes['search']['issuesAndPullRequests']['parameters'];
+// Minimal shape we need from /search/issues
+type SearchIssueItem = {
+  repository_url?: string | null;
+  html_url?: string | null;
+} & Record<string, unknown>;
+
 type SearchCommitItem =
   RestEndpointMethodTypes['search']['commits']['response']['data']['items'][number];
 type SearchCommitParams =
@@ -183,18 +185,21 @@ export class GithubService {
   private repoKey(owner: string, repo: string) {
     return `${owner}/${repo}`;
   }
-  private parseOwnerRepoFromRepoUrl(repoUrl?: string) {
+
+  private parseOwnerRepoFromRepoUrl(repoUrl?: string | null) {
     if (!repoUrl) return null;
     const parts = repoUrl.split('/').slice(-2);
     if (parts.length < 2) return null;
     return { owner: parts[0], repo: parts[1] };
   }
-  private parseOwnerRepoFromHtmlUrl(htmlUrl?: string) {
+
+  private parseOwnerRepoFromHtmlUrl(htmlUrl?: string | null) {
     if (!htmlUrl) return null;
     const m = htmlUrl.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
     if (!m) return null;
     return { owner: m[1], repo: m[2] };
   }
+
   // Dual write helper
   private async writeEventBoth(
     row: Omit<BronzeRow, 'received_at'> & { received_at?: string | null },
@@ -769,23 +774,25 @@ export class GithubService {
     const qIssues = `involves:${login} created:>=${sinceIso}`;
     try {
       this.logger.log(`Searching issues/PRs: ${qIssues}`);
-      const issues = await this.retryWithBackoff(
+
+      // NOTE: paginate's typings in this version of @octokit/plugin-paginate-rest
+      // don't support a route string, but the runtime call works.
+      // We cast to `any` here to satisfy TypeScript.
+      const issues = await this.retryWithBackoff<SearchIssueItem[]>(
         () =>
-          this.octokit.paginate(
-            this.octokit.search.issuesAndPullRequests,
-            {
-              q: qIssues,
-              per_page: 100,
-              advanced_search: 'true',
-            } as SearchIssueParams & RequestParameters,
-            (r) => (r.data as unknown as { items: SearchIssueItem[] }).items,
-          ),
+          (this.octokit.paginate as any)('GET /search/issues', {
+            q: qIssues,
+            per_page: 100,
+          } as RequestParameters) as Promise<SearchIssueItem[]>,
         `Issues/PRs search for ${login}`,
       );
+
       this.logger.log(`✅ Found ${issues.length} issues/PRs for ${login}`);
 
       for (const it of issues) {
-        const parsed = this.parseOwnerRepoFromRepoUrl(it.repository_url);
+        const parsed = this.parseOwnerRepoFromRepoUrl(
+          it.repository_url ?? null,
+        );
         if (parsed) found.set(this.repoKey(parsed.owner, parsed.repo), parsed);
       }
     } catch (error) {
@@ -838,7 +845,9 @@ export class GithubService {
 
     const repos = Array.from(found.values());
     this.logger.log(
-      `✅ Discovered ${repos.length} repos for ${login}: ${repos.map((r) => r.owner + '/' + r.repo).join(', ')}`,
+      `✅ Discovered ${repos.length} repos for ${login}: ${repos
+        .map((r) => r.owner + '/' + r.repo)
+        .join(', ')}`,
     );
     return repos;
   }

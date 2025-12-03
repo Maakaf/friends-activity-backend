@@ -32,8 +32,8 @@ type ReviewCommentParams =
 type PullCommitParams =
   RestEndpointMethodTypes['pulls']['listCommits']['parameters'];
 
-type SearchIssueParams =
-  RestEndpointMethodTypes['search']['issuesAndPullRequests']['parameters'];
+// NOTE: there is no typed `search.issues` in this Octokit version,
+// so we don't try to use RestEndpointMethodTypes for that endpoint.
 
 type SearchCommitParams =
   RestEndpointMethodTypes['search']['commits']['parameters'];
@@ -266,13 +266,15 @@ export class OctokitClient implements GithubClient {
   async searchIssuesAndPulls(params: {
     q: string;
   }): Promise<GithubSearchIssueOrPRDTO[]> {
-    const { data } = await this.octokit.search.issuesAndPullRequests({
+    const { data } = await this.octokit.request('GET /search/issues', {
       q: params.q,
       per_page: 100,
-      advanced_search: 'true',
-    } as SearchIssueParams & RequestParameters);
-    return data.items.map(
-      (it): GithubSearchIssueOrPRDTO => ({
+    });
+
+    const items = (data as any).items as any[];
+
+    return items.map(
+      (it: any): GithubSearchIssueOrPRDTO => ({
         repositoryUrl: it.repository_url ?? null,
         raw: it,
       }),
