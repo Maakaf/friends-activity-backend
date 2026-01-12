@@ -147,7 +147,6 @@ Quick highlights:
 
 - TypeScript runs with `"strict": true` + `"noImplicitAny": true`.
 - ESLint treats `@typescript-eslint/no-explicit-any` as an error.
-- Common typing patterns live in [docs/type-safety.md](docs/type-safety.md); update that doc when you introduce new ones.
 
 ### Development Setup
 
