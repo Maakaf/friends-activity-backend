@@ -1,16 +1,28 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { GraphqlIngestService } from '../ingest/graphql-ingest.service.js';
+import {
+  upsertUserProfile,
+  upsertRepositories,
+  replaceUserActivity,
+  replaceUserDailyContributions,
+  markUserReady,
+} from '../ingest/persistence.js';
+import { MIN_FORK_COUNT } from '../ingest/constants.js';
 import { AppUserProfileEntity } from '../database/entities/app/user-profile.entity.js';
 import { AppRepositoryEntity } from '../database/entities/app/repository.entity.js';
 import { AppUserActivityEntity } from '../database/entities/app/user-activity.entity.js';
 import { AppUserSyncEntity } from '../database/entities/app/user-sync.entity.js';
+import { AppUserDailyContributionEntity } from '../database/entities/app/user-daily-contribution.entity.js';
 
 interface RepoActivityCounts {
   commits: number;
   pullRequests: number;
   issues: number;
+  prReviews: number;
   prComments: number;
   issueComments: number;
 }
@@ -31,6 +43,7 @@ interface UserSummaryTotals {
   totalCommits: number;
   totalPRs: number;
   totalIssues: number;
+  totalPRReviews: number;
   totalPRComments: number;
   totalIssueComments: number;
 }
@@ -41,11 +54,11 @@ interface AggregatedActivityRow {
   commits: number;
   prs: number;
   issues: number;
+  pr_reviews: number;
   pr_comments: number;
   issue_comments: number;
 }
 
-const MIN_FORK_COUNT = 3;
 const WINDOW_DAYS = 180;
 
 @Injectable()
@@ -61,101 +74,61 @@ export class PipelineV2Service {
     private readonly activityRepo: Repository<AppUserActivityEntity>,
     @InjectRepository(AppUserSyncEntity)
     private readonly syncRepo: Repository<AppUserSyncEntity>,
+    @InjectRepository(AppUserDailyContributionEntity)
+    private readonly dailyRepo: Repository<AppUserDailyContributionEntity>,
     private readonly ingest: GraphqlIngestService,
   ) {}
 
-  async addNewUsers(users: string[]) {
-    this.assertNonEmpty(users);
+  async refreshAll() {
+    const usersJson = await readFile(join(process.cwd(), 'users.json'), 'utf-8');
+    const users: string[] = JSON.parse(usersJson);
+    this.logger.log(`Refreshing ${users.length} users from users.json`);
 
-    const existingRows = await this.syncRepo.find({
-      where: { login: In(users) },
-      select: ['login'],
-    });
-    const existingLogins = new Set(existingRows.map((r) => r.login));
+    // Phase 1: fetch all from GitHub concurrently (no DB writes yet)
+    const fetched = await Promise.all(
+      users.map((login) => this.ingest.fetchUser(login)),
+    );
 
-    const newUsers: string[] = [];
-    const existingUsers: string[] = [];
-    for (const u of users) {
-      if (existingLogins.has(u)) existingUsers.push(u);
-      else newUsers.push(u);
-    }
+    const successful = fetched.filter((r) => r.status === 'ready');
+    const failed = fetched.filter((r) => r.status !== 'ready');
 
-    if (newUsers.length === 0) {
-      return {
-        message: 'All users already exist',
-        successfulUsers: [] as string[],
-        failedUsers: [] as string[],
-        existingUsers,
-      };
-    }
+    // Phase 2: single atomic transaction — wipe everything + write all results
+    await this.syncRepo.manager.transaction(async (tx) => {
+      await tx.clear(AppUserActivityEntity);
+      await tx.clear(AppUserDailyContributionEntity);
+      await tx.clear(AppUserProfileEntity);
+      await tx.clear(AppUserSyncEntity);
+      await tx.clear(AppRepositoryEntity);
 
-    await this.syncRepo
-      .createQueryBuilder()
-      .insert()
-      .values(
-        newUsers.map((login) => ({
-          login,
-          status: 'processing',
-          updatedAt: () => 'NOW()',
-        })),
-      )
-      .orUpdate(['status', 'updated_at'], ['login'])
-      .execute();
-
-    const results = await this.ingest.ingestUsers(newUsers);
-    const successfulUsers = results
-      .filter((r) => r.status === 'ready')
-      .map((r) => r.login);
-    const failedUsers = results
-      .filter((r) => r.status !== 'ready')
-      .map((r) => r.login);
-
-    return {
-      message: 'User processing completed',
-      successfulUsers,
-      failedUsers,
-      existingUsers,
-    };
-  }
-
-  async removeUsers(users: string[]) {
-    this.assertNonEmpty(users);
-    const removedUsers: string[] = [];
-    const failedUsers: string[] = [];
-
-    for (const login of users) {
-      try {
-        await this.syncRepo.manager.transaction(async (tx) => {
-          const sync = await tx.findOne(AppUserSyncEntity, {
-            where: { login },
-          });
-          const userId = sync?.userId ?? null;
-          if (userId) {
-            await tx.delete(AppUserActivityEntity, { userId });
-            await tx.delete(AppUserProfileEntity, { userId });
-          }
-          await tx.delete(AppUserSyncEntity, { login });
-        });
-        removedUsers.push(login);
-      } catch (e) {
-        this.logger.error(
-          `Failed to remove ${login}: ${e instanceof Error ? e.message : String(e)}`,
-        );
-        failedUsers.push(login);
+      for (const r of successful) {
+        if (r.status !== 'ready') continue;
+        await upsertUserProfile(tx, r.user);
+        await upsertRepositories(tx, r.perRepo);
+        await replaceUserActivity(tx, r.user, r.perRepo);
+        await replaceUserDailyContributions(tx, r.user, r.dailyCounts);
+        await markUserReady(tx, r.user);
       }
-    }
+
+      for (const r of failed) {
+        await tx
+          .createQueryBuilder()
+          .insert()
+          .into(AppUserSyncEntity)
+          .values({
+            login: r.login,
+            status: r.status,
+            lastError: r.error,
+            updatedAt: () => 'NOW()',
+          })
+          .orUpdate(['status', 'last_error', 'updated_at'], ['login'])
+          .execute();
+      }
+    });
 
     return {
-      message: 'User removal completed',
-      summary: {
-        requested: users.length,
-        removed: removedUsers.length,
-        failed: failedUsers.length,
-        skipped: 0,
-      },
-      removedUsers,
-      failedUsers,
-      skippedProcessing: [],
+      message: 'Refresh completed',
+      successfulUsers: successful.map((r) => r.login),
+      failedUsers: failed.map((r) => r.login),
     };
   }
 
@@ -185,17 +158,21 @@ export class PipelineV2Service {
     };
   }
 
-  async generateReport(usernames: string[]) {
-    this.assertNonEmpty(usernames);
-
+  async generateReport() {
     const since = new Date();
-    since.setDate(since.getDate() - WINDOW_DAYS);
+    since.setUTCHours(0, 0, 0, 0);
+    since.setUTCDate(since.getUTCDate() - WINDOW_DAYS);
     const sinceISO = since.toISOString();
     const todayISO = new Date().toISOString();
 
-    const users = await this.userRepo.find({
-      where: { login: In(usernames) },
-    });
+    const readyLogins = await this.syncRepo
+      .find({ where: { status: 'ready' }, select: ['login'] })
+      .then((rows) => rows.map((r) => r.login));
+
+    const users =
+      readyLogins.length > 0
+        ? await this.userRepo.find({ where: { login: In(readyLogins) } })
+        : [];
 
     const userIds = users.map((u) => u.userId);
 
@@ -227,6 +204,10 @@ export class PipelineV2Service {
               'issues',
             )
             .addSelect(
+              `COALESCE(SUM(CASE WHEN a.activity_type = 'pr_review' THEN a.activity_count ELSE 0 END), 0)::int`,
+              'pr_reviews',
+            )
+            .addSelect(
               `COALESCE(SUM(CASE WHEN a.activity_type = 'pr_comment' THEN a.activity_count ELSE 0 END), 0)::int`,
               'pr_comments',
             )
@@ -246,6 +227,26 @@ export class PipelineV2Service {
       const arr = activitiesByUser.get(a.user_id);
       if (arr) arr.push(a);
       else activitiesByUser.set(a.user_id, [a]);
+    }
+
+    const dailyRows =
+      userIds.length === 0
+        ? []
+        : await this.dailyRepo.find({
+            where: { userId: In(userIds), day: MoreThanOrEqual(since) },
+            order: { day: 'ASC' },
+          });
+    const dailyByUser = new Map<
+      string,
+      Array<{ date: string; count: number }>
+    >();
+    for (const d of dailyRows) {
+      const arr = dailyByUser.get(d.userId);
+      const dateStr =
+        typeof d.day === 'string' ? d.day : d.day.toISOString().slice(0, 10);
+      const entry = { date: dateStr, count: d.count };
+      if (arr) arr.push(entry);
+      else dailyByUser.set(d.userId, [entry]);
     }
 
     const usersOut = users.map((u) => {
@@ -271,6 +272,7 @@ export class PipelineV2Service {
         },
         repos: userRepos,
         summary: this.calculateUserSummary(userRepos),
+        dailyContributions: dailyByUser.get(u.userId) ?? [],
       };
     });
 
@@ -281,7 +283,177 @@ export class PipelineV2Service {
       todayISO,
     );
 
-    return { users: usersOut, globalSummary, excludedUsers: [] };
+    const contributorsByRepoId = new Map<
+      string,
+      Array<{ login: string; avatarUrl: string | null }>
+    >();
+    const userInfoById = new Map(
+      users.map((u) => [u.userId, { login: u.login, avatarUrl: u.avatarUrl }]),
+    );
+    for (const a of activities) {
+      const info = userInfoById.get(a.user_id);
+      if (!info) continue;
+      let arr = contributorsByRepoId.get(a.repo_id);
+      if (!arr) {
+        arr = [];
+        contributorsByRepoId.set(a.repo_id, arr);
+      }
+      if (!arr.some((c) => c.login === info.login)) {
+        arr.push(info);
+      }
+    }
+
+    const repoLeaderboard = await this.buildRepoLeaderboard(
+      userIds,
+      sinceISO,
+      contributorsByRepoId,
+    );
+
+    const dailyTotals = this.buildCommunityTimeline(dailyRows);
+
+    return {
+      users: usersOut,
+      globalSummary,
+      repoLeaderboard,
+      dailyTotals,
+      excludedUsers: [],
+    };
+  }
+
+  private buildCommunityTimeline(
+    dailyRows: AppUserDailyContributionEntity[],
+  ): Array<{ date: string; count: number }> {
+    const byDay = new Map<string, number>();
+    for (const d of dailyRows) {
+      const date =
+        typeof d.day === 'string' ? d.day : d.day.toISOString().slice(0, 10);
+      byDay.set(date, (byDay.get(date) || 0) + d.count);
+    }
+    return [...byDay.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => ({ date, count }));
+  }
+
+  private async buildRepoLeaderboard(
+    userIds: string[],
+    sinceISO: string,
+    contributorsByRepoId: Map<
+      string,
+      Array<{ login: string; avatarUrl: string | null }>
+    >,
+  ) {
+    if (userIds.length === 0) return [];
+
+    interface RepoLeaderboardRow {
+      repo_id: string;
+      repo_name: string;
+      description: string | null;
+      html_url: string | null;
+      fork_count: number;
+      stargazer_count: number | null;
+      primary_language: string | null;
+      primary_language_color: string | null;
+      license_name: string | null;
+      license_spdx: string | null;
+      topics: string[] | null;
+      commits: number;
+      prs: number;
+      issues: number;
+      pr_reviews: number;
+      pr_comments: number;
+      issue_comments: number;
+      contributors: number;
+    }
+
+    const rows: RepoLeaderboardRow[] = await this.activityRepo
+      .createQueryBuilder('a')
+      .innerJoin(
+        AppRepositoryEntity,
+        'r',
+        'r.repo_id = a.repo_id AND r.fork_count >= :minForks',
+        { minForks: MIN_FORK_COUNT },
+      )
+      .select('r.repo_id', 'repo_id')
+      .addSelect('r.repo_name', 'repo_name')
+      .addSelect('r.description', 'description')
+      .addSelect('r.html_url', 'html_url')
+      .addSelect('r.fork_count', 'fork_count')
+      .addSelect('r.stargazer_count', 'stargazer_count')
+      .addSelect('r.primary_language', 'primary_language')
+      .addSelect('r.primary_language_color', 'primary_language_color')
+      .addSelect('r.license_name', 'license_name')
+      .addSelect('r.license_spdx', 'license_spdx')
+      .addSelect('r.topics', 'topics')
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN a.activity_type = 'commit' THEN a.activity_count ELSE 0 END), 0)::int`,
+        'commits',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN a.activity_type = 'pr' THEN a.activity_count ELSE 0 END), 0)::int`,
+        'prs',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN a.activity_type = 'issue' THEN a.activity_count ELSE 0 END), 0)::int`,
+        'issues',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN a.activity_type = 'pr_review' THEN a.activity_count ELSE 0 END), 0)::int`,
+        'pr_reviews',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN a.activity_type = 'pr_comment' THEN a.activity_count ELSE 0 END), 0)::int`,
+        'pr_comments',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN a.activity_type = 'issue_comment' THEN a.activity_count ELSE 0 END), 0)::int`,
+        'issue_comments',
+      )
+      .addSelect('COUNT(DISTINCT a.user_id)::int', 'contributors')
+      .where('a.day >= :since', { since: sinceISO })
+      .andWhere('a.user_id IN (:...userIds)', { userIds })
+      .groupBy('r.repo_id')
+      .addGroupBy('r.repo_name')
+      .addGroupBy('r.description')
+      .addGroupBy('r.html_url')
+      .addGroupBy('r.fork_count')
+      .addGroupBy('r.stargazer_count')
+      .addGroupBy('r.primary_language')
+      .addGroupBy('r.primary_language_color')
+      .addGroupBy('r.license_name')
+      .addGroupBy('r.license_spdx')
+      .addGroupBy('r.topics')
+      .getRawMany<RepoLeaderboardRow>();
+
+    return rows
+      .map((r) => ({
+        repoName: r.repo_name,
+        description: r.description,
+        url: r.html_url,
+        forkCount: r.fork_count,
+        stargazerCount: r.stargazer_count ?? 0,
+        primaryLanguage: r.primary_language,
+        primaryLanguageColor: r.primary_language_color,
+        licenseName: r.license_name,
+        licenseSpdx: r.license_spdx,
+        topics: r.topics ?? [],
+        commits: r.commits,
+        pullRequests: r.prs,
+        issues: r.issues,
+        prReviews: r.pr_reviews,
+        prComments: r.pr_comments,
+        issueComments: r.issue_comments,
+        contributors: r.contributors,
+        contributorList: contributorsByRepoId.get(r.repo_id) ?? [],
+        totalActivity:
+          r.commits +
+          r.prs +
+          r.issues +
+          r.pr_reviews +
+          r.pr_comments +
+          r.issue_comments,
+      }))
+      .filter((r) => r.totalActivity > 0)
+      .sort((a, b) => b.totalActivity - a.totalActivity);
   }
 
   private buildUserRepos(
@@ -289,24 +461,25 @@ export class PipelineV2Service {
     repoById: Map<string, AppRepositoryEntity>,
   ): UserRepoSummary[] {
     const out: UserRepoSummary[] = [];
-    for (const a of userActivities) {
-      const r = repoById.get(a.repo_id);
-      if (!r) continue;
+    for (const activity of userActivities) {
+      const repo = repoById.get(activity.repo_id);
+      if (!repo) continue;
       out.push({
-        repoName: r.repoName,
-        description: r.description,
-        url: r.htmlUrl,
-        primaryLanguage: r.primaryLanguage,
-        primaryLanguageColor: r.primaryLanguageColor,
-        stargazerCount: r.stargazerCount,
-        licenseName: r.licenseName,
-        licenseSpdx: r.licenseSpdx,
-        topics: r.topics ?? [],
-        commits: a.commits,
-        pullRequests: a.prs,
-        issues: a.issues,
-        prComments: a.pr_comments,
-        issueComments: a.issue_comments,
+        repoName: repo.repoName,
+        description: repo.description,
+        url: repo.htmlUrl,
+        primaryLanguage: repo.primaryLanguage,
+        primaryLanguageColor: repo.primaryLanguageColor,
+        stargazerCount: repo.stargazerCount,
+        licenseName: repo.licenseName,
+        licenseSpdx: repo.licenseSpdx,
+        topics: repo.topics ?? [],
+        commits: activity.commits,
+        pullRequests: activity.prs,
+        issues: activity.issues,
+        prReviews: activity.pr_reviews,
+        prComments: activity.pr_comments,
+        issueComments: activity.issue_comments,
       });
     }
     return out;
@@ -314,17 +487,19 @@ export class PipelineV2Service {
 
   private calculateUserSummary(repos: UserRepoSummary[]): UserSummaryTotals {
     return repos.reduce<UserSummaryTotals>(
-      (s, r) => ({
-        totalCommits: s.totalCommits + r.commits,
-        totalPRs: s.totalPRs + r.pullRequests,
-        totalIssues: s.totalIssues + r.issues,
-        totalPRComments: s.totalPRComments + r.prComments,
-        totalIssueComments: s.totalIssueComments + r.issueComments,
+      (totals, repo) => ({
+        totalCommits: totals.totalCommits + repo.commits,
+        totalPRs: totals.totalPRs + repo.pullRequests,
+        totalIssues: totals.totalIssues + repo.issues,
+        totalPRReviews: totals.totalPRReviews + repo.prReviews,
+        totalPRComments: totals.totalPRComments + repo.prComments,
+        totalIssueComments: totals.totalIssueComments + repo.issueComments,
       }),
       {
         totalCommits: 0,
         totalPRs: 0,
         totalIssues: 0,
+        totalPRReviews: 0,
         totalPRComments: 0,
         totalIssueComments: 0,
       },
@@ -338,17 +513,19 @@ export class PipelineV2Service {
     todayISO: string,
   ) {
     const totals = activities.reduce(
-      (s, a) => ({
-        totalCommits: s.totalCommits + a.commits,
-        totalPRs: s.totalPRs + a.prs,
-        totalIssues: s.totalIssues + a.issues,
-        totalPRComments: s.totalPRComments + a.pr_comments,
-        totalIssueComments: s.totalIssueComments + a.issue_comments,
+      (acc, activity) => ({
+        totalCommits: acc.totalCommits + activity.commits,
+        totalPRs: acc.totalPRs + activity.prs,
+        totalIssues: acc.totalIssues + activity.issues,
+        totalPRReviews: acc.totalPRReviews + activity.pr_reviews,
+        totalPRComments: acc.totalPRComments + activity.pr_comments,
+        totalIssueComments: acc.totalIssueComments + activity.issue_comments,
       }),
       {
         totalCommits: 0,
         totalPRs: 0,
         totalIssues: 0,
+        totalPRReviews: 0,
         totalPRComments: 0,
         totalIssueComments: 0,
       },
@@ -367,9 +544,4 @@ export class PipelineV2Service {
     };
   }
 
-  private assertNonEmpty(users: string[]): void {
-    if (!Array.isArray(users) || users.length === 0) {
-      throw new BadRequestException('users must be a non-empty array');
-    }
-  }
 }

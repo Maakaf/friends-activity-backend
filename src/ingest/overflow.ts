@@ -14,6 +14,7 @@ export interface RepoRef {
   id: string;
   databaseId: number | null;
   nameWithOwner: string;
+  forkCount: number;
 }
 
 export interface OverflowCounts {
@@ -63,23 +64,32 @@ export async function fetchOverflowCounts(
     ISSUE: RepoRef[];
     PULL_REQUEST_REVIEW: RepoRef[];
   },
+  precomputedCommitTotals?: Map<string, number>,
 ): Promise<Map<string, OverflowCounts>> {
   const out = new Map<string, OverflowCounts>();
-  const ensure = (k: string) => {
-    let b = out.get(k);
-    if (!b) {
-      b = { commits: 0, prs: 0, issues: 0, reviews: 0 };
-      out.set(k, b);
+  const ensure = (nameWithOwner: string) => {
+    let bucket = out.get(nameWithOwner);
+    if (!bucket) {
+      bucket = { commits: 0, prs: 0, issues: 0, reviews: 0 };
+      out.set(nameWithOwner, bucket);
     }
-    return b;
+    return bucket;
   };
 
   type Job =
     | { kind: 'commit'; repo: { nameWithOwner: string } }
     | { kind: 'pr' | 'issue' | 'review'; repo: { nameWithOwner: string } };
 
+  if (precomputedCommitTotals) {
+    for (const [name, count] of precomputedCommitTotals) {
+      ensure(name).commits = count;
+    }
+  }
+
   const jobs: Job[] = [
-    ...overflow.COMMIT.map((r) => ({ kind: 'commit' as const, repo: r })),
+    ...(precomputedCommitTotals
+      ? []
+      : overflow.COMMIT.map((r) => ({ kind: 'commit' as const, repo: r }))),
     ...overflow.PULL_REQUEST.map((r) => ({ kind: 'pr' as const, repo: r })),
     ...overflow.ISSUE.map((r) => ({ kind: 'issue' as const, repo: r })),
     ...overflow.PULL_REQUEST_REVIEW.map((r) => ({

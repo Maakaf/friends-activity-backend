@@ -34,30 +34,30 @@ export function aggregate(
   overflowCounts: Map<string, OverflowCounts>,
 ): Map<string, RepoAggregate> {
   const perRepo = new Map<string, RepoAggregate>();
-  const c = user.contributionsCollection;
+  const cc = user.contributionsCollection;
 
-  const ensure = (r: {
+  const ensure = (repo: {
     databaseId: number | null;
     nameWithOwner: string;
   }): RepoAggregate => {
-    const key = r.nameWithOwner;
+    const key = repo.nameWithOwner;
     let bucket = perRepo.get(key);
     if (!bucket) {
-      const m = metadata.get(key);
-      const topics = (m?.repositoryTopics.nodes ?? [])
+      const meta = metadata.get(key);
+      const topics = (meta?.repositoryTopics.nodes ?? [])
         .map((n) => n?.topic?.name)
-        .filter((n): n is string => typeof n === 'string');
+        .filter((name): name is string => typeof name === 'string');
       bucket = {
-        repoDatabaseId: r.databaseId ?? m?.databaseId ?? 0,
+        repoDatabaseId: repo.databaseId ?? meta?.databaseId ?? 0,
         nameWithOwner: key,
-        description: m?.description ?? null,
-        url: m?.url ?? '',
-        forkCount: m?.forkCount ?? 0,
-        stargazerCount: m?.stargazerCount ?? 0,
-        primaryLanguage: m?.primaryLanguage?.name ?? null,
-        primaryLanguageColor: m?.primaryLanguage?.color ?? null,
-        licenseName: m?.licenseInfo?.name ?? null,
-        licenseSpdx: m?.licenseInfo?.spdxId ?? null,
+        description: meta?.description ?? null,
+        url: meta?.url ?? '',
+        forkCount: meta?.forkCount ?? 0,
+        stargazerCount: meta?.stargazerCount ?? 0,
+        primaryLanguage: meta?.primaryLanguage?.name ?? null,
+        primaryLanguageColor: meta?.primaryLanguage?.color ?? null,
+        licenseName: meta?.licenseInfo?.name ?? null,
+        licenseSpdx: meta?.licenseInfo?.spdxId ?? null,
         topics,
         commits: 0,
         pullRequests: 0,
@@ -71,17 +71,17 @@ export function aggregate(
     return bucket;
   };
 
-  for (const cb of c.commitContributionsByRepository) {
-    ensure(cb.repository).commits = cb.contributions.totalCount;
+  for (const bucket of cc.commitContributionsByRepository) {
+    ensure(bucket.repository).commits = bucket.contributions.totalCount;
   }
-  for (const cb of c.pullRequestContributionsByRepository) {
-    ensure(cb.repository).pullRequests = cb.contributions.totalCount;
+  for (const bucket of cc.pullRequestContributionsByRepository) {
+    ensure(bucket.repository).pullRequests = bucket.contributions.totalCount;
   }
-  for (const cb of c.issueContributionsByRepository) {
-    ensure(cb.repository).issues = cb.contributions.totalCount;
+  for (const bucket of cc.issueContributionsByRepository) {
+    ensure(bucket.repository).issues = bucket.contributions.totalCount;
   }
-  for (const cb of c.pullRequestReviewContributionsByRepository) {
-    ensure(cb.repository).prReviews = cb.contributions.totalCount;
+  for (const bucket of cc.pullRequestReviewContributionsByRepository) {
+    ensure(bucket.repository).prReviews = bucket.contributions.totalCount;
   }
 
   for (const comment of commentsInWindow) {
@@ -97,9 +97,9 @@ export function aggregate(
   }
 
   for (const [nameWithOwner, counts] of overflowCounts) {
-    const m = metadata.get(nameWithOwner);
+    const meta = metadata.get(nameWithOwner);
     const bucket = ensure({
-      databaseId: m?.databaseId ?? null,
+      databaseId: meta?.databaseId ?? null,
       nameWithOwner,
     });
     if (counts.commits > 0) bucket.commits = counts.commits;

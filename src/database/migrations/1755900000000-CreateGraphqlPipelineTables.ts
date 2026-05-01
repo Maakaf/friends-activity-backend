@@ -82,9 +82,22 @@ export class CreateGraphqlPipelineTables1755900000000
     await queryRunner.query(
       `CREATE INDEX IF NOT EXISTS idx_user_sync_status ON user_sync (status)`,
     );
+
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS user_daily_contribution (
+        user_id VARCHAR(64) NOT NULL,
+        day     DATE NOT NULL,
+        count   INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (user_id, day)
+      )
+    `);
+    await queryRunner.query(
+      `CREATE INDEX IF NOT EXISTS idx_user_daily_contribution_day ON user_daily_contribution (day)`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP TABLE IF EXISTS user_daily_contribution`);
     await queryRunner.query(`DROP TABLE IF EXISTS user_sync`);
     await queryRunner.query(`DROP TABLE IF EXISTS user_activity`);
     await queryRunner.query(`DROP TABLE IF EXISTS repository`);

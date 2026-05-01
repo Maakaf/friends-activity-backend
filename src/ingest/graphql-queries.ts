@@ -1,3 +1,5 @@
+import { MAX_REPOSITORIES, PAGE_SIZE } from './constants.js';
+
 export const USER_ACTIVITY_QUERY = `
 query UserActivity($login: String!, $since: DateTime!) {
   rateLimit { limit cost remaining resetAt }
@@ -16,24 +18,40 @@ query UserActivity($login: String!, $since: DateTime!) {
       totalRepositoriesWithContributedPullRequests
       totalRepositoriesWithContributedIssues
       totalRepositoriesWithContributedPullRequestReviews
-      commitContributionsByRepository(maxRepositories: 100) {
+      commitContributionsByRepository(maxRepositories: ${MAX_REPOSITORIES}) {
         repository { id databaseId nameWithOwner }
-        contributions { totalCount }
+        contributions(first: ${PAGE_SIZE}) {
+          totalCount
+          pageInfo { hasNextPage endCursor }
+          nodes { occurredAt commitCount }
+        }
       }
-      pullRequestContributionsByRepository(maxRepositories: 100) {
+      pullRequestContributionsByRepository(maxRepositories: ${MAX_REPOSITORIES}) {
         repository { id databaseId nameWithOwner }
-        contributions { totalCount }
+        contributions(first: ${PAGE_SIZE}) {
+          totalCount
+          pageInfo { hasNextPage endCursor }
+          nodes { occurredAt }
+        }
       }
-      issueContributionsByRepository(maxRepositories: 100) {
+      issueContributionsByRepository(maxRepositories: ${MAX_REPOSITORIES}) {
         repository { id databaseId nameWithOwner }
-        contributions { totalCount }
+        contributions(first: ${PAGE_SIZE}) {
+          totalCount
+          pageInfo { hasNextPage endCursor }
+          nodes { occurredAt }
+        }
       }
-      pullRequestReviewContributionsByRepository(maxRepositories: 100) {
+      pullRequestReviewContributionsByRepository(maxRepositories: ${MAX_REPOSITORIES}) {
         repository { id databaseId nameWithOwner }
-        contributions { totalCount }
+        contributions(first: ${PAGE_SIZE}) {
+          totalCount
+          pageInfo { hasNextPage endCursor }
+          nodes { occurredAt }
+        }
       }
     }
-    issueComments(last: 100) {
+    issueComments(last: ${PAGE_SIZE}) {
       totalCount
       pageInfo { hasPreviousPage startCursor }
       nodes {
@@ -50,7 +68,7 @@ export const USER_COMMENTS_PAGE_QUERY = `
 query UserCommentsPage($login: String!, $before: String!) {
   rateLimit { limit cost remaining resetAt }
   user(login: $login) {
-    issueComments(last: 100, before: $before) {
+    issueComments(last: ${PAGE_SIZE}, before: $before) {
       totalCount
       pageInfo { hasPreviousPage startCursor }
       nodes {
@@ -78,7 +96,7 @@ query RepoMetadata($ids: [ID!]!) {
       stargazerCount
       primaryLanguage { name color }
       licenseInfo { name spdxId }
-      repositoryTopics(first: 100) {
+      repositoryTopics(first: ${PAGE_SIZE}) {
         pageInfo { hasNextPage endCursor }
         nodes { topic { name } }
       }
@@ -91,7 +109,7 @@ query RepoTopicsPage($id: ID!, $after: String!) {
   rateLimit { limit cost remaining resetAt }
   node(id: $id) {
     ... on Repository {
-      repositoryTopics(first: 100, after: $after) {
+      repositoryTopics(first: ${PAGE_SIZE}, after: $after) {
         pageInfo { hasNextPage endCursor }
         nodes { topic { name } }
       }
@@ -108,13 +126,13 @@ query ReposContributedTo(
   rateLimit { limit cost remaining resetAt }
   user(login: $login) {
     repositoriesContributedTo(
-      first: 100,
+      first: ${PAGE_SIZE},
       after: $after,
       contributionTypes: $types,
       includeUserRepositories: true
     ) {
       pageInfo { hasNextPage endCursor }
-      nodes { id databaseId nameWithOwner }
+      nodes { id databaseId nameWithOwner forkCount }
     }
   }
 }`;
@@ -124,7 +142,7 @@ query UserPRReviews($login: String!, $since: DateTime!) {
   rateLimit { limit cost remaining resetAt }
   user(login: $login) {
     contributionsCollection(from: $since) {
-      pullRequestReviewContributions(first: 100) {
+      pullRequestReviewContributions(first: ${PAGE_SIZE}) {
         pageInfo { hasNextPage endCursor }
         nodes {
           pullRequestReview {
@@ -138,12 +156,74 @@ query UserPRReviews($login: String!, $since: DateTime!) {
   }
 }`;
 
+export const REPO_COMMITS_HISTORY_QUERY = `
+query RepoCommitsHistory(
+  $owner: String!,
+  $name: String!,
+  $since: GitTimestamp!,
+  $authorId: ID!,
+  $after: String
+) {
+  rateLimit { limit cost remaining resetAt }
+  repository(owner: $owner, name: $name) {
+    defaultBranchRef {
+      target {
+        ... on Commit {
+          history(since: $since, author: { id: $authorId }, first: ${PAGE_SIZE}, after: $after) {
+            pageInfo { hasNextPage endCursor }
+            nodes { committedDate }
+          }
+        }
+      }
+    }
+  }
+}`;
+
+export const FLAT_PR_CONTRIBUTIONS_QUERY = `
+query FlatPRContributions($login: String!, $since: DateTime!, $after: String) {
+  rateLimit { limit cost remaining resetAt }
+  user(login: $login) {
+    contributionsCollection(from: $since) {
+      pullRequestContributions(first: ${PAGE_SIZE}, after: $after) {
+        pageInfo { hasNextPage endCursor }
+        nodes { occurredAt pullRequest { repository { nameWithOwner forkCount } } }
+      }
+    }
+  }
+}`;
+
+export const FLAT_ISSUE_CONTRIBUTIONS_QUERY = `
+query FlatIssueContributions($login: String!, $since: DateTime!, $after: String) {
+  rateLimit { limit cost remaining resetAt }
+  user(login: $login) {
+    contributionsCollection(from: $since) {
+      issueContributions(first: ${PAGE_SIZE}, after: $after) {
+        pageInfo { hasNextPage endCursor }
+        nodes { occurredAt issue { repository { nameWithOwner forkCount } } }
+      }
+    }
+  }
+}`;
+
+export const FLAT_REVIEW_CONTRIBUTIONS_QUERY = `
+query FlatReviewContributions($login: String!, $since: DateTime!, $after: String) {
+  rateLimit { limit cost remaining resetAt }
+  user(login: $login) {
+    contributionsCollection(from: $since) {
+      pullRequestReviewContributions(first: ${PAGE_SIZE}, after: $after) {
+        pageInfo { hasNextPage endCursor }
+        nodes { occurredAt pullRequestReview { repository { nameWithOwner forkCount } } }
+      }
+    }
+  }
+}`;
+
 export const USER_PR_REVIEWS_PAGE_QUERY = `
 query UserPRReviewsPage($login: String!, $since: DateTime!, $after: String!) {
   rateLimit { limit cost remaining resetAt }
   user(login: $login) {
     contributionsCollection(from: $since) {
-      pullRequestReviewContributions(first: 100, after: $after) {
+      pullRequestReviewContributions(first: ${PAGE_SIZE}, after: $after) {
         pageInfo { hasNextPage endCursor }
         nodes {
           pullRequestReview {

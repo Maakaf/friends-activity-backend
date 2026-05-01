@@ -1,13 +1,15 @@
-import type { DataSource, EntityManager } from 'typeorm';
+import type { EntityManager } from 'typeorm';
 import { AppUserProfileEntity } from '../database/entities/app/user-profile.entity.js';
 import { AppRepositoryEntity } from '../database/entities/app/repository.entity.js';
 import { AppUserActivityEntity } from '../database/entities/app/user-activity.entity.js';
 import { AppUserSyncEntity } from '../database/entities/app/user-sync.entity.js';
+import { AppUserDailyContributionEntity } from '../database/entities/app/user-daily-contribution.entity.js';
 import type { UserNode } from './graphql-types.js';
 import type { RepoAggregate } from './aggregate.js';
 
 const REPO_BATCH_SIZE = 500;
 const ACTIVITY_BATCH_SIZE = 1000;
+const CALENDAR_BATCH_SIZE = 1000;
 
 export async function upsertUserProfile(
   tx: EntityManager,
@@ -118,6 +120,7 @@ export async function replaceUserActivity(
     ['commits', 'commit'],
     ['pullRequests', 'pr'],
     ['issues', 'issue'],
+    ['prReviews', 'pr_review'],
     ['issueComments', 'issue_comment'],
     ['prComments', 'pr_comment'],
   ];
@@ -184,21 +187,31 @@ export async function markUserReady(
     .execute();
 }
 
-export async function markUserFailed(
-  ds: DataSource,
-  login: string,
-  error: string,
+export async function replaceUserDailyContributions(
+  tx: EntityManager,
+  user: UserNode,
+  dailyCounts: Map<string, number>,
 ): Promise<void> {
-  await ds
-    .createQueryBuilder()
-    .insert()
-    .into(AppUserSyncEntity)
-    .values({
-      login,
-      status: 'failed',
-      lastError: error,
-      updatedAt: () => 'NOW()',
-    })
-    .orUpdate(['status', 'last_error', 'updated_at'], ['login'])
-    .execute();
+  const userId = String(user.databaseId ?? 0);
+
+  await tx.delete(AppUserDailyContributionEntity, { userId });
+  if (dailyCounts.size === 0) return;
+
+  const rows = [...dailyCounts.entries()].map(([date, count]) => ({
+    userId,
+    day: new Date(date),
+    count,
+  }));
+
+  for (let i = 0; i < rows.length; i += CALENDAR_BATCH_SIZE) {
+    const chunk = rows.slice(i, i + CALENDAR_BATCH_SIZE);
+    await tx
+      .createQueryBuilder()
+      .insert()
+      .into(AppUserDailyContributionEntity)
+      .values(chunk)
+      .orUpdate(['count'], ['user_id', 'day'])
+      .execute();
+  }
 }
+

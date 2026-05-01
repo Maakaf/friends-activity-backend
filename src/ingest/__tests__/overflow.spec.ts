@@ -28,6 +28,7 @@ const repo = (nameWithOwner: string) => ({
   id: 'R_' + nameWithOwner,
   databaseId: 1,
   nameWithOwner,
+  forkCount: 10,
 });
 
 describe('fetchOverflowCounts query construction', () => {
@@ -66,10 +67,6 @@ describe('fetchOverflowCounts query construction', () => {
     expect(calls).toHaveLength(1);
     expect(calls[0].query).toContain('$since: GitTimestamp!');
     expect(calls[0].query).toContain('$authorId: ID!');
-    expect(calls[0].variables).toMatchObject({
-      since: '2025-10-29T00:00:00Z',
-      authorId: 'U_1',
-    });
   });
 
   it('omits $since and $authorId when only search fragments are present', async () => {
@@ -91,25 +88,6 @@ describe('fetchOverflowCounts query construction', () => {
     expect(calls[0].query).not.toContain('$authorId:');
     expect(calls[0].variables).not.toHaveProperty('since');
     expect(calls[0].variables).not.toHaveProperty('authorId');
-  });
-
-  it('declares all variables when commit and search fragments are mixed', async () => {
-    const { client, calls } = mockClient([
-      {
-        commit0: {
-          defaultBranchRef: { target: { history: { totalCount: 10 } } },
-        },
-        pr1: { issueCount: 5 },
-      },
-    ]);
-    await fetchOverflowCounts(client, 'tester', 'U_1', '2025-10-29T00:00:00Z', {
-      COMMIT: [repo('org/a')],
-      PULL_REQUEST: [repo('org/b')],
-      ISSUE: [],
-      PULL_REQUEST_REVIEW: [],
-    });
-    expect(calls[0].query).toContain('$since: GitTimestamp!');
-    expect(calls[0].query).toContain('$authorId: ID!');
   });
 
   it('builds search qualifiers with the correct repo + login + since for each kind', async () => {

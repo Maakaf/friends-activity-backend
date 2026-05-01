@@ -40,9 +40,25 @@ export interface RepoMetadataResponse {
   nodes: Array<RepoMetadata | null>;
 }
 
-export interface ContributionsByRepo {
+export interface ContributionEvent {
+  occurredAt: string;
+}
+
+export interface CommitContributionEvent extends ContributionEvent {
+  commitCount: number;
+}
+
+export interface ContributionsConnection<TNode extends ContributionEvent> {
+  totalCount: number;
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
+  nodes: TNode[];
+}
+
+export interface ContributionsByRepo<
+  TNode extends ContributionEvent = ContributionEvent,
+> {
   repository: RepositoryRef;
-  contributions: { totalCount: number };
+  contributions: ContributionsConnection<TNode>;
 }
 
 export interface ContributionsCollection {
@@ -54,10 +70,56 @@ export interface ContributionsCollection {
   totalRepositoriesWithContributedPullRequests: number;
   totalRepositoriesWithContributedIssues: number;
   totalRepositoriesWithContributedPullRequestReviews: number;
-  commitContributionsByRepository: ContributionsByRepo[];
+  commitContributionsByRepository: ContributionsByRepo<CommitContributionEvent>[];
   pullRequestContributionsByRepository: ContributionsByRepo[];
   issueContributionsByRepository: ContributionsByRepo[];
   pullRequestReviewContributionsByRepository: ContributionsByRepo[];
+}
+
+interface FlatRepoRef {
+  nameWithOwner: string;
+  forkCount: number;
+}
+
+export type FlatPRContribEvent = {
+  occurredAt: string;
+  pullRequest: { repository: FlatRepoRef } | null;
+};
+
+export type FlatIssueContribEvent = {
+  occurredAt: string;
+  issue: { repository: FlatRepoRef } | null;
+};
+
+export type FlatReviewContribEvent = {
+  occurredAt: string;
+  pullRequestReview: { repository: FlatRepoRef } | null;
+};
+
+export interface RepoCommitsHistoryResponse {
+  rateLimit: RateLimit | null;
+  repository: {
+    defaultBranchRef: {
+      target: {
+        history: {
+          pageInfo: { hasNextPage: boolean; endCursor: string | null };
+          nodes: Array<{ committedDate: string }>;
+        };
+      } | null;
+    } | null;
+  } | null;
+}
+
+export interface FlatContributionsResponse<TNode> {
+  rateLimit: RateLimit | null;
+  user: {
+    contributionsCollection: {
+      [key: string]: {
+        pageInfo: { hasNextPage: boolean; endCursor: string | null };
+        nodes: TNode[];
+      };
+    };
+  } | null;
 }
 
 export interface ReposContributedToConnection {
@@ -66,6 +128,7 @@ export interface ReposContributedToConnection {
     id: string;
     databaseId: number | null;
     nameWithOwner: string;
+    forkCount: number;
   } | null>;
 }
 

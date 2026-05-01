@@ -1,7 +1,6 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody, ApiSecurity } from '@nestjs/swagger';
+import { Controller, Post, Get } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { PipelineV2Service } from './pipeline-v2.service.js';
-import { IngestUsersDto } from '../raw/dto/ingest-users.dto.js';
 
 @ApiTags('pipeline-v2')
 @ApiSecurity('X-API-Key')
@@ -9,28 +8,19 @@ import { IngestUsersDto } from '../raw/dto/ingest-users.dto.js';
 export class PipelineV2Controller {
   constructor(private readonly pipeline: PipelineV2Service) {}
 
-  @Post('analytics/report')
+  @Get('analytics/report')
   @ApiOperation({
     summary:
-      'Generate frontend analytics report (last 180 days, fork_count >= 3)',
+      'Generate frontend analytics report (last 180 days, fork_count >= 3) for all users in the DB.',
   })
-  @ApiBody({ type: IngestUsersDto })
-  getAnalyticsReport(@Body() body: IngestUsersDto) {
-    return this.pipeline.generateReport(body.users);
+  getAnalyticsReport() {
+    return this.pipeline.generateReport();
   }
 
-  @Post('removeUsers')
-  @ApiOperation({ summary: 'Remove users and their activity data' })
-  @ApiBody({ type: IngestUsersDto })
-  removeUsers(@Body() body: IngestUsersDto) {
-    return this.pipeline.removeUsers(body.users);
-  }
-
-  @Post('addNewUsers')
-  @ApiOperation({ summary: 'Add new users via GraphQL ingest' })
-  @ApiBody({ type: IngestUsersDto })
-  addNewUsers(@Body() body: IngestUsersDto) {
-    return this.pipeline.addNewUsers(body.users);
+  @Post('refreshAll')
+  @ApiOperation({ summary: 'Wipe all data and re-ingest from users.json (daily refresh)' })
+  refreshAll() {
+    return this.pipeline.refreshAll();
   }
 
   @Get('listUsers')
