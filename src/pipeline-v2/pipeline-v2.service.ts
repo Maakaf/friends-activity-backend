@@ -80,56 +80,67 @@ export class PipelineV2Service {
   ) {}
 
   async refreshAll() {
-    const usersJson = await readFile(join(process.cwd(), 'users.json'), 'utf-8');
-    const users: string[] = JSON.parse(usersJson);
-    this.logger.log(`Refreshing ${users.length} users from users.json`);
+    try {
+      const usersJson = await readFile(join(process.cwd(), 'users.json'), 'utf-8');
+      const users: string[] = JSON.parse(usersJson);
+      this.logger.log(`Refreshing ${users.length} users from users.json`);
 
-    // Phase 1: fetch all from GitHub concurrently (no DB writes yet)
-    const fetched = await Promise.all(
-      users.map((login) => this.ingest.fetchUser(login)),
-    );
+      // Phase 1: fetch all from GitHub concurrently (no DB writes yet)
+      const fetched = await Promise.all(
+        users.map((login) => this.ingest.fetchUser(login)),
+      );
 
-    const successful = fetched.filter((r) => r.status === 'ready');
-    const failed = fetched.filter((r) => r.status !== 'ready');
+      const successful = fetched.filter((r) => r.status === 'ready');
+      const failed = fetched.filter((r) => r.status !== 'ready');
 
-    // Phase 2: single atomic transaction — wipe everything + write all results
-    await this.syncRepo.manager.transaction(async (tx) => {
-      await tx.clear(AppUserActivityEntity);
-      await tx.clear(AppUserDailyContributionEntity);
-      await tx.clear(AppUserProfileEntity);
-      await tx.clear(AppUserSyncEntity);
-      await tx.clear(AppRepositoryEntity);
+      // Phase 2: single atomic transaction — wipe everything + write all results
+      await this.syncRepo.manager.transaction(async (tx) => {
+        await tx.clear(AppUserActivityEntity);
+        await tx.clear(AppUserDailyContributionEntity);
+        await tx.clear(AppUserProfileEntity);
+        await tx.clear(AppUserSyncEntity);
+        await tx.clear(AppRepositoryEntity);
 
-      for (const r of successful) {
-        if (r.status !== 'ready') continue;
-        await upsertUserProfile(tx, r.user);
-        await upsertRepositories(tx, r.perRepo);
-        await replaceUserActivity(tx, r.user, r.perRepo);
-        await replaceUserDailyContributions(tx, r.user, r.dailyCounts);
-        await markUserReady(tx, r.user);
-      }
+        for (const r of successful) {
+          if (r.status !== 'ready') continue;
+          await upsertUserProfile(tx, r.user);
+          await upsertRepositories(tx, r.perRepo);
+          await replaceUserActivity(tx, r.user, r.perRepo);
+          await replaceUserDailyContributions(tx, r.user, r.dailyCounts);
+          await markUserReady(tx, r.user);
+        }
 
-      for (const r of failed) {
-        await tx
-          .createQueryBuilder()
-          .insert()
-          .into(AppUserSyncEntity)
-          .values({
-            login: r.login,
-            status: r.status,
-            lastError: r.error,
-            updatedAt: () => 'NOW()',
-          })
-          .orUpdate(['status', 'last_error', 'updated_at'], ['login'])
-          .execute();
-      }
-    });
+        for (const r of failed) {
+          await tx
+            .createQueryBuilder()
+            .insert()
+            .into(AppUserSyncEntity)
+            .values({
+              login: r.login,
+              status: r.status,
+              lastError: r.error,
+              updatedAt: () => 'NOW()',
+            })
+            .orUpdate(['status', 'last_error', 'updated_at'], ['login'])
+            .execute();
+        }
+      });
 
-    return {
-      message: 'Refresh completed',
-      successfulUsers: successful.map((r) => r.login),
-      failedUsers: failed.map((r) => r.login),
-    };
+      this.logger.log(
+        `✅ refreshAll done: ${successful.length} successful, ${failed.length} failed`,
+      );
+
+      return {
+        message: 'Refresh completed',
+        successfulUsers: successful.map((r) => r.login),
+        failedUsers: failed.map((r) => r.login),
+      };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const stack = err instanceof Error ? err.stack : undefined;
+      this.logger.error(`❌ refreshAll failed: ${msg}`, stack);
+      throw err;
+    }
   }
 
   async listUsers() {
