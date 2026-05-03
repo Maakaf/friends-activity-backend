@@ -27,7 +27,7 @@ interface RepoActivityCounts {
   issueComments: number;
 }
 
-interface UserRepoSummary extends RepoActivityCounts {
+export interface UserRepoSummary extends RepoActivityCounts {
   repoName: string | null;
   description: string | null;
   url: string | null;
@@ -39,7 +39,7 @@ interface UserRepoSummary extends RepoActivityCounts {
   topics: string[];
 }
 
-interface UserSummaryTotals {
+export interface UserSummaryTotals {
   totalCommits: number;
   totalPRs: number;
   totalIssues: number;
