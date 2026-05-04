@@ -78,6 +78,10 @@ export class GraphqlIngestService {
 
       const mainP = this.client.call<UserActivityResponse>(USER_ACTIVITY_QUERY, { login, since });
       const reviewsP = fetchPRReviewsInWindow(this.client, login, since);
+      // Mark reviewsP as handled so an early return/throw in this function
+      // doesn't leave it dangling and crash the process via unhandled rejection.
+      // The real handler is the await inside Promise.all below.
+      reviewsP.catch(() => {});
 
       const primary = await mainP;
       if (!primary.user) {
