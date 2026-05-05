@@ -98,6 +98,10 @@ export class PipelineV2Service {
       //   - 365d: source of daily contribution data, used to compute the
       //     rolling-180d-window time series (graph)
       //
+      // Users are released in batches of BATCH_SIZE with a random delay
+      // between batches so we don't slam GitHub with all users at once.
+      // Within a batch users still run in parallel.
+      //
       // FUTURE OPTIMIZATION: 365d events are a strict superset of 180d. A
       // single 365d fetch with date-filtered aggregate could halve the load,
       // but the current overflow path (fetchOverflowCounts) uses different
@@ -105,8 +109,15 @@ export class PipelineV2Service {
       // defaultBranchRef.history vs all-branch commit contributions), so naive
       // single-fetch produces incorrect table totals. Doable but needs flat
       // events plumbed into aggregate.
+      const BATCH_SIZE = 10;
       const fetched = await Promise.all(
-        users.map(async (login) => {
+        users.map(async (login, idx) => {
+          const batchIdx = Math.floor(idx / BATCH_SIZE);
+          if (batchIdx > 0) {
+            // Random 2–10s wait per preceding batch
+            const delayMs = batchIdx * (2_000 + Math.random() * 8_000);
+            await new Promise((r) => setTimeout(r, delayMs));
+          }
           const main180 = await this.ingest.fetchUser(login, 180);
           const full365 = await this.ingest.fetchUser(login, 365);
           return { main: main180, daily365: full365 };
@@ -120,15 +131,12 @@ export class PipelineV2Service {
         (r) => r.main.status !== 'ready' || r.daily365.status !== 'ready',
       );
 
-      // Phase 2: single atomic transaction — wipe everything + write all results
+      // Phase 2: single atomic transaction — replace per-user data for
+      // successful fetches; failed users keep their previous data so a
+      // transient GitHub 5xx doesn't make a member vanish from the dashboard
+      // until the next refresh succeeds. The replace*() helpers below already
+      // do per-user delete-then-insert, so no global tx.clear() needed.
       await this.syncRepo.manager.transaction(async (tx) => {
-        await tx.clear(AppUserActivityEntity);
-        await tx.clear(AppUserDailyContributionEntity);
-        await tx.clear(AppUserRollingActivityEntity);
-        await tx.clear(AppUserProfileEntity);
-        await tx.clear(AppUserSyncEntity);
-        await tx.clear(AppRepositoryEntity);
-
         for (const r of successful) {
           if (r.main.status !== 'ready' || r.daily365.status !== 'ready')
             continue;
