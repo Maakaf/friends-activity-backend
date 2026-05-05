@@ -8,6 +8,7 @@ import { AppRepositoryEntity } from '../database/entities/app/repository.entity.
 import { AppUserActivityEntity } from '../database/entities/app/user-activity.entity.js';
 import { AppUserSyncEntity } from '../database/entities/app/user-sync.entity.js';
 import { AppUserDailyContributionEntity } from '../database/entities/app/user-daily-contribution.entity.js';
+import { AppUserRollingActivityEntity } from '../database/entities/app/user-rolling-activity.entity.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AppUserDailyContributionEntity } from '../database/entities/app/user-da
       AppUserActivityEntity,
       AppUserSyncEntity,
       AppUserDailyContributionEntity,
+      AppUserRollingActivityEntity,
     ]),
   ],
   controllers: [PipelineV2Controller],

@@ -9,6 +9,8 @@ import {
   upsertRepositories,
   replaceUserActivity,
   replaceUserDailyContributions,
+  replaceUserRollingActivity,
+  computeRollingActivity,
   markUserReady,
 } from '../ingest/persistence.js';
 import { MIN_FORK_COUNT } from '../ingest/constants.js';
@@ -17,6 +19,7 @@ import { AppRepositoryEntity } from '../database/entities/app/repository.entity.
 import { AppUserActivityEntity } from '../database/entities/app/user-activity.entity.js';
 import { AppUserSyncEntity } from '../database/entities/app/user-sync.entity.js';
 import { AppUserDailyContributionEntity } from '../database/entities/app/user-daily-contribution.entity.js';
+import { AppUserRollingActivityEntity } from '../database/entities/app/user-rolling-activity.entity.js';
 
 interface RepoActivityCounts {
   commits: number;
@@ -76,6 +79,8 @@ export class PipelineV2Service {
     private readonly syncRepo: Repository<AppUserSyncEntity>,
     @InjectRepository(AppUserDailyContributionEntity)
     private readonly dailyRepo: Repository<AppUserDailyContributionEntity>,
+    @InjectRepository(AppUserRollingActivityEntity)
+    private readonly rollingRepo: Repository<AppUserRollingActivityEntity>,
     private readonly ingest: GraphqlIngestService,
   ) {}
 
@@ -85,40 +90,72 @@ export class PipelineV2Service {
       const users: string[] = JSON.parse(usersJson);
       this.logger.log(`Refreshing ${users.length} users from users.json`);
 
-      // Phase 1: fetch all from GitHub concurrently (no DB writes yet)
+      // Phase 1: fetch all from GitHub concurrently (no DB writes yet).
+      // Two windows per user, run sequentially per user (180d then 365d) to
+      // halve the burst rate against GitHub's secondary rate limit while still
+      // running all users in parallel:
+      //   - 180d: source of truth for table data (per-repo counts, summary)
+      //   - 365d: source of daily contribution data, used to compute the
+      //     rolling-180d-window time series (graph)
+      //
+      // FUTURE OPTIMIZATION: 365d events are a strict superset of 180d. A
+      // single 365d fetch with date-filtered aggregate could halve the load,
+      // but the current overflow path (fetchOverflowCounts) uses different
+      // semantics than bucket counts (search updated:>= vs occurredAt;
+      // defaultBranchRef.history vs all-branch commit contributions), so naive
+      // single-fetch produces incorrect table totals. Doable but needs flat
+      // events plumbed into aggregate.
       const fetched = await Promise.all(
-        users.map((login) => this.ingest.fetchUser(login)),
+        users.map(async (login) => {
+          const main180 = await this.ingest.fetchUser(login, 180);
+          const full365 = await this.ingest.fetchUser(login, 365);
+          return { main: main180, daily365: full365 };
+        }),
       );
 
-      const successful = fetched.filter((r) => r.status === 'ready');
-      const failed = fetched.filter((r) => r.status !== 'ready');
+      const successful = fetched.filter(
+        (r) => r.main.status === 'ready' && r.daily365.status === 'ready',
+      );
+      const failed = fetched.filter(
+        (r) => r.main.status !== 'ready' || r.daily365.status !== 'ready',
+      );
 
       // Phase 2: single atomic transaction — wipe everything + write all results
       await this.syncRepo.manager.transaction(async (tx) => {
         await tx.clear(AppUserActivityEntity);
         await tx.clear(AppUserDailyContributionEntity);
+        await tx.clear(AppUserRollingActivityEntity);
         await tx.clear(AppUserProfileEntity);
         await tx.clear(AppUserSyncEntity);
         await tx.clear(AppRepositoryEntity);
 
         for (const r of successful) {
-          if (r.status !== 'ready') continue;
-          await upsertUserProfile(tx, r.user);
-          await upsertRepositories(tx, r.perRepo);
-          await replaceUserActivity(tx, r.user, r.perRepo);
-          await replaceUserDailyContributions(tx, r.user, r.dailyCounts);
-          await markUserReady(tx, r.user);
+          if (r.main.status !== 'ready' || r.daily365.status !== 'ready')
+            continue;
+          await upsertUserProfile(tx, r.main.user);
+          await upsertRepositories(tx, r.main.perRepo);
+          await replaceUserActivity(tx, r.main.user, r.main.perRepo);
+          await replaceUserDailyContributions(
+            tx,
+            r.main.user,
+            r.main.dailyCounts,
+          );
+          const rolling = computeRollingActivity(r.daily365.dailyCounts, 180);
+          await replaceUserRollingActivity(tx, r.main.user, rolling);
+          await markUserReady(tx, r.main.user);
         }
 
         for (const r of failed) {
+          // Surface whichever fetch failed (or both, if both failed).
+          const reason = r.main.status !== 'ready' ? r.main : r.daily365;
           await tx
             .createQueryBuilder()
             .insert()
             .into(AppUserSyncEntity)
             .values({
-              login: r.login,
-              status: r.status,
-              lastError: r.error,
+              login: reason.login,
+              status: reason.status,
+              lastError: 'error' in reason ? reason.error : undefined,
               updatedAt: () => 'NOW()',
             })
             .orUpdate(['status', 'last_error', 'updated_at'], ['login'])
@@ -132,8 +169,8 @@ export class PipelineV2Service {
 
       return {
         message: 'Refresh completed',
-        successfulUsers: successful.map((r) => r.login),
-        failedUsers: failed.map((r) => r.login),
+        successfulUsers: successful.map((r) => r.main.login),
+        failedUsers: failed.map((r) => r.main.login),
       };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -240,24 +277,24 @@ export class PipelineV2Service {
       else activitiesByUser.set(a.user_id, [a]);
     }
 
-    const dailyRows =
+    const rollingRows =
       userIds.length === 0
         ? []
-        : await this.dailyRepo.find({
+        : await this.rollingRepo.find({
             where: { userId: In(userIds), day: MoreThanOrEqual(since) },
             order: { day: 'ASC' },
           });
-    const dailyByUser = new Map<
+    const rollingByUser = new Map<
       string,
-      Array<{ date: string; count: number }>
+      Array<{ date: string; total: number }>
     >();
-    for (const d of dailyRows) {
-      const arr = dailyByUser.get(d.userId);
+    for (const r of rollingRows) {
+      const arr = rollingByUser.get(r.userId);
       const dateStr =
-        typeof d.day === 'string' ? d.day : d.day.toISOString().slice(0, 10);
-      const entry = { date: dateStr, count: d.count };
+        typeof r.day === 'string' ? r.day : r.day.toISOString().slice(0, 10);
+      const entry = { date: dateStr, total: r.total };
       if (arr) arr.push(entry);
-      else dailyByUser.set(d.userId, [entry]);
+      else rollingByUser.set(r.userId, [entry]);
     }
 
     const usersOut = users.map((u) => {
@@ -283,7 +320,7 @@ export class PipelineV2Service {
         },
         repos: userRepos,
         summary: this.calculateUserSummary(userRepos),
-        dailyContributions: dailyByUser.get(u.userId) ?? [],
+        rollingActivity: rollingByUser.get(u.userId) ?? [],
       };
     });
 
@@ -320,29 +357,29 @@ export class PipelineV2Service {
       contributorsByRepoId,
     );
 
-    const dailyTotals = this.buildCommunityTimeline(dailyRows);
+    const communityRolling = this.buildCommunityRollingTimeline(rollingRows);
 
     return {
       users: usersOut,
       globalSummary,
       repoLeaderboard,
-      dailyTotals,
+      communityRolling,
       excludedUsers: [],
     };
   }
 
-  private buildCommunityTimeline(
-    dailyRows: AppUserDailyContributionEntity[],
-  ): Array<{ date: string; count: number }> {
+  private buildCommunityRollingTimeline(
+    rollingRows: AppUserRollingActivityEntity[],
+  ): Array<{ date: string; total: number }> {
     const byDay = new Map<string, number>();
-    for (const d of dailyRows) {
+    for (const r of rollingRows) {
       const date =
-        typeof d.day === 'string' ? d.day : d.day.toISOString().slice(0, 10);
-      byDay.set(date, (byDay.get(date) || 0) + d.count);
+        typeof r.day === 'string' ? r.day : r.day.toISOString().slice(0, 10);
+      byDay.set(date, (byDay.get(date) || 0) + r.total);
     }
     return [...byDay.entries()]
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, count]) => ({ date, count }));
+      .map(([date, total]) => ({ date, total }));
   }
 
   private async buildRepoLeaderboard(

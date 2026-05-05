@@ -4,12 +4,18 @@ import { AppRepositoryEntity } from '../database/entities/app/repository.entity.
 import { AppUserActivityEntity } from '../database/entities/app/user-activity.entity.js';
 import { AppUserSyncEntity } from '../database/entities/app/user-sync.entity.js';
 import { AppUserDailyContributionEntity } from '../database/entities/app/user-daily-contribution.entity.js';
+import { AppUserRollingActivityEntity } from '../database/entities/app/user-rolling-activity.entity.js';
 import type { UserNode } from './graphql-types.js';
 import type { RepoAggregate } from './aggregate.js';
 
 const REPO_BATCH_SIZE = 500;
 const ACTIVITY_BATCH_SIZE = 1000;
 const CALENDAR_BATCH_SIZE = 1000;
+
+// FUTURE OPTIMIZATION: each replace*() function below issues one INSERT per
+// user. At 17 users this is fine, but at 1000+ users the per-user round-trips
+// dominate. Refactor refreshAll to collect all rows across users first, then
+// run a single bulk INSERT per table chunked by Postgres parameter limits.
 
 export async function upsertUserProfile(
   tx: EntityManager,
@@ -185,6 +191,75 @@ export async function markUserReady(
       ['login'],
     )
     .execute();
+}
+
+/**
+ * Compute rolling 180-day totals from 365 days of daily contribution data.
+ * For each day in the last 180 days, returns the sum of OSS contributions
+ * in the 180 days ending on that day. This produces a time-series showing
+ * how the user's "last 6 months activity" has trended over time.
+ */
+export function computeRollingActivity(
+  daily365: Map<string, number>,
+  windowDays = 180,
+): Map<string, number> {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  // We want `windowDays` output points (today, today-1, ..., today-(windowDays-1)).
+  // The earliest output point's window starts at today-(2*windowDays-2) and ends
+  // at today-(windowDays-1). So we need (2*windowDays-1) days of input data.
+  const earliest = new Date(today);
+  earliest.setUTCDate(earliest.getUTCDate() - (2 * windowDays - 2));
+
+  const dailyArr: Array<{ date: string; count: number }> = [];
+  for (
+    let dt = new Date(earliest);
+    dt <= today;
+    dt.setUTCDate(dt.getUTCDate() + 1)
+  ) {
+    const dateStr = dt.toISOString().slice(0, 10);
+    dailyArr.push({ date: dateStr, count: daily365.get(dateStr) ?? 0 });
+  }
+
+  const result = new Map<string, number>();
+  let runningSum = 0;
+  for (let i = 0; i < dailyArr.length; i++) {
+    runningSum += dailyArr[i].count;
+    if (i >= windowDays) runningSum -= dailyArr[i - windowDays].count;
+    if (i >= windowDays - 1) {
+      result.set(dailyArr[i].date, runningSum);
+    }
+  }
+  return result;
+}
+
+export async function replaceUserRollingActivity(
+  tx: EntityManager,
+  user: UserNode,
+  rollingTotals: Map<string, number>,
+): Promise<void> {
+  const userId = String(user.databaseId ?? 0);
+
+  await tx.delete(AppUserRollingActivityEntity, { userId });
+  if (rollingTotals.size === 0) return;
+
+  const rows = [...rollingTotals.entries()].map(([date, total]) => ({
+    userId,
+    day: new Date(date),
+    total,
+  }));
+
+  for (let i = 0; i < rows.length; i += CALENDAR_BATCH_SIZE) {
+    const chunk = rows.slice(i, i + CALENDAR_BATCH_SIZE);
+    await tx
+      .createQueryBuilder()
+      .insert()
+      .into(AppUserRollingActivityEntity)
+      .values(chunk)
+      .orUpdate(['total'], ['user_id', 'day'])
+      .execute();
+  }
 }
 
 export async function replaceUserDailyContributions(
