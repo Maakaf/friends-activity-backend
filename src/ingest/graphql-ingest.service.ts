@@ -70,7 +70,11 @@ export class GraphqlIngestService {
     windowDays = DEFAULT_WINDOW_DAYS,
   ): Promise<FetchedUser> {
     const start = Date.now();
-    const sinceMs = Date.now() - windowDays * 86_400_000;
+    // Anchor the window to today's midnight UTC so boundaries don't slide
+    // with the wall-clock time the refresh happens to run.
+    const todayMidnight = new Date();
+    todayMidnight.setUTCHours(0, 0, 0, 0);
+    const sinceMs = todayMidnight.getTime() - windowDays * 86_400_000;
     const since = new Date(sinceMs).toISOString();
 
     try {
